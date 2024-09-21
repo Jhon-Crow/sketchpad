@@ -3,13 +3,20 @@ document.addEventListener('DOMContentLoaded', function() {
     var ctx = canvas.getContext('2d');
     var saveBtn = document.getElementById('saveBtn');
     var isDrawing = false;
-    var text = '';
+    let text = '';
+    const textWrapLimit = 100;
+    let textWrapCounter = textWrapLimit;
+    const coordsDisabledLimit = 1000;
+    const caretColor = 'red';
+    const fontColor = 'black';
     var textX = 10;
     var textY = 20;
     var fontSize = 14;
     var fontFamily = 'Arial';
     const coords = [];
     const coordsDisabled = [];
+
+
 
 
     // Настройка размеров canvas
@@ -24,9 +31,15 @@ document.addEventListener('DOMContentLoaded', function() {
             canvas.height
         );
 
+
+        if (text.length >= textWrapCounter){
+            text += '\n';
+            textWrapCounter += textWrapLimit;
+        }
+
         // Рисуем текст, учитывая переносы строк
         ctx.font = fontSize + 'px ' + fontFamily;
-        ctx.fillStyle = 'black';
+        ctx.fillStyle = fontColor;
         let lines = text.split('\n');
         let y = textY;
         for (let i = 0; i < lines.length; i++) {
@@ -37,7 +50,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Рисуем каретку, если мы не находимся в процессе рисования
         if (!isDrawing) {
             calculateCaretPosition();
-            ctx.fillStyle = 'red';
+            ctx.fillStyle = caretColor;
             ctx.fillRect(caretX, caretY - fontSize, 1, fontSize);
         }
 
@@ -108,19 +121,16 @@ document.addEventListener('DOMContentLoaded', function() {
         if(e.ctrlKey) {
             switch (e.keyCode) {
                 case 90 :
-                    if (coords.length && coordsDisabled.length < 500){
+                    if (coords.length && coordsDisabled.length < coordsDisabledLimit){
                         coordsDisabled.push(coords?.pop());
-                        console.log(coordsDisabled)
                     }
                     break;
                 case 89:
                     if (coordsDisabled.length){
                         coords?.push(coordsDisabled?.pop());
-                        console.log(coords)
                     }
                     break;
                 default:
-                    // text += e.key;
                     break;
             }
         } else {
@@ -131,16 +141,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 case 'Backspace':
                     text = text.slice(0, -1);
                     break;
+                    //TODO перемещение каретки с помощью стрелочек
                 default:
-                    text += e.key;
+                    if (/^[a-zA-Zа-яА-Я]$/.test(e.key)) {
+                        text += e.key;
+                    }
                     break;
             }
         }
         updateTextOnCanvas(); // Обновляем текст и рисунок на холсте
     });
 
-    // Сохранение в PDF
-    // ...
+    //TODO функцию сохранения в пнг или пдф или ещё как
+
 
     // Инициальный рендеринг текста
     updateTextOnCanvas();

@@ -106,14 +106,14 @@ document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('keydown', function(e) {
 
         if(e.ctrlKey) {
-            switch (e.key) {
-                case 'z':
+            switch (e.keyCode) {
+                case 90 :
                     if (coords.length && coordsDisabled.length < 500){
                         coordsDisabled.push(coords?.pop());
                         console.log(coordsDisabled)
                     }
                     break;
-                case 'y':
+                case 89:
                     if (coordsDisabled.length){
                         coords?.push(coordsDisabled?.pop());
                         console.log(coords)

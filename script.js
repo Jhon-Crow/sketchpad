@@ -55,16 +55,20 @@ document.addEventListener('DOMContentLoaded', function() {
     function redraw() {
         ctx.beginPath();
         coords.forEach(function(coord) {
-            ctx.lineTo(coord[0], coord[1]);
-            ctx.stroke();
+            if (coord === 'brake') {
+                ctx.stroke();  // Завершаем текущий путь
+                ctx.beginPath();  // Начинаем новый путь
+            } else {
+                ctx.lineTo(coord[0], coord[1]);
+            }
         });
-        ctx.closePath();
+        ctx.stroke();  // Вызовем stroke после завершения всех линий
     }
 
     // Функции для рисования (startDrawing, draw, endDrawing) остаются без изменений
 // Функция для начала рисования
     function startDrawing(e) {
-
+        // coords.push([e.offsetX, e.offsetY])
         isDrawing = true;
         ctx.beginPath();
         ctx.moveTo(e.offsetX, e.offsetY);
@@ -75,14 +79,18 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!isDrawing) return;
         ctx.lineTo(e.offsetX, e.offsetY);
         ctx.stroke();
+        coords.push([e.offsetX, e.offsetY])
     }
 
     // Функция для окончания рисования
     function endDrawing() {
         if (isDrawing) {
+            coords.push('brake')
+
             ctx.closePath();
             isDrawing = false;
         }
+        // coords.push('brake')
     }
     // Обработчики событий для рисования на canvas
     canvas.addEventListener('mousedown', startDrawing);

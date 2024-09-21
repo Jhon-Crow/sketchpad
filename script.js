@@ -8,7 +8,9 @@ document.addEventListener('DOMContentLoaded', function() {
     var textY = 20;
     var fontSize = 14;
     var fontFamily = 'Arial';
-    var coords = [];
+    const coords = [];
+    const coordsDisabled = [];
+
 
     // Настройка размеров canvas
     canvas.width = window.innerWidth;
@@ -68,7 +70,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Функции для рисования (startDrawing, draw, endDrawing) остаются без изменений
 // Функция для начала рисования
     function startDrawing(e) {
-        // coords.push([e.offsetX, e.offsetY])
+        coords.push('brake');
+        coordsDisabled.length = 0;
+        coords.push([e.offsetX, e.offsetY])
         isDrawing = true;
         ctx.beginPath();
         ctx.moveTo(e.offsetX, e.offsetY);
@@ -100,12 +104,37 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Обработчики событий для ввода текста
     document.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') {
-            text += '\n';
-        } else if (e.key === 'Backspace') {
-            text = text.slice(0, -1);
+
+        if(e.ctrlKey) {
+            switch (e.key) {
+                case 'z':
+                    if (coords.length && coordsDisabled.length < 500){
+                        coordsDisabled.push(coords?.pop());
+                        console.log(coordsDisabled)
+                    }
+                    break;
+                case 'y':
+                    if (coordsDisabled.length){
+                        coords?.push(coordsDisabled?.pop());
+                        console.log(coords)
+                    }
+                    break;
+                default:
+                    // text += e.key;
+                    break;
+            }
         } else {
-            text += e.key;
+            switch (e.key) {
+                case 'Enter':
+                    text += '\n';
+                    break;
+                case 'Backspace':
+                    text = text.slice(0, -1);
+                    break;
+                default:
+                    text += e.key;
+                    break;
+            }
         }
         updateTextOnCanvas(); // Обновляем текст и рисунок на холсте
     });

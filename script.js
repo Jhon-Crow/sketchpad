@@ -4,7 +4,8 @@ document.addEventListener('DOMContentLoaded', function() {
     var saveBtn = document.getElementById('saveBtn');
     var isDrawing = false;
     let text = '';
-    const textWrapLimit = 100;
+    const textWrapLimit = 10;
+    let textLineCounter = 1;
     let textWrapCounter = textWrapLimit;
     const coordsDisabledLimit = 1000;
     const caretColor = 'red';
@@ -32,10 +33,14 @@ document.addEventListener('DOMContentLoaded', function() {
         );
 
 
-        if (text.length >= textWrapCounter){
+        if (text.length >= (textWrapLimit * textLineCounter)){
+            textLineCounter++
             text += '\n';
-            textWrapCounter += textWrapLimit;
         }
+        if (text.length < (textWrapLimit * (textLineCounter - 1))){
+            textLineCounter--;
+        }
+
 
         // Рисуем текст, учитывая переносы строк
         ctx.font = fontSize + 'px ' + fontFamily;
@@ -57,6 +62,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // Перерисовываем рисунок
         redraw();
     }
+
+
 
     function calculateCaretPosition() {
         let lines = text.split('\n');

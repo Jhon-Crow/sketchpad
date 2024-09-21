@@ -1,0 +1,21 @@
+/*#notepad {*/
+/*    position: relative;*/
+/*    width: 800px;*/
+/*    height: 600px;*/
+/*    margin: auto;*/
+/*}*/
+
+#canvas {
+    width: 100vw;
+    height: 90vh;
+    border: 1px solid #ccc;
+    position: absolute;
+    top: 4rem;
+    left: 0;
+}
+
+/*#saveBtn {*/
+/*    position: absolute;*/
+/*    bottom: 10px;*/
+/*    right: 10px;*/
+/*}*/

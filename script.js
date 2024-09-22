@@ -16,8 +16,8 @@ document.addEventListener('DOMContentLoaded', function() {
     var fontFamily = 'Arial';
     const coords = [];
     const coordsDisabled = [];
-    const textHistory = [];
-    let textHistoryIndex = -1;
+    const textHistory = [''];
+    let textHistoryIndex = 0;
     const keysDontPrint = ['Tab', 'Shift', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'F12', 'CapsLock']
 
     canvas.width = window.innerWidth;
@@ -119,17 +119,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     } else if (textHistoryIndex > 0) {
                         textHistoryIndex--;
                         text = textHistory[textHistoryIndex];
-                        // updateTextOnCanvas();
                     }
                     break;
                 case 89:
-                    //TODO вынести откат рисунка отдельно (может capslock)
                     if (coordsDisabled.length && e.getModifierState('CapsLock')){
                         coords?.push(coordsDisabled?.pop());
                     } else if (textHistoryIndex < textHistory.length - 1) {
                         textHistoryIndex++;
                         text = textHistory[textHistoryIndex];
-                        // updateTextOnCanvas();
                     }
                     break;
                 default:
@@ -146,9 +143,9 @@ document.addEventListener('DOMContentLoaded', function() {
                 //TODO перемещение каретки с помощью стрелочек
                 default:
                     if (!keysDontPrint.includes(e.key)) {
+                        text += e.key;
                         textHistory.push(text);
                         textHistoryIndex++;
-                        text += e.key;
                     }
                     break;
             }

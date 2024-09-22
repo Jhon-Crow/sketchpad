@@ -128,6 +128,7 @@ document.addEventListener('DOMContentLoaded', function() {
             switch (e.key) {
                 case 'Enter':
                     enterKeyAction();
+                    saveToHistory();
                     break;
                 case 'Backspace':
                     delOnBackspace();
@@ -147,14 +148,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 default:
                     if (!keysDontPrint.includes(e.key)) {
                         addLetter(e.key);
-                        textHistory.push(text);
-                        textHistoryIndex++;
+                        saveToHistory();
                     }
                     break;
             }
         }
         updateTextOnCanvas();
     });
+
+    function saveToHistory(){
+        textHistory.push(text);
+        textHistoryIndex++;
+    }
 
     function caretMoveLeft() {
         if (caretPosition.character > 0) {
@@ -210,6 +215,7 @@ document.addEventListener('DOMContentLoaded', function() {
             text = newLines.join('\n');
             caretPosition.line--;
             caretPosition.character = newPreviousLine.length;
+            saveToHistory();
         }
     }
 

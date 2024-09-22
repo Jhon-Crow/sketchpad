@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const coordsDisabled = [];
     const textHistory = [];
     let textHistoryIndex = -1;
-    const keysDontPrint = ['Tab', 'Shift', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'F12']
+    const keysDontPrint = ['Tab', 'Shift', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'F12', 'CapsLock']
 
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
@@ -114,24 +114,22 @@ document.addEventListener('DOMContentLoaded', function() {
         if(e.ctrlKey) {
             switch (e.keyCode) {
                 case 90 :
-                    if (coords.length && coordsDisabled.length < coordsDisabledLimit){
+                    if ((coords.length && coordsDisabled.length < coordsDisabledLimit) && e.getModifierState('CapsLock')){
                         coordsDisabled.push(coords?.pop());
-                    }
-                    if (textHistoryIndex > 0) {
+                    } else if (textHistoryIndex > 0) {
                         textHistoryIndex--;
                         text = textHistory[textHistoryIndex];
-                        updateTextOnCanvas();
+                        // updateTextOnCanvas();
                     }
                     break;
                 case 89:
                     //TODO вынести откат рисунка отдельно (может capslock)
-                    if (coordsDisabled.length){
+                    if (coordsDisabled.length && e.getModifierState('CapsLock')){
                         coords?.push(coordsDisabled?.pop());
-                    }
-                    if (textHistoryIndex < textHistory.length - 1) {
+                    } else if (textHistoryIndex < textHistory.length - 1) {
                         textHistoryIndex++;
                         text = textHistory[textHistoryIndex];
-                        updateTextOnCanvas();
+                        // updateTextOnCanvas();
                     }
                     break;
                 default:

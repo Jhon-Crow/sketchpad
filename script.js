@@ -6,7 +6,6 @@ document.addEventListener('DOMContentLoaded', function() {
     let text = '';
     const textWrapLimit = 78;
     let textLineCounter = 1;
-    // let textWrapCounter = textWrapLimit;
     const coordsDisabledLimit = 1000;
     const caretColor = 'red';
     const fontColor = 'white';
@@ -17,22 +16,19 @@ document.addEventListener('DOMContentLoaded', function() {
     var fontFamily = 'Arial';
     const coords = [];
     const coordsDisabled = [];
-
-
+    const textHistory = [];
+    let textHistoryIndex = -1;
     const keysDontPrint = ['Tab', 'Shift', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'F12']
 
-    // Настройка размеров canvas
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
-    // Функция для обновления текста на холсте
     function updateTextOnCanvas() {
         // Очищаем весь холст перед перерисовкой
         ctx.clearRect(0, 0,
             canvas.width,
             canvas.height
         );
-
 
         if (text.length >= (textWrapLimit * textLineCounter)){
             textLineCounter++
@@ -41,7 +37,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (text.length < (textWrapLimit * (textLineCounter - 1))){
             textLineCounter--;
         }
-
 
         // Рисуем текст, учитывая переносы строк
         ctx.font = fontSize + 'px ' + fontFamily;
@@ -60,11 +55,8 @@ document.addEventListener('DOMContentLoaded', function() {
             ctx.fillRect(caretX, caretY - fontSize, 1, fontSize);
         }
 
-        // Перерисовываем рисунок
         redraw();
     }
-
-
 
     function calculateCaretPosition() {
         let lines = text.split('\n');
@@ -74,7 +66,6 @@ document.addEventListener('DOMContentLoaded', function() {
         caretY = textY + (fontSize + 5) * (lines.length - 1); // Вычисляем Y для последней строки
     }
 
-    // Функция для перерисовки рисунка
     function redraw() {
         ctx.beginPath();
         coords.forEach(function(coord) {
@@ -88,8 +79,6 @@ document.addEventListener('DOMContentLoaded', function() {
         ctx.stroke();  // Вызовем stroke после завершения всех линий
     }
 
-    // Функции для рисования (startDrawing, draw, endDrawing) остаются без изменений
-// Функция для начала рисования
     function startDrawing(e) {
         coords.push('brake');
         coordsDisabled.length = 0;
@@ -99,7 +88,6 @@ document.addEventListener('DOMContentLoaded', function() {
         ctx.moveTo(e.offsetX, e.offsetY);
     }
 
-    // Функция для процесса рисования
     function draw(e) {
         if (!isDrawing) return;
         ctx.strokeStyle = lineColor;
@@ -108,7 +96,6 @@ document.addEventListener('DOMContentLoaded', function() {
         coords.push([e.offsetX, e.offsetY])
     }
 
-    // Функция для окончания рисования
     function endDrawing() {
         if (isDrawing) {
             coords.push('brake')
@@ -116,27 +103,35 @@ document.addEventListener('DOMContentLoaded', function() {
             ctx.closePath();
             isDrawing = false;
         }
-        // coords.push('brake')
     }
-    // Обработчики событий для рисования на canvas
+
     canvas.addEventListener('mousedown', startDrawing);
     canvas.addEventListener('mousemove', draw);
     canvas.addEventListener('mouseup', endDrawing);
     canvas.addEventListener('mouseout', endDrawing);
 
-    // Обработчики событий для ввода текста
     document.addEventListener('keydown', function(e) {
-
         if(e.ctrlKey) {
             switch (e.keyCode) {
                 case 90 :
                     if (coords.length && coordsDisabled.length < coordsDisabledLimit){
                         coordsDisabled.push(coords?.pop());
                     }
+                    if (textHistoryIndex > 0) {
+                        textHistoryIndex--;
+                        text = textHistory[textHistoryIndex];
+                        updateTextOnCanvas();
+                    }
                     break;
                 case 89:
+                    //TODO вынести откат рисунка отдельно (может capslock)
                     if (coordsDisabled.length){
                         coords?.push(coordsDisabled?.pop());
+                    }
+                    if (textHistoryIndex < textHistory.length - 1) {
+                        textHistoryIndex++;
+                        text = textHistory[textHistoryIndex];
+                        updateTextOnCanvas();
                     }
                     break;
                 default:
@@ -150,9 +145,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 case 'Backspace':
                     text = text.slice(0, -1);
                     break;
-                    //TODO перемещение каретки с помощью стрелочек
+                //TODO перемещение каретки с помощью стрелочек
                 default:
-                    if (!keysDontPrint.includes(e.key)) text += e.key;
+                    if (!keysDontPrint.includes(e.key)) {
+                        textHistory.push(text);
+                        textHistoryIndex++;
+                        text += e.key;
+                    }
                     break;
             }
         }
@@ -166,9 +165,6 @@ document.addEventListener('DOMContentLoaded', function() {
         link.download = 'canvas_note_image.png';
         link.click();
     });
-
     // Инициальный рендеринг текста
     updateTextOnCanvas();
 });
-
-

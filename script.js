@@ -21,31 +21,18 @@ document.addEventListener('DOMContentLoaded', function() {
     const coordsDisabled = [];
     const textHistory = [''];
     let textHistoryIndex = 0;
-    const keysDontPrint = ['Tab', 'Shift', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'F12', 'CapsLock', 'Meta']
+    const keysDontPrint = ['Tab', 'Shift', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'F12', 'CapsLock', 'Meta'];
 
-    let xPositionChange = 0;
-    let yPositionChange = -1;
-    let letterToBackspaceDelIndex;
+    let caretPosition = { line: 0, character: 0 };
+    let caretX = textX;
+    let caretY = textY;
 
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
 
     function updateTextOnCanvas() {
-        // Очищаем весь холст перед перерисовкой
-        ctx.clearRect(0, 0,
-            canvas.width,
-            canvas.height
-        );
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        if (text.length >= (textWrapLimit * textLineCounter)){
-            textLineCounter++
-            text += '\n';
-        }
-        if (text.length < (textWrapLimit * (textLineCounter - 1))){
-            textLineCounter--;
-        }
-
-        // Рисуем текст, учитывая переносы строк
         ctx.font = fontSize + 'px ' + fontFamily;
         ctx.fillStyle = fontColor;
         let lines = text.split('\n');
@@ -55,7 +42,6 @@ document.addEventListener('DOMContentLoaded', function() {
             y += fontSize + 5; // Добавляем немного пространства между строками
         }
 
-        // Рисуем каретку, если мы не находимся в процессе рисования
         if (!isDrawing) {
             calculateCaretPosition();
             ctx.fillStyle = caretColor;
@@ -67,60 +53,29 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function calculateCaretPosition() {
         let lines = text.split('\n');
-
-        let currentLine = lines[lines.length - 1];
-        // console.log(currentLine.slice(0, xPositionChange))
-        // let caretMeasurement = ctx.measureText(currentLine);
-        let caretMeasurement;
-
-        if (xPositionChange){
-            caretMeasurement = ctx.measureText(currentLine.slice(0, xPositionChange));
-        } else {
-            caretMeasurement = ctx.measureText(currentLine);
-        }
-
-        console.log(letterToBackspaceDelIndex)
-        // console.log(text.charAt(letterToBackspaceDelIndex))
-
-
-        if (text.charAt(letterToBackspaceDelIndex + 1) === '\n'){
-            yPositionChange--;
-            caretMeasurement = ctx.measureText(currentLine);
-            xPositionChange = 0;
-            // letterToBackspaceDelIndex
-        }
-
+        let currentLine = lines[caretPosition.line] || '';
+        let caretMeasurement = ctx.measureText(currentLine.substring(0, caretPosition.character));
         caretX = textX + caretMeasurement.width;
-
-        // console.log(lines, letterToBackspaceDelIndex, text.charAt(letterToBackspaceDelIndex))
-
-        // console.log(caretMeasurement.width)
-
-
-
-
-        // caretY = textY + (fontSize + 5) * (lines.length - 1); // Вычисляем Y для последней строки
-        caretY = textY + (fontSize + 5) * (lines.length + yPositionChange);
-
+        caretY = textY + (fontSize + 5) * caretPosition.line;
     }
 
     function redraw() {
         ctx.beginPath();
         coords.forEach(function(coord) {
             if (coord === 'brake') {
-                ctx.stroke();  // Завершаем текущий путь
-                ctx.beginPath();  // Начинаем новый путь
+                ctx.stroke();
+                ctx.beginPath();
             } else {
                 ctx.lineTo(coord[0], coord[1]);
             }
         });
-        ctx.stroke();  // Вызовем stroke после завершения всех линий
+        ctx.stroke();
     }
 
     function startDrawing(e) {
         coords.push('brake');
         coordsDisabled.length = 0;
-        coords.push([e.offsetX, e.offsetY])
+        coords.push([e.offsetX, e.offsetY]);
         isDrawing = true;
         ctx.beginPath();
         ctx.moveTo(e.offsetX, e.offsetY);
@@ -131,13 +86,12 @@ document.addEventListener('DOMContentLoaded', function() {
         ctx.strokeStyle = lineColor;
         ctx.lineTo(e.offsetX, e.offsetY);
         ctx.stroke();
-        coords.push([e.offsetX, e.offsetY])
+        coords.push([e.offsetX, e.offsetY]);
     }
 
     function endDrawing() {
         if (isDrawing) {
-            coords.push('brake')
-
+            coords.push('brake');
             ctx.closePath();
             isDrawing = false;
         }
@@ -149,7 +103,7 @@ document.addEventListener('DOMContentLoaded', function() {
     canvas.addEventListener('mouseout', endDrawing);
 
     document.addEventListener('keydown', function(e) {
-        if(e.ctrlKey) {
+        if (e.ctrlKey) {
             switch (e.keyCode) {
                 case 90 :
                     if ((coords.length && coordsDisabled.length < coordsDisabledLimit) && e.getModifierState('CapsLock')){
@@ -177,62 +131,104 @@ document.addEventListener('DOMContentLoaded', function() {
                     break;
                 case 'Backspace':
                     delOnBackspace();
-                    // text = text.slice(0, -1);
                     break;
-                //TODO перемещение каретки с помощью стрелочек
                 case 'ArrowLeft':
                     caretMoveLeft();
+                    break;
+                case 'ArrowRight':
+                    caretMoveRight();
+                    break;
+                case 'ArrowUp':
+                    caretMoveUp();
+                    break;
+                case 'ArrowDown':
+                    caretMoveDown();
                     break;
                 default:
                     if (!keysDontPrint.includes(e.key)) {
                         addLetter(e.key);
-
-
-
-
                         textHistory.push(text);
                         textHistoryIndex++;
                     }
                     break;
             }
         }
-        updateTextOnCanvas(); // Обновляем текст и рисунок на холсте
+        updateTextOnCanvas();
     });
 
-    function caretMoveLeft(){
-        if (letterToBackspaceDelIndex < 0) return;
-            xPositionChange--;
-        console.log(xPositionChange)
-            letterToBackspaceDelIndex = (text.length + (xPositionChange - 1));
-        // console.log(xPositionChange, letterToBackspaceDelIndex)
-        //TODO сделать переход со строки на строку
+    function caretMoveLeft() {
+        if (caretPosition.character > 0) {
+            caretPosition.character--;
+        } else if (caretPosition.line > 0) {
+            caretPosition.line--;
+            caretPosition.character = lines(caretPosition.line).length;
+        }
     }
 
-    function addLetter(letter){
-        if (!xPositionChange){
-            text += letter;
-        } else {
-           text = text.slice(0, letterToBackspaceDelIndex + 1) + letter + text.slice(letterToBackspaceDelIndex + 1);
-           letterToBackspaceDelIndex++;
+    function caretMoveRight() {
+        if (caretPosition.character < lines(caretPosition.line).length) {
+            caretPosition.character++;
+        } else if (caretPosition.line < lines().length - 1) {
+            caretPosition.line++;
+            caretPosition.character = 0;
         }
+    }
+
+    function caretMoveUp() {
+        if (caretPosition.line > 0) {
+            caretPosition.line--;
+            caretPosition.character = Math.min(caretPosition.character, lines(caretPosition.line).length);
+        }
+    }
+
+    function caretMoveDown() {
+        if (caretPosition.line < lines().length - 1) {
+            caretPosition.line++;
+            caretPosition.character = Math.min(caretPosition.character, lines(caretPosition.line).length);
+        }
+    }
+
+    function addLetter(letter) {
+        let currentLine = lines(caretPosition.line);
+        let newLine = currentLine.substring(0, caretPosition.character) + letter + currentLine.substring(caretPosition.character);
+        let newLines = lines().map((line, index) => index === caretPosition.line ? newLine : line);
+        text = newLines.join('\n');
+        caretPosition.character++;
     }
 
     function delOnBackspace() {
-        if (letterToBackspaceDelIndex >= 0){
-            text = text.slice(0, letterToBackspaceDelIndex) + text.slice(letterToBackspaceDelIndex + 1);
-            letterToBackspaceDelIndex--;
-        } else if (!xPositionChange){
-            text = text.slice(0, -1);
+        let currentLine = lines(caretPosition.line);
+        if (currentLine.length > 0 && caretPosition.character > 0) {
+            let newLine = currentLine.substring(0, caretPosition.character - 1) + currentLine.substring(caretPosition.character);
+            let newLines = lines().map((line, index) => index === caretPosition.line ? newLine : line);
+            text = newLines.join('\n');
+            caretPosition.character--;
+        } else if (caretPosition.line > 0) {
+            let previousLine = lines(caretPosition.line - 1);
+            let newPreviousLine = previousLine + currentLine.substring(caretPosition.character);
+            let newLines = lines().map((line, index) => index === caretPosition.line - 1 ? newPreviousLine : (index === caretPosition.line ? '' : line));
+            text = newLines.join('\n');
+            caretPosition.line--;
+            caretPosition.character = newPreviousLine.length;
         }
     }
 
-    function enterKeyAction(){
-        if (!xPositionChange){
-            text += '\n';
-        } else {
-            text = text.slice(0, letterToBackspaceDelIndex + 1) + '\n' + text.slice(letterToBackspaceDelIndex + 1);
-            letterToBackspaceDelIndex++;
+    function enterKeyAction() {
+        let currentLine = lines(caretPosition.line);
+        let newLine = currentLine.substring(0, caretPosition.character);
+        let newLines = lines().map((line, index) => index === caretPosition.line ? newLine : line);
+        newLines.splice(caretPosition.line + 1, 0, currentLine.substring(caretPosition.character));
+        text = newLines.join('\n');
+        caretPosition.line++;
+        caretPosition.character = 0;
+    }
+
+    function lines(lineNumber = null) {
+        let linesArray = text.split('\n');
+        if (lineNumber !== null) {
+            return linesArray[lineNumber] || '';
         }
+        return linesArray;
     }
 
     saveBtn.addEventListener('click', function() {
@@ -242,6 +238,7 @@ document.addEventListener('DOMContentLoaded', function() {
         link.download = 'canvas_note_image.png';
         link.click();
     });
+
     // Инициальный рендеринг текста
     updateTextOnCanvas();
 });

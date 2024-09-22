@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var saveBtn = document.getElementById('saveBtn');
     var isDrawing = false;
     let text = '';
-    const textWrapLimit = 78;
+    const textWrapLimit = 100;
     let textLineCounter = 1;
     const coordsDisabledLimit = 2000;
 
@@ -24,8 +24,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const keysDontPrint = ['Tab', 'Shift', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'F12', 'CapsLock', 'Meta']
 
     let xPositionChange = 0;
-    let letterToDelIndex;
-    //TODO возможно убрать ленз
+    let letterToBackspaceDelIndex;
 
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
@@ -165,7 +164,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     break;
                 default:
                     if (!keysDontPrint.includes(e.key)) {
-                        text += e.key;
+                        addLetter(e.key);
+
+
+
+
                         textHistory.push(text);
                         textHistoryIndex++;
                     }
@@ -176,25 +179,25 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function caretMoveLeft(){
+        if (letterToBackspaceDelIndex < 0) return;
+            xPositionChange--;
+            letterToBackspaceDelIndex = (text.length + (xPositionChange - 1));
+        console.log(xPositionChange, letterToBackspaceDelIndex)
+    }
 
-
-        xPositionChange--;
-        // console.log(text.charAt(text.length + (xPositionChange - 1)))
-        letterToDelIndex = (text.length + (xPositionChange - 1));
-        // console.log(text.charAt(text.length + (xPositionChange - 1)))
-
-        // console.log(letterToDelIndex)
-
-
-        // console.log(text.replace(text[letterToDelIndex], ''))
-
-        // console.log(text.length + (xPositionChange - 1))
+    function addLetter(letter){
+        if (!xPositionChange){
+            text += letter;
+        } else {
+           text = text.slice(0, letterToBackspaceDelIndex + 1) + letter + text.slice(letterToBackspaceDelIndex + 1);
+           letterToBackspaceDelIndex++;
+        }
     }
 
     function delOnBackspace() {
-        if (letterToDelIndex >= 0){
-            text = text.replace(text[letterToDelIndex], '');
-            letterToDelIndex--;
+        if (letterToBackspaceDelIndex >= 0){
+            text = text.slice(0, letterToBackspaceDelIndex) + text.slice(letterToBackspaceDelIndex + 1);
+            letterToBackspaceDelIndex--;
         } else if (!xPositionChange){
             text = text.slice(0, -1);
         }

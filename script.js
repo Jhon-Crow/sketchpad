@@ -4,9 +4,9 @@ document.addEventListener('DOMContentLoaded', function() {
     var saveBtn = document.getElementById('saveBtn');
     var isDrawing = false;
     let text = '';
-    const textWrapLimit = 10;
+    const textWrapLimit = 78;
     let textLineCounter = 1;
-    let textWrapCounter = textWrapLimit;
+    // let textWrapCounter = textWrapLimit;
     const coordsDisabledLimit = 1000;
     const caretColor = 'red';
     const fontColor = 'white';

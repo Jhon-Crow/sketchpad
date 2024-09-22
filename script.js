@@ -9,7 +9,8 @@ document.addEventListener('DOMContentLoaded', function() {
     let textWrapCounter = textWrapLimit;
     const coordsDisabledLimit = 1000;
     const caretColor = 'red';
-    const fontColor = 'black';
+    const fontColor = 'white';
+    const lineColor = 'white';
     var textX = 10;
     var textY = 20;
     var fontSize = 14;
@@ -18,7 +19,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const coordsDisabled = [];
 
 
-
+    const keysDontPrint = ['Tab', 'Shift', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'F12']
 
     // Настройка размеров canvas
     canvas.width = window.innerWidth;
@@ -101,6 +102,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Функция для процесса рисования
     function draw(e) {
         if (!isDrawing) return;
+        ctx.strokeStyle = lineColor;
         ctx.lineTo(e.offsetX, e.offsetY);
         ctx.stroke();
         coords.push([e.offsetX, e.offsetY])
@@ -150,17 +152,20 @@ document.addEventListener('DOMContentLoaded', function() {
                     break;
                     //TODO перемещение каретки с помощью стрелочек
                 default:
-                    if (/^[a-zA-Zа-яА-Я]$/.test(e.key)) {
-                        text += e.key;
-                    }
+                    if (!keysDontPrint.includes(e.key)) text += e.key;
                     break;
             }
         }
         updateTextOnCanvas(); // Обновляем текст и рисунок на холсте
     });
 
-    //TODO функцию сохранения в пнг или пдф или ещё как
-
+    saveBtn.addEventListener('click', function() {
+        const canvasData = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.href = canvasData;
+        link.download = 'canvas_note_image.png';
+        link.click();
+    });
 
     // Инициальный рендеринг текста
     updateTextOnCanvas();

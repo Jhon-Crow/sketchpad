@@ -24,6 +24,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const keysDontPrint = ['Tab', 'Shift', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'F12', 'CapsLock', 'Meta']
 
     let xPositionChange = 0;
+    let yPositionChange = -1;
     let letterToBackspaceDelIndex;
 
     canvas.width = window.innerWidth;
@@ -78,9 +79,29 @@ document.addEventListener('DOMContentLoaded', function() {
             caretMeasurement = ctx.measureText(currentLine);
         }
 
+        console.log(letterToBackspaceDelIndex)
+        // console.log(text.charAt(letterToBackspaceDelIndex))
+
+
+        if (text.charAt(letterToBackspaceDelIndex + 1) === '\n'){
+            yPositionChange--;
+            caretMeasurement = ctx.measureText(currentLine);
+            xPositionChange = 0;
+            // letterToBackspaceDelIndex
+        }
+
         caretX = textX + caretMeasurement.width;
+
+        // console.log(lines, letterToBackspaceDelIndex, text.charAt(letterToBackspaceDelIndex))
+
         // console.log(caretMeasurement.width)
-        caretY = textY + (fontSize + 5) * (lines.length - 1); // Вычисляем Y для последней строки
+
+
+
+
+        // caretY = textY + (fontSize + 5) * (lines.length - 1); // Вычисляем Y для последней строки
+        caretY = textY + (fontSize + 5) * (lines.length + yPositionChange);
+
     }
 
     function redraw() {
@@ -152,7 +173,7 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             switch (e.key) {
                 case 'Enter':
-                    text += '\n';
+                    enterKeyAction();
                     break;
                 case 'Backspace':
                     delOnBackspace();
@@ -181,8 +202,10 @@ document.addEventListener('DOMContentLoaded', function() {
     function caretMoveLeft(){
         if (letterToBackspaceDelIndex < 0) return;
             xPositionChange--;
+        console.log(xPositionChange)
             letterToBackspaceDelIndex = (text.length + (xPositionChange - 1));
-        console.log(xPositionChange, letterToBackspaceDelIndex)
+        // console.log(xPositionChange, letterToBackspaceDelIndex)
+        //TODO сделать переход со строки на строку
     }
 
     function addLetter(letter){
@@ -200,6 +223,15 @@ document.addEventListener('DOMContentLoaded', function() {
             letterToBackspaceDelIndex--;
         } else if (!xPositionChange){
             text = text.slice(0, -1);
+        }
+    }
+
+    function enterKeyAction(){
+        if (!xPositionChange){
+            text += '\n';
+        } else {
+            text = text.slice(0, letterToBackspaceDelIndex + 1) + '\n' + text.slice(letterToBackspaceDelIndex + 1);
+            letterToBackspaceDelIndex++;
         }
     }
 

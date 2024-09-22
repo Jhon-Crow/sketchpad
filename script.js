@@ -6,19 +6,26 @@ document.addEventListener('DOMContentLoaded', function() {
     let text = '';
     const textWrapLimit = 78;
     let textLineCounter = 1;
-    const coordsDisabledLimit = 1000;
+    const coordsDisabledLimit = 2000;
+
     const caretColor = 'red';
     const fontColor = 'white';
     const lineColor = 'white';
+
     var textX = 10;
     var textY = 20;
     var fontSize = 14;
     var fontFamily = 'Arial';
+
     const coords = [];
     const coordsDisabled = [];
     const textHistory = [''];
     let textHistoryIndex = 0;
-    const keysDontPrint = ['Tab', 'Shift', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'F12', 'CapsLock']
+    const keysDontPrint = ['Tab', 'Shift', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'F12', 'CapsLock', 'Meta']
+
+    let xPositionChange = 0;
+    let letterToDelIndex;
+    //TODO возможно убрать ленз
 
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
@@ -60,9 +67,20 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function calculateCaretPosition() {
         let lines = text.split('\n');
+
         let currentLine = lines[lines.length - 1];
-        const caretMeasurement = ctx.measureText(currentLine);
+        // console.log(currentLine.slice(0, xPositionChange))
+        // let caretMeasurement = ctx.measureText(currentLine);
+        let caretMeasurement;
+
+        if (xPositionChange){
+            caretMeasurement = ctx.measureText(currentLine.slice(0, xPositionChange));
+        } else {
+            caretMeasurement = ctx.measureText(currentLine);
+        }
+
         caretX = textX + caretMeasurement.width;
+        // console.log(caretMeasurement.width)
         caretY = textY + (fontSize + 5) * (lines.length - 1); // Вычисляем Y для последней строки
     }
 
@@ -138,9 +156,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     text += '\n';
                     break;
                 case 'Backspace':
-                    text = text.slice(0, -1);
+                    delOnBackspace();
+                    // text = text.slice(0, -1);
                     break;
                 //TODO перемещение каретки с помощью стрелочек
+                case 'ArrowLeft':
+                    caretMoveLeft();
+                    break;
                 default:
                     if (!keysDontPrint.includes(e.key)) {
                         text += e.key;
@@ -152,6 +174,31 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         updateTextOnCanvas(); // Обновляем текст и рисунок на холсте
     });
+
+    function caretMoveLeft(){
+
+
+        xPositionChange--;
+        // console.log(text.charAt(text.length + (xPositionChange - 1)))
+        letterToDelIndex = (text.length + (xPositionChange - 1));
+        // console.log(text.charAt(text.length + (xPositionChange - 1)))
+
+        // console.log(letterToDelIndex)
+
+
+        // console.log(text.replace(text[letterToDelIndex], ''))
+
+        // console.log(text.length + (xPositionChange - 1))
+    }
+
+    function delOnBackspace() {
+        if (letterToDelIndex >= 0){
+            text = text.replace(text[letterToDelIndex], '');
+            letterToDelIndex--;
+        } else if (!xPositionChange){
+            text = text.slice(0, -1);
+        }
+    }
 
     saveBtn.addEventListener('click', function() {
         const canvasData = canvas.toDataURL('image/png');

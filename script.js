@@ -135,13 +135,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     saveToHistory();
                     break;
                 case 'Backspace':
-                    delOnBackspace();
+                    // delOnBackspace();
+                    deleteCharacter('backspace');
                     saveToHistory();
                     break;
                 case 'Delete':
-                    console.log('NEED TO DO!')
+                    // console.log('NEED TO DO!')
                     // delOnBackspace();
-                    // saveToHistory();
+                    deleteCharacter('delete');
+                    saveToHistory();
                     break;
                 case 'ArrowLeft':
                     caretMoveLeft();
@@ -219,25 +221,42 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    function delOnBackspace() {
-        //TODO сделать универсальную функцию удаления для delete и backspace
+    function deleteCharacter(direction) {
         let currentLine = lines(caretPosition.line);
-        if (currentLine.length > 0 && caretPosition.character > 0) {
-            // Удаление символа в середине или в конце строки
-            let newLine = currentLine.substring(0, caretPosition.character - 1) + currentLine.substring(caretPosition.character);
-            let newLines = lines().map((line, index) => index === caretPosition.line ? newLine : line);
-            text = newLines.join('\n');
-            caretPosition.character--;
-        } else if (caretPosition.line > 0) {
-            // Удаление переноса строки
-            let previousLine = lines(caretPosition.line - 1);
-            let newPreviousLine = previousLine + (currentLine.length > 0 ? currentLine : '');
-            let newLines = lines().map((line, index) => index === caretPosition.line - 1 ? newPreviousLine : (index === caretPosition.line ? '' : line));
-            text = newLines.join('\n');
-            caretPosition.line--;
-            caretPosition.character = previousLine.length
+        if (direction === 'backspace') {
+            if (currentLine.length > 0 && caretPosition.character > 0) {
+                // Удаление символа в середине или в конце строки
+                let newLine = currentLine.substring(0, caretPosition.character - 1) + currentLine.substring(caretPosition.character);
+                let newLines = lines().map((line, index) => index === caretPosition.line ? newLine : line);
+                text = newLines.join('\n');
+                caretPosition.character--;
+            } else if (caretPosition.line > 0) {
+                // Удаление переноса строки
+                let previousLine = lines(caretPosition.line - 1);
+                let newPreviousLine = previousLine + (currentLine.length > 0 ? currentLine : '');
+                let newLines = lines().map((line, index) => index === caretPosition.line - 1 ? newPreviousLine : (index === caretPosition.line ? '' : line));
+                newLines.splice(caretPosition.line, 1)
+                text = newLines.join('\n');
+                caretPosition.line--;
+                caretPosition.character = previousLine.length
+            }
+        } else if (direction === 'delete') {
+            if (currentLine.length > 0 && caretPosition.character < currentLine.length) {
+                // Deletion of a character in the middle or at the end of a line
+                let newLine = currentLine.substring(0, caretPosition.character) + currentLine.substring(caretPosition.character + 1);
+                let newLines = lines().map((line, index) => index === caretPosition.line ? newLine : line);
+                text = newLines.join('\n');
+            } else if (caretPosition.line < lines().length - 1) {
+                // Deletion of a newline character
+                let nextLine = lines(caretPosition.line + 1);
+                let newCurrentLine = currentLine + (nextLine.length > 0 ? nextLine : '');
+                let newLines = lines().map((line, index) => index === caretPosition.line ? newCurrentLine : (index === caretPosition.line + 1 ? '' : line));
+                newLines.splice(caretPosition.line + 1, 1);
+                text = newLines.join('\n');
+            }
         }
     }
+
 
     function enterKeyAction() {
         let currentLine = lines(caretPosition.line);

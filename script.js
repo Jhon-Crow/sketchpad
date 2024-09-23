@@ -5,7 +5,6 @@ document.addEventListener('DOMContentLoaded', function() {
     var isDrawing = false;
     let text = '';
     const textWrapLimit = 10;
-    let textLineCounter = 1;
     const coordsDisabledLimit = 2000;
 
     const caretColor = 'red';
@@ -19,7 +18,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const coords = [];
     const coordsDisabled = [];
-    const textHistory = [''];
+    const textHistory = [{'text': '', 'caretPosition': {line: 0, character: 0}}];
     let textHistoryIndex = 0;
     const keysDontPrint = ['Tab', 'Shift', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'F12', 'CapsLock', 'Meta'];
 
@@ -112,7 +111,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         coordsDisabled.push(coords?.pop());
                     } else if (textHistoryIndex > 0) {
                         textHistoryIndex--;
-                        text = textHistory[textHistoryIndex];
+                        text = textHistory[textHistoryIndex].text;
+                        caretPosition = textHistory[textHistoryIndex].caretPosition;
                     }
                     break;
                 case 89:
@@ -120,7 +120,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         coords?.push(coordsDisabled?.pop());
                     } else if (textHistoryIndex < textHistory.length - 1) {
                         textHistoryIndex++;
-                        text = textHistory[textHistoryIndex];
+                        text = textHistory[textHistoryIndex].text;
+                        caretPosition = textHistory[textHistoryIndex].caretPosition;
                     }
                     break;
                 default:
@@ -134,6 +135,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     break;
                 case 'Backspace':
                     delOnBackspace();
+                    saveToHistory();
                     break;
                 case 'ArrowLeft':
                     caretMoveLeft();
@@ -159,7 +161,7 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     function saveToHistory(){
-        textHistory.push(text);
+        textHistory.push({text: text, caretPosition: {line: caretPosition.line, character: caretPosition.character}});
         textHistoryIndex++;
     }
 
@@ -208,8 +210,6 @@ document.addEventListener('DOMContentLoaded', function() {
             text = newLines.join('\n');
             caretPosition.character++;
         }
-
-
     }
 
     function delOnBackspace() {
@@ -231,9 +231,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-
-
-//TODO подумать, как сделать вставку из буфера
     function enterKeyAction() {
         let currentLine = lines(caretPosition.line);
         let newLine = currentLine.substring(0, caretPosition.character);

@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var saveBtn = document.getElementById('saveBtn');
     var isDrawing = false;
     let text = '';
-    const textWrapLimit = 100;
+    const textWrapLimit = 10;
     let textLineCounter = 1;
     const coordsDisabledLimit = 2000;
 
@@ -36,6 +36,7 @@ document.addEventListener('DOMContentLoaded', function() {
         ctx.font = fontSize + 'px ' + fontFamily;
         ctx.fillStyle = fontColor;
         let lines = text.split('\n');
+
         let y = textY;
         for (let i = 0; i < lines.length; i++) {
             ctx.fillText(lines[i], textX, y);
@@ -54,6 +55,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function calculateCaretPosition() {
         let lines = text.split('\n');
         let currentLine = lines[caretPosition.line] || '';
+
         let caretMeasurement = ctx.measureText(currentLine.substring(0, caretPosition.character));
         caretX = textX + caretMeasurement.width;
         caretY = textY + (fontSize + 5) * caretPosition.line;
@@ -194,31 +196,44 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function addLetter(letter) {
+        let newLine;
+        let newLines;
         let currentLine = lines(caretPosition.line);
-        let newLine = currentLine.substring(0, caretPosition.character) + letter + currentLine.substring(caretPosition.character);
-        let newLines = lines().map((line, index) => index === caretPosition.line ? newLine : line);
-        text = newLines.join('\n');
-        caretPosition.character++;
+        if (currentLine.length >= textWrapLimit) {
+            enterKeyAction();
+            addLetter(letter);
+        } else {
+            newLine = currentLine.substring(0, caretPosition.character) + letter + currentLine.substring(caretPosition.character);
+            newLines = lines().map((line, index) => index === caretPosition.line ? newLine : line);
+            text = newLines.join('\n');
+            caretPosition.character++;
+        }
+
+
     }
 
     function delOnBackspace() {
         let currentLine = lines(caretPosition.line);
         if (currentLine.length > 0 && caretPosition.character > 0) {
+            // Удаление символа в середине или в конце строки
             let newLine = currentLine.substring(0, caretPosition.character - 1) + currentLine.substring(caretPosition.character);
             let newLines = lines().map((line, index) => index === caretPosition.line ? newLine : line);
             text = newLines.join('\n');
             caretPosition.character--;
         } else if (caretPosition.line > 0) {
+            // Удаление переноса строки
             let previousLine = lines(caretPosition.line - 1);
-            let newPreviousLine = previousLine + currentLine.substring(caretPosition.character);
+            let newPreviousLine = previousLine + (currentLine.length > 0 ? currentLine : '');
             let newLines = lines().map((line, index) => index === caretPosition.line - 1 ? newPreviousLine : (index === caretPosition.line ? '' : line));
             text = newLines.join('\n');
             caretPosition.line--;
-            caretPosition.character = newPreviousLine.length;
-            saveToHistory();
+            caretPosition.character = previousLine.length
         }
     }
 
+
+
+//TODO подумать, как сделать вставку из буфера
     function enterKeyAction() {
         let currentLine = lines(caretPosition.line);
         let newLine = currentLine.substring(0, caretPosition.character);

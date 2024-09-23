@@ -56,8 +56,10 @@ document.addEventListener('DOMContentLoaded', function() {
         let currentLine = lines[caretPosition.line] || '';
 
         let caretMeasurement = ctx.measureText(currentLine.substring(0, caretPosition.character));
+        // console.log(caretMeasurement)
         caretX = textX + caretMeasurement.width;
         caretY = textY + (fontSize + 5) * caretPosition.line;
+        // console.log(caretX)
     }
 
     function redraw() {
@@ -137,13 +139,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     saveToHistory();
                     break;
                 case 'Backspace':
-                    // delOnBackspace();
                     deleteCharacter('backspace');
                     saveToHistory();
                     break;
                 case 'Delete':
-                    // console.log('NEED TO DO!')
-                    // delOnBackspace();
                     deleteCharacter('delete');
                     saveToHistory();
                     break;
@@ -207,21 +206,71 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // function addLetter(letter) {
+    //     let newLine;
+    //     let newLines;
+    //     let currentLine = lines(caretPosition.line);
+    //     let textWidth = ctx.measureText(currentLine + letter).width;
+    //     //TODO сделать перенос не убирающихся символов
+    //
+    //     if (textWidth > textWrapLimit) {
+    //         console.log(currentLine[currentLine.length - 1])
+    //         // enterKeyAction();
+    //         // addLetter(letter);
+    //     } else {
+    //         newLine = currentLine.substring(0, caretPosition.character) + letter + currentLine.substring(caretPosition.character);
+    //         newLines = lines().map((line, index) => index === caretPosition.line ? newLine : line);
+    //         text = newLines.join('\n');
+    //         caretPosition.character++;
+    //     }
+    // }
+
     function addLetter(letter) {
         let newLine;
         let newLines;
         let currentLine = lines(caretPosition.line);
-        if (currentLine.length >= textWrapLimit) {
-            //TODO сделать перенос не убирающихся символов
-            enterKeyAction();
-            addLetter(letter);
-        } else {
+        let textWidth = ctx.measureText(currentLine + letter).width;
+
+        function addLetterOnCaret(letter){
             newLine = currentLine.substring(0, caretPosition.character) + letter + currentLine.substring(caretPosition.character);
             newLines = lines().map((line, index) => index === caretPosition.line ? newLine : line);
             text = newLines.join('\n');
             caretPosition.character++;
         }
+
+        // console.log(lines(caretPosition.line).length)
+        // console.log(caretPosition.character, textWrapLimit)
+
+        if (textWidth >= textWrapLimit) {
+            if (caretX >= textWrapLimit) {
+                console.log('caret wrap')
+                        enterKeyAction();
+                        addLetter(letter);
+            // }
+            } else {
+                //TODO finish
+                // добавлять новую(если нет) строку в массив строк и
+                // дописывать туда букву
+                console.log('hardcore')
+                // addLetterOnCaret(letter)
+                let lastChar = currentLine[currentLine.length - 1];
+                currentLine = currentLine.substring(0, currentLine.length - 1);
+                // console.log(currentLine)
+                newLine = lastChar;
+                newLines = lines().map((line, index) => index === caretPosition.line ? currentLine : line);
+                newLines.splice(caretPosition.line + 1, 0, newLine);
+                text = newLines.join('\n');
+                // caretPosition.line++;
+                // caretPosition.character = 0;
+            }
+        //
+        } else {
+            console.log('simple')
+            addLetterOnCaret(letter);
+        }
     }
+
+
 
     function deleteCharacter(direction) {
         let currentLine = lines(caretPosition.line);
@@ -244,12 +293,12 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         } else if (direction === 'delete') {
             if (currentLine.length > 0 && caretPosition.character < currentLine.length) {
-                // Deletion of a character in the middle or at the end of a line
+
                 let newLine = currentLine.substring(0, caretPosition.character) + currentLine.substring(caretPosition.character + 1);
                 let newLines = lines().map((line, index) => index === caretPosition.line ? newLine : line);
                 text = newLines.join('\n');
             } else if (caretPosition.line < lines().length - 1) {
-                // Deletion of a newline character
+
                 let nextLine = lines(caretPosition.line + 1);
                 let newCurrentLine = currentLine + (nextLine.length > 0 ? nextLine : '');
                 let newLines = lines().map((line, index) => index === caretPosition.line ? newCurrentLine : (index === caretPosition.line + 1 ? '' : line));
@@ -259,22 +308,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-
-    // function pastText(){
-    //     getPasteText().then(str => {
-    //         for (let l of str){
-    //             setTimeout(() => {
-    //                 addLetter(l);
-    //                 updateTextOnCanvas();
-    //             }, pastDelay)
-    //
-    //         }
-    //     })
-    // }
-
     function pastText(){
         getPasteText().then(str => {
             text += str;
+            //TODO сделать возможность вставки в середине текста
             calculateCaretPosition();
             updateTextOnCanvas();
         })
@@ -320,6 +357,5 @@ document.addEventListener('DOMContentLoaded', function() {
         link.click();
     });
 
-    // Инициальный рендеринг текста
     updateTextOnCanvas();
 });

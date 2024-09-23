@@ -10,7 +10,6 @@ document.addEventListener('DOMContentLoaded', function() {
     let caretColor = 'red';
     const fontColor = 'white';
     const lineColor = 'white';
-    const pastDelay = 0;
 
     var textX = 10;
     var textY = 20;

@@ -106,6 +106,7 @@ document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('keydown', function(e) {
         if (e.ctrlKey) {
             switch (e.keyCode) {
+                //TODO сделать возможность вставки из буфера обмена
                 case 90 :
                     if ((coords.length && coordsDisabled.length < coordsDisabledLimit) && e.getModifierState('CapsLock')){
                         coordsDisabled.push(coords?.pop());
@@ -136,6 +137,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 case 'Backspace':
                     delOnBackspace();
                     saveToHistory();
+                    break;
+                case 'Delete':
+                    console.log('NEED TO DO!')
+                    // delOnBackspace();
+                    // saveToHistory();
                     break;
                 case 'ArrowLeft':
                     caretMoveLeft();
@@ -202,6 +208,7 @@ document.addEventListener('DOMContentLoaded', function() {
         let newLines;
         let currentLine = lines(caretPosition.line);
         if (currentLine.length >= textWrapLimit) {
+            //TODO сделать перенос не убирающихся символов
             enterKeyAction();
             addLetter(letter);
         } else {
@@ -213,6 +220,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function delOnBackspace() {
+        //TODO сделать универсальную функцию удаления для delete и backspace
         let currentLine = lines(caretPosition.line);
         if (currentLine.length > 0 && caretPosition.character > 0) {
             // Удаление символа в середине или в конце строки

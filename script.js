@@ -4,12 +4,13 @@ document.addEventListener('DOMContentLoaded', function() {
     var saveBtn = document.getElementById('saveBtn');
     var isDrawing = false;
     let text = '';
-    const textWrapLimit = 10;
+    const textWrapLimit = 100;
     const coordsDisabledLimit = 2000;
 
-    const caretColor = 'red';
+    let caretColor = 'red';
     const fontColor = 'white';
     const lineColor = 'white';
+    const pastDelay = 0;
 
     var textX = 10;
     var textY = 20;
@@ -106,7 +107,9 @@ document.addEventListener('DOMContentLoaded', function() {
     document.addEventListener('keydown', function(e) {
         if (e.ctrlKey) {
             switch (e.keyCode) {
-                //TODO сделать возможность вставки из буфера обмена
+                case 86:
+                    pastText();
+                    break;
                 case 90 :
                     if ((coords.length && coordsDisabled.length < coordsDisabledLimit) && e.getModifierState('CapsLock')){
                         coordsDisabled.push(coords?.pop());
@@ -258,6 +261,29 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
 
+    // function pastText(){
+    //     getPasteText().then(str => {
+    //         for (let l of str){
+    //             setTimeout(() => {
+    //                 addLetter(l);
+    //                 updateTextOnCanvas();
+    //             }, pastDelay)
+    //
+    //         }
+    //     })
+    // }
+
+    function pastText(){
+        getPasteText().then(str => {
+            text += str;
+            calculateCaretPosition();
+            updateTextOnCanvas();
+        })
+    }
+
+
+
+
     function enterKeyAction() {
         let currentLine = lines(caretPosition.line);
         let newLine = currentLine.substring(0, caretPosition.character);
@@ -274,6 +300,17 @@ document.addEventListener('DOMContentLoaded', function() {
             return linesArray[lineNumber] || '';
         }
         return linesArray;
+    }
+
+
+
+
+    async function getPasteText() {
+        try {
+            return await navigator.clipboard.readText();
+        } catch (error) {
+            console.error('Error reading from clipboard:', error);
+        }
     }
 
     saveBtn.addEventListener('click', function() {

@@ -56,10 +56,8 @@ document.addEventListener('DOMContentLoaded', function() {
         let currentLine = lines[caretPosition.line] || '';
 
         let caretMeasurement = ctx.measureText(currentLine.substring(0, caretPosition.character));
-        // console.log(caretMeasurement)
         caretX = textX + caretMeasurement.width;
         caretY = textY + (fontSize + 5) * caretPosition.line;
-        // console.log(caretX)
     }
 
     function redraw() {
@@ -210,21 +208,12 @@ document.addEventListener('DOMContentLoaded', function() {
             let newLine;
             let newLines;
             let currentLine = lines(caretPosition.line);
-            // let textWidth = ctx.measureText(currentLine + letter).width;
-            // let nCounter = 0;
-
-// обычный ввод
                 addLetterOnCaret(letter);
-                // if (caretPosition.line === newLines.length - 1) newLines.push('!')
                 for (let i = 0; i < newLines.length; i++){
-
-                    // работа с 1 символом
                     if(newLines[i].length >= textWrapLimit) {
                         newLines[i].split(0, textWrapLimit)
-                        // console.log(newLines[i].substring(0, textWrapLimit))
                         if (!newLines[i + 1]){
                             newLines[i + 1] = newLines[i].substring(textWrapLimit, newLines[i].length)
-                            // console.log(newLines[i + 1])
                         } else {
                             newLines[i + 1] = newLines[i].substring(textWrapLimit, newLines[i].length) + newLines[i + 1]
                         }
@@ -232,121 +221,18 @@ document.addEventListener('DOMContentLoaded', function() {
                             caretPosition.line++;
                             caretPosition.character = 1;
                         }
-                        // console.log(newLines[i + 1])
                         newLines[i] = newLines[i].substring(0, textWrapLimit);
-
-
-                        // console.log(newLines[i + 1][0], newLines[i][newLines[i].length - 1])
-                        // newLines[i + 1][0].replace(newLines[i + 1][0] , newLines[i][newLines[i].length - 1]);
-                        // newLines[i][newLines[i].length - 1]
-                        // console.log(newLines[i][newLines[i].length - 1])
                     }
                 }
-                // console.log(newLines)
                 text = newLines.join('\n');
-
-        // console.log(text)
-
-
-                // if (currentLine.length >= textWrapLimit){
-                //
-                //
-                //
-                //
-                // }
-
-
-
-
-
 
         function addLetterOnCaret(letter) {
             newLine = currentLine.substring(0, caretPosition.character) + letter + currentLine.substring(caretPosition.character);
-            // newLines = lines().map((line, index) => index === caretPosition.line ? newLine : line);
             newLines = lines().map((line, index) => index === caretPosition.line ? newLine : line);
-            // console.log(newLines)
             currentLine = newLine;
-            // text = newLines.join('\n');
             caretPosition.character++;
         }
     }
-
-    // function addLetter(letter) {
-    //     let newLine;
-    //     let newLines;
-    //     let currentLine = lines(caretPosition.line);
-    //     let nextLine = lines(caretPosition.line + 1);
-    //
-    //     let textWidth = ctx.measureText(currentLine + letter).width;
-    //
-    //     function addLetterOnCaret(letter) {
-    //         newLine = currentLine.substring(0, caretPosition.character) + letter + currentLine.substring(caretPosition.character);
-    //         newLines = lines().map((line, index) => index === caretPosition.line ? newLine : line);
-    //         currentLine = newLine;
-    //         text = newLines.join('\n');
-    //         caretPosition.character++;
-    //     }
-    //
-    //     if (textWidth >= textWrapLimit) {
-    //         if (caretX >= textWrapLimit) {
-    //             if (!lines(caretPosition.line + 1)) {
-    //                 enterKeyAction();
-    //                 addLetter(letter);
-    //             } else {
-    //                 console.log('caret wrap')
-    //                 nextLine = letter + nextLine;
-    //                 newLines = lines().map((line, index) => {
-    //                     if (index === caretPosition.line) {
-    //                         console.log('2) currentLine', currentLine)
-    //                         console.log(lines())
-    //                         return currentLine;
-    //                     } else if (index === caretPosition.line + 1) {
-    //                         console.log(index, caretPosition.line)
-    //                         console.log(`2) на строку ${caretPosition.line + 1} добавим`, nextLine)
-    //                         return nextLine;
-    //                     } else {
-    //                         console.log('2) line', line)
-    //                         return line;
-    //                     }
-    //                 });
-    //                 text = newLines.join('\n');
-    //                 caretPosition.line++;
-    //                 caretPosition.character = 1;
-    //             }
-    //         } else {
-    //             console.log('1) врап в середине start')
-    //             let lastChar = currentLine[currentLine.length - 1];
-    //             // let nextLine = lines(caretPosition.line + 1);
-    //             addLetterOnCaret(letter);
-    //             console.log(letter)
-    //             currentLine = currentLine.slice(0, currentLine.length - 1);
-    //             nextLine = lastChar + nextLine;
-    //             if (lines().length <= 1) {
-    //                 console.log(`1.5) если ${lines().length} <= 1 буква в новую строку`)
-    //                 newLines.push(lastChar)
-    //             }
-    //             newLines = newLines.map((line, index) => {
-    //                 if (index === caretPosition.line) {
-    //                     console.log('2) currentLine', currentLine)
-    //                     console.log(lines())
-    //                     return currentLine;
-    //                 } else if (index === caretPosition.line + 1) {
-    //                     console.log(index, caretPosition.line)
-    //                     console.log(`2) на строку ${caretPosition.line + 1} добавим`, nextLine)
-    //                     return nextLine;
-    //                 } else {
-    //                     console.log('2) line', line)
-    //                     return line;
-    //                 }
-    //             });
-    //             text = newLines.join('\n');
-    //             console.log('end')
-    //         }
-    //     } else {
-    //         console.log('simple')
-    //         addLetterOnCaret(letter);
-    //     }
-    // }
 
 //TODO добавить 4 пробела на таб
 
@@ -395,9 +281,6 @@ document.addEventListener('DOMContentLoaded', function() {
         })
     }
 
-
-
-
     function enterKeyAction() {
         let currentLine = lines(caretPosition.line);
         let newLine = currentLine.substring(0, caretPosition.character);
@@ -415,9 +298,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         return linesArray;
     }
-
-
-
 
     async function getPasteText() {
         try {

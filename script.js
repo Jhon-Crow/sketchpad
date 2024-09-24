@@ -210,8 +210,8 @@ document.addEventListener('DOMContentLoaded', function() {
             let newLine;
             let newLines;
             let currentLine = lines(caretPosition.line);
-            let textWidth = ctx.measureText(currentLine + letter).width;
-            let nCounter = 0;
+            // let textWidth = ctx.measureText(currentLine + letter).width;
+            // let nCounter = 0;
 
 // обычный ввод
                 addLetterOnCaret(letter);
@@ -223,13 +223,12 @@ document.addEventListener('DOMContentLoaded', function() {
                         newLines[i].split(0, textWrapLimit)
                         // console.log(newLines[i].substring(0, textWrapLimit))
                         if (!newLines[i + 1]){
-
                             newLines[i + 1] = newLines[i].substring(textWrapLimit, newLines[i].length)
                             // console.log(newLines[i + 1])
                         } else {
                             newLines[i + 1] = newLines[i].substring(textWrapLimit, newLines[i].length) + newLines[i + 1]
                         }
-                        if (caretPosition.character >= currentLine.length){
+                        if (caretPosition.character > textWrapLimit){
                             caretPosition.line++;
                             caretPosition.character = 1;
                         }

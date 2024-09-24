@@ -231,7 +231,7 @@ document.addEventListener('DOMContentLoaded', function() {
         let currentLine = lines(caretPosition.line);
         let textWidth = ctx.measureText(currentLine + letter).width;
 
-        function addLetterOnCaret(letter){
+        function addLetterOnCaret(letter) {
             // console.log('addLetterOnCaret ===== start', letter)
             // console.log(newLine)
             newLine = currentLine.substring(0, caretPosition.character) + letter + currentLine.substring(caretPosition.character);
@@ -252,47 +252,39 @@ document.addEventListener('DOMContentLoaded', function() {
         if (textWidth >= textWrapLimit) {
             if (caretX >= textWrapLimit) {
                 console.log('caret wrap')
-                        enterKeyAction();
-                        addLetter(letter);
+                enterKeyAction();
+                addLetter(letter);
             } else {
-                console.log('врап в середине start')
-                currentLine = text
+                console.log('1) врап в середине start')
                 let lastChar = currentLine[currentLine.length - 1];
                 let nextLine = lines(caretPosition.line + 1);
-                // console.log(lastChar)
                 addLetterOnCaret(letter);
                 console.log(letter)
 
-                nextLine = lastChar + nextLine
                 currentLine = currentLine.slice(0, currentLine.length - 1);
-                if (lines().length <= 1){
-                    console.log(`если ${lines().length} <= 1 буква в новую строку`)
+                nextLine = lastChar + nextLine
+
+                if (lines().length <= 1) {
+                    console.log(`1.5) если ${lines().length} <= 1 буква в новую строку`)
                     newLines.push(lastChar)
                 }
-                    newLines = newLines.map((line, index) => {
-                        // console.log(lines().length, caretPosition.line + 1)
-                        if (index === caretPosition.line){
-                            console.log('currentLine', currentLine)
-                           return currentLine;
-                        } else if (index === caretPosition.line + 1) {
-                            //TODO добавлять одну букву вначало новой строки
-
-                            console.log(`на строку ${caretPosition.line + 1} добавим`, nextLine)
-
-                            return nextLine;
-                        } else {
-                            console.log('line', line)
-
-                            return line;
-                        }
-                    });
+                newLines = newLines.map((line, index) => {
+                    if (index === caretPosition.line) {
+                        console.log('2) currentLine', currentLine)
+                        console.log(lines())
+                        return currentLine;
+                    } else if (index === caretPosition.line + 1) {
+                        console.log(index, caretPosition.line)
+                        console.log(`2) на строку ${caretPosition.line + 1} добавим`, nextLine)
+                        return nextLine;
+                    } else {
+                        console.log('2) line', line)
+                        return line;
+                    }
+                });
                 text = newLines.join('\n');
-                //TODO finish
-                // добавлять новую(если нет) строку в массив строк и
-                // дописывать туда букву
                 console.log('end')
             }
-        //
         } else {
             console.log('simple')
             addLetterOnCaret(letter);

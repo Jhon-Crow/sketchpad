@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const coordsDisabled = [];
     const textHistory = [{'text': '', 'caretPosition': {line: 0, character: 0}}];
     let textHistoryIndex = 0;
-    const keysDontPrint = ['Tab', 'Shift', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'F12', 'CapsLock', 'Meta'];
+    const keysDontPrint = ['Tab', 'Shift', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'F12', 'F5', 'CapsLock', 'Meta'];
 
     let caretPosition = { line: 0, character: 0 };
     let caretX = textX;
@@ -232,36 +232,65 @@ document.addEventListener('DOMContentLoaded', function() {
         let textWidth = ctx.measureText(currentLine + letter).width;
 
         function addLetterOnCaret(letter){
+            // console.log('addLetterOnCaret ===== start', letter)
+            // console.log(newLine)
             newLine = currentLine.substring(0, caretPosition.character) + letter + currentLine.substring(caretPosition.character);
+            // console.log(newLine)
+
             newLines = lines().map((line, index) => index === caretPosition.line ? newLine : line);
+            currentLine = newLine;
+            // lines().map((line, index) => console.log(index, line));
+            // console.log(newLines)
             text = newLines.join('\n');
             caretPosition.character++;
+            // console.log(text, `=== ${letter} не пропала`)
+            // console.log('currentLine ===', currentLine)
+            //
+            // console.log('addLetterOnCaret ==== end', letter)
         }
-
-        // console.log(lines(caretPosition.line).length)
-        // console.log(caretPosition.character, textWrapLimit)
 
         if (textWidth >= textWrapLimit) {
             if (caretX >= textWrapLimit) {
                 console.log('caret wrap')
                         enterKeyAction();
                         addLetter(letter);
-            // }
             } else {
+                console.log('врап в середине start')
+                currentLine = text
+                let lastChar = currentLine[currentLine.length - 1];
+                let nextLine = lines(caretPosition.line + 1);
+                // console.log(lastChar)
+                addLetterOnCaret(letter);
+                console.log(letter)
+
+                nextLine = lastChar + nextLine
+                currentLine = currentLine.slice(0, currentLine.length - 1);
+                if (lines().length <= 1){
+                    console.log(`если ${lines().length} <= 1 буква в новую строку`)
+                    newLines.push(lastChar)
+                }
+                    newLines = newLines.map((line, index) => {
+                        // console.log(lines().length, caretPosition.line + 1)
+                        if (index === caretPosition.line){
+                            console.log('currentLine', currentLine)
+                           return currentLine;
+                        } else if (index === caretPosition.line + 1) {
+                            //TODO добавлять одну букву вначало новой строки
+
+                            console.log(`на строку ${caretPosition.line + 1} добавим`, nextLine)
+
+                            return nextLine;
+                        } else {
+                            console.log('line', line)
+
+                            return line;
+                        }
+                    });
+                text = newLines.join('\n');
                 //TODO finish
                 // добавлять новую(если нет) строку в массив строк и
                 // дописывать туда букву
-                console.log('hardcore')
-                // addLetterOnCaret(letter)
-                let lastChar = currentLine[currentLine.length - 1];
-                currentLine = currentLine.substring(0, currentLine.length - 1);
-                // console.log(currentLine)
-                newLine = lastChar;
-                newLines = lines().map((line, index) => index === caretPosition.line ? currentLine : line);
-                newLines.splice(caretPosition.line + 1, 0, newLine);
-                text = newLines.join('\n');
-                // caretPosition.line++;
-                // caretPosition.character = 0;
+                console.log('end')
             }
         //
         } else {

@@ -17,8 +17,6 @@ document.addEventListener('DOMContentLoaded', function() {
     var fontFamily = 'Arial';
 
     const linesLimit = window.innerHeight / (fontSize * 1.5);
-    // let linesLimitReached = lines().length > (linesLimit - 1);
-
 
     const coords = [];
     const coordsDisabled = [];
@@ -35,11 +33,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function updateTextOnCanvas() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-
         ctx.font = fontSize + 'px ' + fontFamily;
         ctx.fillStyle = fontColor;
         let lines = text.split('\n');
-
         let y = textY;
         for (let i = 0; i < lines.length; i++) {
             ctx.fillText(lines[i], textX, y);
@@ -51,7 +47,6 @@ document.addEventListener('DOMContentLoaded', function() {
             ctx.fillStyle = caretColor;
             ctx.fillRect(caretX, caretY - fontSize, 1, fontSize);
         }
-
         redraw();
     }
 
@@ -118,13 +113,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     } else {
                         pastText(saveToHistory);
                     }
-                    // console.log(linesLimitReached)
-                    // if (!linesLimitReached) {
-                    //     pastText(saveToHistory);
-                    // }
-                    console.log('1')
-                    // saveToHistory();
-
                     break;
                 case 90 :
                     if ((coords.length && coordsDisabled.length < coordsDisabledLimit) && e.getModifierState('CapsLock')){
@@ -157,6 +145,17 @@ document.addEventListener('DOMContentLoaded', function() {
                             'input blocked')
                     } else {
                         enterKeyAction();
+                        saveToHistory();
+                    }
+                    break;
+                case 'Tab':
+                    if (lines().length > linesLimit - 1){
+                        e.stopPropagation();
+                        e.preventDefault();
+                        alert('no space on page!\n' +
+                            'input blocked')
+                    } else {
+                        onTabAction(e);
                         saveToHistory();
                     }
                     break;
@@ -235,19 +234,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-
-
-    // function inputBlocker(callback){
-    //     if (lines().length > linesLimit - 1){
-    //         e.stopPropagation();
-    //         e.preventDefault();
-    //         alert('no space on page!\n' +
-    //             'input blocked')
-    //     } else {
-    //         callback();
-    //     }
-    // }
-
     function addLetter(letter){
             let newLine;
             let newLines;
@@ -278,7 +264,11 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-//TODO добавить 4 пробела на таб
+    function onTabAction(e){
+        e.preventDefault();
+        addLetter('    ');
+        caretPosition.character += 3;
+    }
 
     function deleteCharacter(direction) {
         let currentLine = lines(caretPosition.line);
@@ -301,12 +291,10 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         } else if (direction === 'delete') {
             if (currentLine.length > 0 && caretPosition.character < currentLine.length) {
-
                 let newLine = currentLine.substring(0, caretPosition.character) + currentLine.substring(caretPosition.character + 1);
                 let newLines = lines().map((line, index) => index === caretPosition.line ? newLine : line);
                 text = newLines.join('\n');
             } else if (caretPosition.line < lines().length - 1) {
-
                 let nextLine = lines(caretPosition.line + 1);
                 let newCurrentLine = currentLine + (nextLine.length > 0 ? nextLine : '');
                 let newLines = lines().map((line, index) => index === caretPosition.line ? newCurrentLine : (index === caretPosition.line + 1 ? '' : line));
@@ -322,7 +310,6 @@ document.addEventListener('DOMContentLoaded', function() {
             caretPosition.character--;
             calculateCaretPosition();
             updateTextOnCanvas();
-            console.log('past', text)
             callback();
         })
     }

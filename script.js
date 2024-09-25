@@ -16,6 +16,10 @@ document.addEventListener('DOMContentLoaded', function() {
     var fontSize = 14;
     var fontFamily = 'Arial';
 
+    const linesLimit = window.innerHeight / (fontSize * 1.5);
+    // let linesLimitReached = lines().length > (linesLimit - 1);
+
+
     const coords = [];
     const coordsDisabled = [];
     const textHistory = [{'text': '', 'caretPosition': {line: 0, character: 0}}];
@@ -54,7 +58,6 @@ document.addEventListener('DOMContentLoaded', function() {
     function calculateCaretPosition() {
         let lines = text.split('\n');
         let currentLine = lines[caretPosition.line] || '';
-
         let caretMeasurement = ctx.measureText(currentLine.substring(0, caretPosition.character));
         caretX = textX + caretMeasurement.width;
         caretY = textY + (fontSize + 5) * caretPosition.line;
@@ -107,7 +110,21 @@ document.addEventListener('DOMContentLoaded', function() {
         if (e.ctrlKey) {
             switch (e.keyCode) {
                 case 86:
-                    pastText();
+                    if (lines().length > linesLimit - 1){
+                        e.stopPropagation();
+                        e.preventDefault();
+                        alert('no space on page!\n' +
+                            'input blocked')
+                    } else {
+                        pastText(saveToHistory);
+                    }
+                    // console.log(linesLimitReached)
+                    // if (!linesLimitReached) {
+                    //     pastText(saveToHistory);
+                    // }
+                    console.log('1')
+                    // saveToHistory();
+
                     break;
                 case 90 :
                     if ((coords.length && coordsDisabled.length < coordsDisabledLimit) && e.getModifierState('CapsLock')){
@@ -133,8 +150,15 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             switch (e.key) {
                 case 'Enter':
-                    enterKeyAction();
-                    saveToHistory();
+                    if (lines().length > linesLimit - 1){
+                        e.stopPropagation();
+                        e.preventDefault();
+                        alert('no space on page!\n' +
+                            'input blocked')
+                    } else {
+                        enterKeyAction();
+                        saveToHistory();
+                    }
                     break;
                 case 'Backspace':
                     deleteCharacter('backspace');
@@ -158,8 +182,15 @@ document.addEventListener('DOMContentLoaded', function() {
                     break;
                 default:
                     if (!keysDontPrint.includes(e.key)) {
-                        addLetter(e.key);
-                        saveToHistory();
+                        if (lines().length > linesLimit - 1){
+                            e.stopPropagation();
+                            e.preventDefault();
+                            alert('no space on page!\n' +
+                                'input blocked')
+                        } else {
+                            addLetter(e.key);
+                            saveToHistory();
+                        }
                     }
                     break;
             }
@@ -203,6 +234,19 @@ document.addEventListener('DOMContentLoaded', function() {
             caretPosition.character = Math.min(caretPosition.character, lines(caretPosition.line).length);
         }
     }
+
+
+
+    // function inputBlocker(callback){
+    //     if (lines().length > linesLimit - 1){
+    //         e.stopPropagation();
+    //         e.preventDefault();
+    //         alert('no space on page!\n' +
+    //             'input blocked')
+    //     } else {
+    //         callback();
+    //     }
+    // }
 
     function addLetter(letter){
             let newLine;
@@ -272,12 +316,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    function pastText(){
+    function pastText(callback){
         getPasteText().then(str => {
-            text += str;
-            //TODO сделать возможность вставки в середине текста
+            addLetter(str);
+            caretPosition.character--;
             calculateCaretPosition();
             updateTextOnCanvas();
+            console.log('past', text)
+            callback();
         })
     }
 

@@ -1,0 +1,13 @@
+.Tabs {
+    display: flex;
+    gap: .5rem;
+    cursor: pointer;
+}
+
+.selectedTab {
+    transform: scale(1.1);
+}
+
+.notSelectedTab {
+    transform: scale(.9);
+}

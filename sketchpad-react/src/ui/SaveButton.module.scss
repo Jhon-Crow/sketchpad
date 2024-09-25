@@ -1,0 +1,30 @@
+.SaveButton {
+  transition: all 400ms;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1.34375rem;
+  background-color: var(--bg-color);
+  border-radius: 1.75rem;
+  border: none;
+  padding: 3.25rem;
+  cursor: pointer;
+  font-family: "Inter", sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  max-height: 129px;
+  width: 129px;
+
+  .textContent {
+    white-space: nowrap;
+    display: none;
+  }
+
+  &:hover {
+    width: 260px;
+    .textContent {
+      color: var(--icon-color);
+      display: block;
+    }
+  }
+}

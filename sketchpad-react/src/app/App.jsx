@@ -1,11 +1,13 @@
-import './App.css'
+import './styles/index.scss'
+import SaveButton from "../ui/SaveButton.jsx";
+import cls from './App.module.scss'
 
 function App() {
 
   return (
-    <>
-      App
-    </>
+    <div className={cls.App}>
+      <SaveButton/>
+    </div>
   )
 }
 

@@ -1,0 +1,10 @@
+//@import './globals/globals';
+@import './themes/light';
+@import './themes/dark';
+@import './reset';
+
+
+.app {
+	background-color: var(--bg-color);
+	//font: var(--font-text-regular);
+}

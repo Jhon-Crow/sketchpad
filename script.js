@@ -138,26 +138,11 @@ document.addEventListener('DOMContentLoaded', function() {
         } else {
             switch (e.key) {
                 case 'Enter':
-                    if (lines().length > linesLimit - 1){
-                        e.stopPropagation();
-                        e.preventDefault();
-                        alert('no space on page!\n' +
-                            'input blocked')
-                    } else {
-                        enterKeyAction();
-                        saveToHistory();
-                    }
+                    checkLinesLimit(enterKeyAction);
                     break;
                 case 'Tab':
-                    if (lines().length > linesLimit - 1){
-                        e.stopPropagation();
-                        e.preventDefault();
-                        alert('no space on page!\n' +
-                            'input blocked')
-                    } else {
-                        onTabAction(e);
-                        saveToHistory();
-                    }
+                    e.preventDefault();
+                    checkLinesLimit(onTabAction);
                     break;
                 case 'Backspace':
                     deleteCharacter('backspace');
@@ -181,12 +166,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     break;
                 default:
                     if (!keysDontPrint.includes(e.key)) {
-                        if (lines().length > linesLimit - 1){
-                            e.stopPropagation();
-                            e.preventDefault();
-                            alert('no space on page!\n' +
-                                'input blocked')
-                        } else {
+                        if (checkLinesLimit()) {
                             addLetter(e.key);
                             saveToHistory();
                         }
@@ -196,6 +176,20 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         updateTextOnCanvas();
     });
+
+    function checkLinesLimit(action) {
+        if (lines().length > linesLimit - 1) {
+            alert('no space on page!\n' +
+                'input blocked');
+            return false;
+        } else {
+            if (action){
+                action();
+                saveToHistory();
+            }
+            return true;
+        }
+    }
 
     function saveToHistory(){
         textHistory.push({text: text, caretPosition: {line: caretPosition.line, character: caretPosition.character}});
@@ -264,8 +258,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    function onTabAction(e){
-        e.preventDefault();
+    function onTabAction(){
         addLetter('    ');
         caretPosition.character += 3;
     }

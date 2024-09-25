@@ -1,0 +1,1 @@
+export const LOCALSTORAGE_SKETCHPAD_DATA = 'sketchpad-data';

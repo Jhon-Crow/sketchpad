@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var isDrawing = false;
     let text = '';
     const textWrapLimit = 10;
-    const coordsDisabledLimit = 2000;
+    const coordsDisabledLimit = 10000;
 
     let caretColor = 'red';
     const fontColor = 'white';

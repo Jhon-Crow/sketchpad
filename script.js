@@ -333,13 +333,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // saveBtn.addEventListener('click', function() {
-    //     const canvasData = canvas.toDataURL('image/png');
-    //     const link = document.createElement('a');
-    //     link.href = canvasData;
-    //     link.download = 'canvas_note_image.png';
-    //     link.click();
-    // });
+    saveBtn.addEventListener('click', function() {
+        const canvasData = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        link.href = canvasData;
+        link.download = 'canvas_note_image.png';
+        link.click();
+    });
 
     updateTextOnCanvas();
 });

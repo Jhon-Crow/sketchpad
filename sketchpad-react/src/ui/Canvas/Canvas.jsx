@@ -5,10 +5,12 @@ const Canvas = ({caretColor, fontColor, lineColor, fontFamily, fontSize}) => {
     const canvasRef = useRef(null);
     let isDrawing = false;
     let text = '';
+
     useEffect(() => {
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth / 1.56;
+        // canvas.width = window.innerWidth / 1.56;
+        canvas.width = window.innerWidth;
         canvas.height = window.innerHeight / 1.05;
 
     }, []);

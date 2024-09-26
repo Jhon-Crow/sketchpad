@@ -6,6 +6,7 @@ const Canvas = ({caretColor, fontColor, lineColor, fontFamily, fontSize, isLight
     const canvasRef = useRef(null);
     const [coordsState, setCoordsState] = useState([]);
     const [textState, setTextState] = useState('');
+    const [coordsDisabledState, setCoordsDisabledState] = useState([]);
 
 
     useEffect(() => {
@@ -26,7 +27,7 @@ const Canvas = ({caretColor, fontColor, lineColor, fontFamily, fontSize, isLight
         const linesLimit = canvas.height / (fontSize * 1.5);
 
         const coords = coordsState || [];
-        const coordsDisabled = [];
+        const coordsDisabled = coordsDisabledState || [];
         const textHistory = [{'text': '', 'caretPosition': {line: 0, character: 0}}];
         let textHistoryIndex = 0;
         const keysDontPrint = ['Tab', 'Shift', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'F12', 'F5', 'CapsLock', 'Meta'];
@@ -82,6 +83,7 @@ const Canvas = ({caretColor, fontColor, lineColor, fontFamily, fontSize, isLight
         function startDrawing(e) {
             coords.push('brake');
             coordsDisabled.length = 0;
+            setCoordsDisabledState(coordsDisabled);
             coords.push([e.offsetX, e.offsetY]);
             isDrawing = true;
             ctx.beginPath();
@@ -128,6 +130,7 @@ const Canvas = ({caretColor, fontColor, lineColor, fontFamily, fontSize, isLight
                     case 90 :
                         if ((coords.length && coordsDisabled.length < coordsDisabledLimit) && e.getModifierState('CapsLock')){
                             coordsDisabled.push(coords?.pop());
+                            setCoordsDisabledState(coordsDisabled)
                         } else if (textHistoryIndex > 0) {
                             textHistoryIndex--;
                             text = textHistory[textHistoryIndex].text;
@@ -138,6 +141,7 @@ const Canvas = ({caretColor, fontColor, lineColor, fontFamily, fontSize, isLight
                     case 89:
                         if (coordsDisabled.length && e.getModifierState('CapsLock')){
                             coords?.push(coordsDisabled?.pop());
+                            setCoordsState(coords);
                         } else if (textHistoryIndex < textHistory.length - 1) {
                             textHistoryIndex++;
                             text = textHistory[textHistoryIndex].text;

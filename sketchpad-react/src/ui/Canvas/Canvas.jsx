@@ -9,12 +9,16 @@ const Canvas = ({caretColor, fontColor, lineColor, fontFamily, fontSize, isLight
     const [coordsDisabledState, setCoordsDisabledState] = useState([]);
     const [textHistoryState, setTextHistoryState] = useState([{'text': '', 'caretPosition': {line: 0, character: 0}}]);
     const [textHistoryIndexState, setTextHistoryIndexState] = useState(1);
+    let canvasBackgroundColor;
+    let linkOnKeydownHandler = null;
+
     useEffect(() => {
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth / 1.56;
         canvas.height = window.innerHeight / 1.05;
-        let canvasBackgroundColor = isLight ? '#F2F0E7FF' : '#2A2A2B';
+        canvasBackgroundColor = isLight ? '#F2F0E7FF' : '#2A2A2B';
+        // canvasBackgroundColor = getBgColor();
 
         let isDrawing = false;
         let text = textState || '';
@@ -113,7 +117,7 @@ const Canvas = ({caretColor, fontColor, lineColor, fontFamily, fontSize, isLight
         canvas.addEventListener('mouseup', endDrawing);
         canvas.addEventListener('mouseout', endDrawing);
 
-        document.addEventListener('keydown', function(e) {
+        function keyDownHandler(e) {
             if (e.ctrlKey) {
                 switch (e.keyCode) {
                     case 86:
@@ -132,7 +136,6 @@ const Canvas = ({caretColor, fontColor, lineColor, fontFamily, fontSize, isLight
                             setCoordsDisabledState(coordsDisabled)
                         } else if (textHistoryIndex > 0) {
                             textHistoryIndex--;
-                            textHistoryIndex--;
                             setTextHistoryIndexState(textHistoryIndex);
                             text = textHistory[textHistoryIndex].text;
                             setTextState(text);
@@ -144,7 +147,6 @@ const Canvas = ({caretColor, fontColor, lineColor, fontFamily, fontSize, isLight
                             coords?.push(coordsDisabled?.pop());
                             setCoordsState(coords);
                         } else if (textHistoryIndex < textHistory.length - 1) {
-                            textHistoryIndex++;
                             textHistoryIndex++;
                             setTextHistoryIndexState(textHistoryIndex);
                             text = textHistory[textHistoryIndex].text;
@@ -195,7 +197,9 @@ const Canvas = ({caretColor, fontColor, lineColor, fontFamily, fontSize, isLight
                 }
             }
             updateTextOnCanvas();
-        });
+        }
+            document.addEventListener('keydown', keyDownHandler);
+
 
         function checkLinesLimit(action) {
             if (lines().length > linesLimit - 1) {
@@ -212,10 +216,14 @@ const Canvas = ({caretColor, fontColor, lineColor, fontFamily, fontSize, isLight
         }
 
         function saveToHistory(){
-            textHistory.push({text: text, caretPosition: {line: caretPosition.line, character: caretPosition.character}});
-            textHistoryIndex++;
-            setTextHistoryIndexState(textHistoryIndex);
-            setTextHistoryState(textHistory);
+            if (text !== textHistory[textHistory.length - 1].text){
+                textHistory.push({text: text, caretPosition: {line: caretPosition.line, character: caretPosition.character}});
+                textHistoryIndex++;
+                setTextHistoryIndexState(textHistoryIndex);
+                // console.log(textHistory, textHistoryState, textHistoryIndex)
+                // console.log(text, textHistory[textHistory.length - 1].text)
+            }
+            // if (textHistory.length > textHistoryState) setTextHistoryState(textHistory);
         }
 
         function caretMoveLeft() {
@@ -361,7 +369,6 @@ const Canvas = ({caretColor, fontColor, lineColor, fontFamily, fontSize, isLight
         }
         updateTextOnCanvas();
     }, [isLight]);
-
 
     const savePng = () => {
         const canvasData = canvas.toDataURL('image/png');

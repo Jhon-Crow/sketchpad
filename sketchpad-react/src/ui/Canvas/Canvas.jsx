@@ -7,8 +7,8 @@ const Canvas = ({caretColor, fontColor, lineColor, fontFamily, fontSize, isLight
     const [coordsState, setCoordsState] = useState([]);
     const [textState, setTextState] = useState('');
     const [coordsDisabledState, setCoordsDisabledState] = useState([]);
-
-
+    const [textHistoryState, setTextHistoryState] = useState([{'text': '', 'caretPosition': {line: 0, character: 0}}]);
+    const [textHistoryIndexState, setTextHistoryIndexState] = useState(1);
     useEffect(() => {
         const canvas = canvasRef.current;
         const ctx = canvas.getContext('2d');
@@ -28,14 +28,13 @@ const Canvas = ({caretColor, fontColor, lineColor, fontFamily, fontSize, isLight
 
         const coords = coordsState || [];
         const coordsDisabled = coordsDisabledState || [];
-        const textHistory = [{'text': '', 'caretPosition': {line: 0, character: 0}}];
-        let textHistoryIndex = 0;
+        const textHistory = textHistoryState || [{'text': '', 'caretPosition': {line: 0, character: 0}}];
+        let textHistoryIndex = textHistoryIndexState || 1;
         const keysDontPrint = ['Tab', 'Shift', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'F12', 'F5', 'CapsLock', 'Meta'];
 
         let caretPosition = { line: 0, character: 0 };
         let caretX = textX;
         let caretY = textY;
-
         function updateTextOnCanvas() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = canvasBackgroundColor;
@@ -133,6 +132,8 @@ const Canvas = ({caretColor, fontColor, lineColor, fontFamily, fontSize, isLight
                             setCoordsDisabledState(coordsDisabled)
                         } else if (textHistoryIndex > 0) {
                             textHistoryIndex--;
+                            textHistoryIndex--;
+                            setTextHistoryIndexState(textHistoryIndex);
                             text = textHistory[textHistoryIndex].text;
                             setTextState(text);
                             caretPosition = textHistory[textHistoryIndex].caretPosition;
@@ -144,6 +145,8 @@ const Canvas = ({caretColor, fontColor, lineColor, fontFamily, fontSize, isLight
                             setCoordsState(coords);
                         } else if (textHistoryIndex < textHistory.length - 1) {
                             textHistoryIndex++;
+                            textHistoryIndex++;
+                            setTextHistoryIndexState(textHistoryIndex);
                             text = textHistory[textHistoryIndex].text;
                             setTextState(text);
                             caretPosition = textHistory[textHistoryIndex].caretPosition;
@@ -211,6 +214,8 @@ const Canvas = ({caretColor, fontColor, lineColor, fontFamily, fontSize, isLight
         function saveToHistory(){
             textHistory.push({text: text, caretPosition: {line: caretPosition.line, character: caretPosition.character}});
             textHistoryIndex++;
+            setTextHistoryIndexState(textHistoryIndex);
+            setTextHistoryState(textHistory);
         }
 
         function caretMoveLeft() {
@@ -369,9 +374,7 @@ const Canvas = ({caretColor, fontColor, lineColor, fontFamily, fontSize, isLight
         <>
             <canvas id='canvas' ref={canvasRef} className={cls.Canvas}></canvas>
             <SaveButton isLight={isLight} onClick={savePng}/>
-
         </>
-
     );
 };
 

@@ -1,5 +1,4 @@
 import './styles/index.scss'
-import SaveButton from "../ui/SaveButton/SaveButton.jsx";
 import cls from './App.module.scss'
 import ThemeSwitcher from "../ui/themeSwitcher/themeSwitcher.jsx";
 import {useState} from "react";
@@ -21,9 +20,8 @@ function App() {
 
   return (
     <div className={cls.App}>
-      <SaveButton isLight={isLight}/>
         <ThemeSwitcher themeChecker={themeChecker} isLight={isLight}/>
-        <Canvas caretColor={'red'} fontColor={'white'} lineColor={'white'} fontFamily={'Arial'} fontSize={14}/>
+        <Canvas isLight={isLight} caretColor={'red'} fontColor={'white'} lineColor={'white'} fontFamily={'Arial'} fontSize={14}/>
     </div>
   )
 }

@@ -5,6 +5,7 @@ import SaveButton from "../SaveButton/SaveButton.jsx";
 const Canvas = ({caretColor, fontColor, lineColor, fontFamily, fontSize, isLight}) => {
     const canvasRef = useRef(null);
     const [coordsState, setCoordsState] = useState([]);
+    const [textState, setTextState] = useState('');
 
 
     useEffect(() => {
@@ -15,7 +16,7 @@ const Canvas = ({caretColor, fontColor, lineColor, fontFamily, fontSize, isLight
         let canvasBackgroundColor = isLight ? '#F2F0E7FF' : '#2A2A2B';
 
         let isDrawing = false;
-        let text = '';
+        let text = textState || '';
         const textWrapLimit = 10;
         const coordsDisabledLimit = 10000;
 
@@ -66,6 +67,7 @@ const Canvas = ({caretColor, fontColor, lineColor, fontFamily, fontSize, isLight
 
         function redraw() {
             ctx.beginPath();
+            ctx.strokeStyle = lineColor;
             coords.forEach(function(coord) {
                 if (coord === 'brake') {
                     ctx.stroke();
@@ -129,6 +131,7 @@ const Canvas = ({caretColor, fontColor, lineColor, fontFamily, fontSize, isLight
                         } else if (textHistoryIndex > 0) {
                             textHistoryIndex--;
                             text = textHistory[textHistoryIndex].text;
+                            setTextState(text);
                             caretPosition = textHistory[textHistoryIndex].caretPosition;
                         }
                         break;
@@ -138,6 +141,7 @@ const Canvas = ({caretColor, fontColor, lineColor, fontFamily, fontSize, isLight
                         } else if (textHistoryIndex < textHistory.length - 1) {
                             textHistoryIndex++;
                             text = textHistory[textHistoryIndex].text;
+                            setTextState(text);
                             caretPosition = textHistory[textHistoryIndex].caretPosition;
                         }
                         break;
@@ -258,7 +262,7 @@ const Canvas = ({caretColor, fontColor, lineColor, fontFamily, fontSize, isLight
                 }
             }
             text = newLines.join('\n');
-
+            setTextState(text);
             function addLetterOnCaret(letter) {
                 newLine = currentLine.substring(0, caretPosition.character) + letter + currentLine.substring(caretPosition.character);
                 newLines = lines().map((line, index) => index === caretPosition.line ? newLine : line);
@@ -280,6 +284,7 @@ const Canvas = ({caretColor, fontColor, lineColor, fontFamily, fontSize, isLight
                     let newLine = currentLine.substring(0, caretPosition.character - 1) + currentLine.substring(caretPosition.character);
                     let newLines = lines().map((line, index) => index === caretPosition.line ? newLine : line);
                     text = newLines.join('\n');
+                    setTextState(text);
                     caretPosition.character--;
                 } else if (caretPosition.line > 0) {
                     // Удаление переноса строки
@@ -288,6 +293,7 @@ const Canvas = ({caretColor, fontColor, lineColor, fontFamily, fontSize, isLight
                     let newLines = lines().map((line, index) => index === caretPosition.line - 1 ? newPreviousLine : (index === caretPosition.line ? '' : line));
                     newLines.splice(caretPosition.line, 1)
                     text = newLines.join('\n');
+                    setTextState(text);
                     caretPosition.line--;
                     caretPosition.character = previousLine.length
                 }
@@ -296,12 +302,14 @@ const Canvas = ({caretColor, fontColor, lineColor, fontFamily, fontSize, isLight
                     let newLine = currentLine.substring(0, caretPosition.character) + currentLine.substring(caretPosition.character + 1);
                     let newLines = lines().map((line, index) => index === caretPosition.line ? newLine : line);
                     text = newLines.join('\n');
+                    setTextState(text);
                 } else if (caretPosition.line < lines().length - 1) {
                     let nextLine = lines(caretPosition.line + 1);
                     let newCurrentLine = currentLine + (nextLine.length > 0 ? nextLine : '');
                     let newLines = lines().map((line, index) => index === caretPosition.line ? newCurrentLine : (index === caretPosition.line + 1 ? '' : line));
                     newLines.splice(caretPosition.line + 1, 1);
                     text = newLines.join('\n');
+                    setTextState(text);
                 }
             }
         }
@@ -322,6 +330,7 @@ const Canvas = ({caretColor, fontColor, lineColor, fontFamily, fontSize, isLight
             let newLines = lines().map((line, index) => index === caretPosition.line ? newLine : line);
             newLines.splice(caretPosition.line + 1, 0, currentLine.substring(caretPosition.character));
             text = newLines.join('\n');
+            setTextState(text);
             caretPosition.line++;
             caretPosition.character = 0;
         }

@@ -6,7 +6,7 @@ import Moon from '../../assets/Icon/white/moon.svg?react'
 
 const ThemeSwitcher = ({isLight, themeChecker}) => {
     return (
-        <button onClick={themeChecker} className={cls.themeSwitcher}>
+        <button onKeyDown={(e) => e.preventDefault()} onClick={themeChecker} className={cls.themeSwitcher}>
             {isLight ? <Moon /> : <Sun />}
         </button>
     );

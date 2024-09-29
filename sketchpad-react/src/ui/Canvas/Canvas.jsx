@@ -2,39 +2,46 @@ import React, {useEffect, useRef, useState} from 'react';
 import cls from './Canvas.module.scss'
 import SaveButton from "../SaveButton/SaveButton.jsx";
 
+const coords = [];
+//TODO сохранять цвета линий
+// и текста
+const coordsDisabled = [];
+let text = '';
+
+const textHistory = [{'text': '', 'caretPosition': {line: 0, character: 0}}];
+let textHistoryIndex = 0;
+const keysDontPrint = ['Tab', 'Shift', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'F12', 'F5', 'CapsLock', 'Meta'];
+
+let textX = 10;
+let textY = 20;
+let caretX = textX;
+let caretY = textY;
+
+let caretPosition = { line: 0, character: 0 };
+
 const Canvas = ({caretColor, fontColor, lineColor, fontFamily, fontSize, isLight}) => {
     const canvasRef = useRef(null);
     let canvas;
     let ctx;
     let canvasData;
     let link;
-    let text = '';
     let isDrawing = false;
 
     const textWrapLimit = 10;
+    //TODO counting inside comp
     const coordsDisabledLimit = 10000;
 
-
-    const keysDontPrint = ['Tab', 'Shift', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'F12', 'F5', 'CapsLock', 'Meta'];
-
-    const [coords, setCoords] = useState([]);
-    //TODO заменить изменения coords на setCoords
-
-    // const coords = [];
-    console.log(coords)
-    const coordsDisabled = [];
     const linesLimit = window.innerHeight / (fontSize * 1.5);
 
-    const textHistory = [{'text': '', 'caretPosition': {line: 0, character: 0}}];
-    let textHistoryIndex = 0;
+    // const textHistory = [{'text': '', 'caretPosition': {line: 0, character: 0}}];
+    // let textHistoryIndex = 0;
 
-
-    let textX = 10;
-    let textY = 20;
-    let caretX = textX;
-    let caretY = textY;
-
-    let caretPosition = { line: 0, character: 0 };
+    // let textX = 10;
+    // let textY = 20;
+    // let caretX = textX;
+    // let caretY = textY;
+    //
+    // let caretPosition = { line: 0, character: 0 };
 
 
     const drawBg = (ctx) => {
@@ -48,6 +55,7 @@ const Canvas = ({caretColor, fontColor, lineColor, fontFamily, fontSize, isLight
         canvas.width = window.innerWidth / 1.56;
         canvas.height = window.innerHeight / 1.05;
         updateTextOnCanvas(ctx);
+        canvas.focus();
         // console.log(coords)
     }, [isLight])
 
@@ -80,8 +88,9 @@ const Canvas = ({caretColor, fontColor, lineColor, fontFamily, fontSize, isLight
     }
 
     function redraw() {
-        //TODO уже пустой
-        // console.log(coords)
+        // ctx.strokeStyle = lineColor;
+
+        //TODO сделать обработку цветов линий
         ctx.beginPath();
         coords.forEach(function(coord) {
             if (coord === 'brake') {
@@ -96,11 +105,8 @@ const Canvas = ({caretColor, fontColor, lineColor, fontFamily, fontSize, isLight
 
     function startDrawing(e) {
         console.log('start drawing')
-        // console.log(coords)
-        //TODO кордс заполняется
         coords.push('brake');
         coordsDisabled.length = 0;
-        // coords.push([e.offsetX, e.offsetY]);
         coords.push([e.offsetX, e.offsetY]);
         isDrawing = true;
         ctx.beginPath();
@@ -110,6 +116,7 @@ const Canvas = ({caretColor, fontColor, lineColor, fontFamily, fontSize, isLight
     function draw(e) {
         if (!isDrawing) return;
         ctx.strokeStyle = lineColor;
+        // console.log(ctx.strokeStyle)
         ctx.lineTo(e.offsetX, e.offsetY);
         ctx.stroke();
         coords.push([e.offsetX, e.offsetY]);
@@ -197,7 +204,7 @@ const Canvas = ({caretColor, fontColor, lineColor, fontFamily, fontSize, isLight
                     break;
             }
         }
-        updateTextOnCanvas();
+        updateTextOnCanvas(ctx);
     }
 
 
@@ -326,7 +333,7 @@ const Canvas = ({caretColor, fontColor, lineColor, fontFamily, fontSize, isLight
             addLetter(str);
             caretPosition.character--;
             calculateCaretPosition();
-            updateTextOnCanvas();
+            updateTextOnCanvas(ctx);
             callback();
         })
     }
@@ -367,7 +374,7 @@ const Canvas = ({caretColor, fontColor, lineColor, fontFamily, fontSize, isLight
 
     return (
         <>
-            <canvas onKeyDown={(e) => onKeyDownSwitch(e)} onMouseDown={(e) => startDrawing(e.nativeEvent)} onMouseMove={(e) => draw(e.nativeEvent)} onMouseUp={endDrawing} onMouseOut={endDrawing} id='canvas' ref={canvasRef} className={cls.Canvas}></canvas>
+            <canvas tabIndex={0} onKeyDown={(e) => onKeyDownSwitch(e)} onMouseDown={(e) => startDrawing(e.nativeEvent)} onMouseMove={(e) => draw(e.nativeEvent)} onMouseUp={endDrawing} onMouseOut={endDrawing} id='canvas' ref={canvasRef} className={cls.Canvas}></canvas>
             <SaveButton isLight={isLight} onClick={savePng}/>
         </>
     );

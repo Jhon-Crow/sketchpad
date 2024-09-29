@@ -1,10 +1,11 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useRef} from 'react';
 import cls from './Canvas.module.scss'
 import SaveButton from "../SaveButton/SaveButton.jsx";
 
+let canvas;
+let ctx;
+
 const coords = [];
-//TODO сохранять цвета линий
-// и текста
 const coordsDisabled = [];
 let text = '';
 
@@ -19,10 +20,11 @@ let caretY = textY;
 
 let caretPosition = { line: 0, character: 0 };
 
-const Canvas = ({caretColor, fontColor, lineColor, fontFamily, fontSize, isLight}) => {
+const Canvas = ({fontColor, lineColor, fontFamily, fontSize, isLight}) => {
+    // console.log(coords)
     const canvasRef = useRef(null);
-    let canvas;
-    let ctx;
+    // let canvas;
+    // let ctx;
     let canvasData;
     let link;
     let isDrawing = false;
@@ -56,7 +58,6 @@ const Canvas = ({caretColor, fontColor, lineColor, fontFamily, fontSize, isLight
         canvas.height = window.innerHeight / 1.05;
         updateTextOnCanvas(ctx);
         canvas.focus();
-        // console.log(coords)
     }, [isLight])
 
     function updateTextOnCanvas(ctx) {
@@ -73,7 +74,7 @@ const Canvas = ({caretColor, fontColor, lineColor, fontFamily, fontSize, isLight
 
         if (!isDrawing) {
             calculateCaretPosition();
-            ctx.fillStyle = caretColor;
+            ctx.fillStyle = fontColor;
             ctx.fillRect(caretX, caretY - fontSize, 1, fontSize);
         }
         redraw();
@@ -89,13 +90,15 @@ const Canvas = ({caretColor, fontColor, lineColor, fontFamily, fontSize, isLight
 
     function redraw() {
         // ctx.strokeStyle = lineColor;
-
-        //TODO сделать обработку цветов линий
         ctx.beginPath();
+        // console.log(lineColor)
         coords.forEach(function(coord) {
+            // console.log(coord)
             if (coord === 'brake') {
                 ctx.stroke();
                 ctx.beginPath();
+            } else if (coord.includes('#')) {
+                ctx.strokeStyle = coord;
             } else {
                 ctx.lineTo(coord[0], coord[1]);
             }
@@ -104,7 +107,8 @@ const Canvas = ({caretColor, fontColor, lineColor, fontFamily, fontSize, isLight
     }
 
     function startDrawing(e) {
-        console.log('start drawing')
+        // console.log('start drawing')
+        coords.push(lineColor);
         coords.push('brake');
         coordsDisabled.length = 0;
         coords.push([e.offsetX, e.offsetY]);
@@ -131,7 +135,6 @@ const Canvas = ({caretColor, fontColor, lineColor, fontFamily, fontSize, isLight
     }
 
     function onKeyDownSwitch(e) {
-        console.log(e.key)
         if (e.ctrlKey) {
             switch (e.keyCode) {
                 case 86:

@@ -53,8 +53,6 @@ const Canvas = ({fontColor, lineColor, fontFamily, fontSize, isLight}) => {
     }, [isLight])
 
     useEffect(() => {
-
-
         for (let i = 0; i < colorAndIndex.length; i++){
             //works!!!!
             console.log('for ', text.substring(colorAndIndex[i].index, colorAndIndex[i + 1]?.index))
@@ -83,16 +81,38 @@ const Canvas = ({fontColor, lineColor, fontFamily, fontSize, isLight}) => {
     function updateTextOnCanvas(ctx) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         drawBg(ctx);
-        ctx.font = fontSize + 'px ' + fontFamily;
         //TODO добавить проверку длинны текста и краску
-        ctx.fillStyle = fontColor;
+        // удалять совпадающие соседние индексы
+        ctx.font = fontSize + 'px ' + fontFamily;
+        // ctx.fillStyle = fontColor;
         let lines = text.split('\n');
         let y = textY;
+        let countText = 0;
+        let checkIndex = 1;
         for (let i = 0; i < lines.length; i++) {
-            ctx.fillText(lines[i], textX, y);
-            y += fontSize + 5; // Добавляем немного пространства между строками
-        }
+            let x = textX; // Initialize x-coordinate for each line
+            for (let j = 0; j < lines[i].length; j++) {
 
+                if (!colorAndIndex[checkIndex] || countText < colorAndIndex[checkIndex].index){
+                    ctx.fillStyle = colorAndIndex[checkIndex - 1].color;
+                } else if (countText >= colorAndIndex[checkIndex].index){
+                    ctx.fillStyle = colorAndIndex[checkIndex].color;
+                    checkIndex++;
+                }
+                // console.log(countText, colorAndIndex[countText].color)
+
+                // ctx.fillStyle = colorAndIndex[countText].color;
+                ctx.fillText(lines[i][j], x, y);
+                // console.log(lines[i][j], x, y)
+                let charWidth = ctx.measureText(lines[i][j]).width;
+                x += charWidth;
+                countText++;
+                // console.log(countText)
+            }
+
+            y += fontSize + 5; // Add some space between lines
+        }
+        console.log('checkIndex ', checkIndex)
         if (!isDrawing) {
             calculateCaretPosition();
             ctx.fillStyle = fontColor;

@@ -340,10 +340,41 @@ const Canvas = ({fontColor, lineColor, fontFamily, fontSize, isLight}) => {
         if (direction === 'backspace') {
             if (currentLine.length > 0 && caretPosition.character > 0) {
                 // Удаление символа в середине или в конце строки
+
+                //TODO получить индекс удаляемой буквы и сравнить с промежутками
+                // цветовых индексов
+
+                let txt = '';
+                for (let i = 0; i <= caretPosition.line; i++){
+                    if (lines(i) === currentLine){
+                        txt += currentLine.substring(0, caretPosition.character)
+                    } else {
+                        txt += lines(i)
+                    }
+                }
+
+                for (let i = 0; i < colorAndIndex.length; i++){
+                    if (colorAndIndex[i].index <= txt.length && txt.length < colorAndIndex[i + 1]?.index){
+                        colorAndIndex[i + 1].index--;
+                        //TODO IT WORKS!!! надо сделать для других удалений/добавлений
+                        // + вынести в отдельную функцию в идеале
+                    }
+                    // console.log(i)
+                }
+                console.log(txt, txt.length) //получили индекс
+
+
+                // console.log(text.substring(0, caretPosition.character - 1))
+                // console.log(currentLine, caretPosition)
+
                 let newLine = currentLine.substring(0, caretPosition.character - 1) + currentLine.substring(caretPosition.character);
                 let newLines = lines().map((line, index) => index === caretPosition.line ? newLine : line);
                 text = newLines.join('\n');
                 caretPosition.character--;
+
+
+
+                console.log(caretPosition.character)
             } else if (caretPosition.line > 0) {
                 // Удаление переноса строки
                 let previousLine = lines(caretPosition.line - 1);

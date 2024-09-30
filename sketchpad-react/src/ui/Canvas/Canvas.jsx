@@ -8,6 +8,9 @@ let ctx;
 const coords = [];
 const coordsDisabled = [];
 let text = '';
+//TODO надо сделать запись цвета текста по длине текста
+
+//TODO добавить движение каретки на слово по ctrl+Arrow
 
 const textHistory = [{'text': '', 'caretPosition': {line: 0, character: 0}}];
 let textHistoryIndex = 0;
@@ -21,30 +24,17 @@ let caretY = textY;
 let caretPosition = { line: 0, character: 0 };
 
 const Canvas = ({fontColor, lineColor, fontFamily, fontSize, isLight}) => {
-    // console.log(coords)
     const canvasRef = useRef(null);
-    // let canvas;
-    // let ctx;
     let canvasData;
     let link;
     let isDrawing = false;
 
-    const textWrapLimit = 10;
-    //TODO counting inside comp
+    const textWrapLimit = Math.round(window.innerWidth / fontSize);
+    console.log(textWrapLimit)
+    //TODO найти все места где используется и заменить на вычисление размеров
     const coordsDisabledLimit = 10000;
 
     const linesLimit = window.innerHeight / (fontSize * 1.5);
-
-    // const textHistory = [{'text': '', 'caretPosition': {line: 0, character: 0}}];
-    // let textHistoryIndex = 0;
-
-    // let textX = 10;
-    // let textY = 20;
-    // let caretX = textX;
-    // let caretY = textY;
-    //
-    // let caretPosition = { line: 0, character: 0 };
-
 
     const drawBg = (ctx) => {
         ctx.fillStyle = isLight ? '#F2F0E7FF' : '#2A2A2B';
@@ -64,6 +54,7 @@ const Canvas = ({fontColor, lineColor, fontFamily, fontSize, isLight}) => {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         drawBg(ctx);
         ctx.font = fontSize + 'px ' + fontFamily;
+        //TODO добавить проверку длинны текста и краску
         ctx.fillStyle = fontColor;
         let lines = text.split('\n');
         let y = textY;
@@ -89,11 +80,8 @@ const Canvas = ({fontColor, lineColor, fontFamily, fontSize, isLight}) => {
     }
 
     function redraw() {
-        // ctx.strokeStyle = lineColor;
         ctx.beginPath();
-        // console.log(lineColor)
         coords.forEach(function(coord) {
-            // console.log(coord)
             if (coord === 'brake') {
                 ctx.stroke();
                 ctx.beginPath();

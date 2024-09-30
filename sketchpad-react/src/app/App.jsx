@@ -21,7 +21,7 @@ function App() {
   return (
     <div className={cls.App}>
         <ThemeSwitcher themeChecker={themeChecker} isLight={isLight}/>
-        <Canvas isLight={isLight} fontColor={'red'} lineColor={'#ffffff'} fontFamily={'Arial'} fontSize={14}/>
+        <Canvas isLight={isLight} fontColor={'#31be98'} lineColor={'#ffffff'} fontFamily={'Arial'} fontSize={14}/>
     </div>
   )
 }

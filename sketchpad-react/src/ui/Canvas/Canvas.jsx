@@ -1,4 +1,4 @@
-import React, {useEffect, useRef} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import cls from './Canvas.module.scss'
 import SaveButton from "../SaveButton/SaveButton.jsx";
 
@@ -8,6 +8,7 @@ let ctx;
 const coords = [];
 const coordsDisabled = [];
 let text = '';
+// let colorAndIndex = [{index: 0, color: }];
 //TODO надо сделать запись цвета текста по длине текста
 
 //TODO добавить движение каретки на слово по ctrl+Arrow
@@ -24,13 +25,14 @@ let caretY = textY;
 let caretPosition = { line: 0, character: 0 };
 
 const Canvas = ({fontColor, lineColor, fontFamily, fontSize, isLight}) => {
+    const [colorAndIndex, ] = useState([{index: 0, color: fontColor}]);
     const canvasRef = useRef(null);
     let canvasData;
     let link;
     let isDrawing = false;
 
-    const textWrapLimit = Math.round(window.innerWidth / fontSize);
-    console.log(textWrapLimit)
+    const textWrapLimit = Math.round(window.innerWidth );
+    // console.log(textWrapLimit)
     //TODO найти все места где используется и заменить на вычисление размеров
     const coordsDisabledLimit = 10000;
 
@@ -49,6 +51,34 @@ const Canvas = ({fontColor, lineColor, fontFamily, fontSize, isLight}) => {
         updateTextOnCanvas(ctx);
         canvas.focus();
     }, [isLight])
+
+    useEffect(() => {
+
+
+        for (let i = 0; i < colorAndIndex.length; i++){
+            //works!!!!
+            console.log('for ', text.substring(colorAndIndex[i].index, colorAndIndex[i + 1]?.index))
+        }
+        // console.log(text.substring())
+
+        console.log(colorAndIndex.length-1, text.length)
+        console.log(colorAndIndex)
+        if (text.length > colorAndIndex[colorAndIndex.length-1].index && colorAndIndex[colorAndIndex.length-1].color !== fontColor) {
+            colorAndIndex.push({index: text.length, color: fontColor});
+            console.log('push ', colorAndIndex)
+        }
+        if (text.length === colorAndIndex[colorAndIndex.length-1].index && colorAndIndex[colorAndIndex.length-1].color !== fontColor){
+            if (colorAndIndex[colorAndIndex.length-2] && colorAndIndex[colorAndIndex.length-2].color === fontColor){
+                colorAndIndex.pop();
+                console.log('pop ', colorAndIndex)
+            } else {
+                colorAndIndex[colorAndIndex.length-1].color = fontColor;
+                console.log('edit ', colorAndIndex)
+            }
+        }
+
+    },[fontColor])
+
 
     function updateTextOnCanvas(ctx) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);

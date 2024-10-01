@@ -31,8 +31,7 @@ const Canvas = ({fontColor, lineColor, fontFamily, fontSize, isLight}) => {
     let link;
     let isDrawing = false;
 
-    const textWrapLimit = Math.round(window.innerWidth );
-    // console.log(textWrapLimit)
+    const textWrapLimit = Math.round(window.innerWidth);
     //TODO найти все места где используется и заменить на вычисление размеров
     const coordsDisabledLimit = 10000;
 
@@ -53,11 +52,37 @@ const Canvas = ({fontColor, lineColor, fontFamily, fontSize, isLight}) => {
     }, [isLight])
 
     useEffect(() => {
-        for (let i = 0; i < colorAndIndex.length; i++){
-            //works!!!!
-            console.log('for ', text.substring(colorAndIndex[i].index, colorAndIndex[i + 1]?.index))
-        }
-        // console.log(text.substring())
+        countIndexesArray();
+
+
+        // for (let i = 0; i < colorAndIndex.length; i++){
+        //     //works!!!!
+        //     console.log('for ', text.substring(colorAndIndex[i].index, colorAndIndex[i + 1]?.index))
+        // }
+        // // console.log(text.substring())
+        //
+        // console.log(colorAndIndex.length-1, text.length)
+        // console.log(colorAndIndex)
+        // if (text.length > colorAndIndex[colorAndIndex.length-1].index && colorAndIndex[colorAndIndex.length-1].color !== fontColor) {
+        //     colorAndIndex.push({index: text.length, color: fontColor});
+        //     console.log('push ', colorAndIndex)
+        // }
+        // if (text.length === colorAndIndex[colorAndIndex.length-1].index && colorAndIndex[colorAndIndex.length-1].color !== fontColor){
+        //     if (colorAndIndex[colorAndIndex.length-2] && colorAndIndex[colorAndIndex.length-2].color === fontColor){
+        //         colorAndIndex.pop();
+        //         console.log('pop ', colorAndIndex)
+        //     } else {
+        //         colorAndIndex[colorAndIndex.length-1].color = fontColor;
+        //         console.log('edit ', colorAndIndex)
+        //     }
+        // }
+
+    },[fontColor])
+
+    function countIndexesArray(){
+        // for (let i = 0; i < colorAndIndex.length; i++){
+        //     console.log('for ', text.substring(colorAndIndex[i].index, colorAndIndex[i + 1]?.index))
+        // }
 
         console.log(colorAndIndex.length-1, text.length)
         console.log(colorAndIndex)
@@ -74,9 +99,19 @@ const Canvas = ({fontColor, lineColor, fontFamily, fontSize, isLight}) => {
                 console.log('edit ', colorAndIndex)
             }
         }
+        for (let i = 0; i < colorAndIndex.length; i++){
+            if (colorAndIndex[i].color === colorAndIndex[i+1]?.color){
+                colorAndIndex.splice(i + 1, 1);
+            }
+            if (colorAndIndex[i + 1]?.index === colorAndIndex[i].index){
+                colorAndIndex.splice(i, 1);
+            }
 
-    },[fontColor])
+        }
 
+
+
+    }
 
     function updateTextOnCanvas(ctx) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -341,9 +376,6 @@ const Canvas = ({fontColor, lineColor, fontFamily, fontSize, isLight}) => {
             if (currentLine.length > 0 && caretPosition.character > 0) {
                 // Удаление символа в середине или в конце строки
 
-                //TODO получить индекс удаляемой буквы и сравнить с промежутками
-                // цветовых индексов
-
                 let txt = '';
                 for (let i = 0; i <= caretPosition.line; i++){
                     if (lines(i) === currentLine){
@@ -354,27 +386,18 @@ const Canvas = ({fontColor, lineColor, fontFamily, fontSize, isLight}) => {
                 }
 
                 for (let i = 0; i < colorAndIndex.length; i++){
-                    if (colorAndIndex[i].index <= txt.length && txt.length < colorAndIndex[i + 1]?.index){
+                    if (colorAndIndex[i].index <= txt.length && txt.length <= colorAndIndex[i + 1]?.index){
                         colorAndIndex[i + 1].index--;
-                        //TODO IT WORKS!!! надо сделать для других удалений/добавлений
-                        // + вынести в отдельную функцию в идеале
+                        countIndexesArray();
+
                     }
-                    // console.log(i)
                 }
-                console.log(txt, txt.length) //получили индекс
-
-
-                // console.log(text.substring(0, caretPosition.character - 1))
-                // console.log(currentLine, caretPosition)
 
                 let newLine = currentLine.substring(0, caretPosition.character - 1) + currentLine.substring(caretPosition.character);
                 let newLines = lines().map((line, index) => index === caretPosition.line ? newLine : line);
                 text = newLines.join('\n');
                 caretPosition.character--;
 
-
-
-                console.log(caretPosition.character)
             } else if (caretPosition.line > 0) {
                 // Удаление переноса строки
                 let previousLine = lines(caretPosition.line - 1);
@@ -387,6 +410,24 @@ const Canvas = ({fontColor, lineColor, fontFamily, fontSize, isLight}) => {
             }
         } else if (direction === 'delete') {
             if (currentLine.length > 0 && caretPosition.character < currentLine.length) {
+
+                let txt = '';
+                for (let i = 0; i <= caretPosition.line; i++){
+                    if (lines(i) === currentLine){
+                        txt += currentLine.substring(0, caretPosition.character + 1)
+                    } else {
+                        txt += lines(i)
+                    }
+                }
+
+                for (let i = 0; i < colorAndIndex.length; i++){
+                    if (colorAndIndex[i].index <= txt.length && txt.length <= colorAndIndex[i + 1]?.index){
+                            colorAndIndex[i + 1].index--;
+                    }
+                    countIndexesArray();
+                }
+
+
                 let newLine = currentLine.substring(0, caretPosition.character) + currentLine.substring(caretPosition.character + 1);
                 let newLines = lines().map((line, index) => index === caretPosition.line ? newLine : line);
                 text = newLines.join('\n');

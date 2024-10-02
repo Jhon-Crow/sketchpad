@@ -1,3 +1,6 @@
+import {StyleDecorator} from "./decorators/styleDecorator.jsx";
+import ThemeDecorator from "./decorators/themeDecorator.jsx";
+import {Theme} from "../src/app/const/theme.js";
 
 const preview = {
   parameters: {
@@ -8,6 +11,10 @@ const preview = {
       },
     },
   },
+  decorators: [
+     StyleDecorator,
+      // ThemeDecorator(Theme.dark)
+  ],
 };
 
 export default preview;

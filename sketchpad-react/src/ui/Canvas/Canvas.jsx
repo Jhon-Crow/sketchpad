@@ -466,6 +466,7 @@ const Canvas = ({fontColor, lineColor, fontFamily, fontSize, isLight}) => {
     }
 
     function ctrlArrowJumpAction (direction){
+        //TODO сделать удаление слова ctrl+del/bckspce
         let currentLine = lines(caretPosition.line);
         let wordEndIndex;
         if (direction === 'left'){

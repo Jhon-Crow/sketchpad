@@ -1,5 +1,7 @@
 import { fn } from '@storybook/test';
 import SaveButton from "./SaveButton.jsx";
+import ThemeDecorator from "../../../.storybook/decorators/themeDecorator.jsx";
+import {Theme} from "../../app/const/theme.js";
 
 
 export default {
@@ -9,20 +11,19 @@ export default {
     layout: 'centered',
   },
   tags: ['autodocs'],
-  argTypes: {
-    backgroundColor: { control: 'color' },
-  },
   args: { onClick: fn() },
 };
 
-export const Primary = {
+export const Light = {
   args: {
+    isLight: true
   },
 };
-
-// export const Secondary = {
-//   args: {
-//     label: 'Button',
-//   },
-// };
+Light.decorators = [ThemeDecorator(Theme.light)]
+export const Dark = {
+  args: {
+    isLight: false
+  },
+};
+Dark.decorators = [ThemeDecorator(Theme.dark)]
 

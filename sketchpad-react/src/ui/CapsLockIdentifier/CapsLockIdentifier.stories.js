@@ -1,17 +1,17 @@
 import { fn } from '@storybook/test';
-import SaveButton from "./SaveButton.jsx";
+import CapsLockIdentifier from "./CapsLockIdentifier.jsx";
 import ThemeDecorator from "../../../.storybook/decorators/themeDecorator.jsx";
 import {Theme} from "../../app/const/theme.js";
 
 
 export default {
-  title: 'ui/SaveButton',
-  component: SaveButton,
+  title: 'ui/CapsLockIdentifier',
+  component: CapsLockIdentifier,
   parameters: {
     layout: 'centered',
   },
   tags: ['autodocs'],
-  args: { onClick: fn() },
+  args: { capsLockPressed: true },
 };
 
 export const Light = {

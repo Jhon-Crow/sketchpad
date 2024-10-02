@@ -3,6 +3,7 @@ import cls from './App.module.scss'
 import ThemeSwitcher from "../ui/themeSwitcher/themeSwitcher.jsx";
 import {useState} from "react";
 import Canvas from "../ui/Canvas/Canvas.jsx";
+import CapsLockIdentifier from "../ui/CapsLockIdentifier/CapsLockIdentifier.jsx";
 
 function App() {
 
@@ -20,6 +21,7 @@ function App() {
 
   return (
     <div className={cls.App}>
+        <CapsLockIdentifier/>
         <ThemeSwitcher themeChecker={themeChecker} isLight={isLight}/>
         <Canvas isLight={isLight} fontColor={'#be3178'} lineColor={'#3abe31'} fontFamily={'Arial'} fontSize={14}/>
     </div>

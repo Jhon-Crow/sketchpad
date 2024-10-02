@@ -1,0 +1,13 @@
+.Palette {
+  display: flex;
+  width: 10.26125rem;
+  height: 20.803125rem;
+  border-radius: 1.75rem;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  padding: 17px 34.97px 36.47px 34.29px ;
+  background-color: var(--canvas-color);
+    .item{
+      flex-basis: 45%;
+    }
+}

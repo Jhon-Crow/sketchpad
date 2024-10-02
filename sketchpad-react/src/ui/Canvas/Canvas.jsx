@@ -12,7 +12,7 @@ let text = '';
 
 //TODO добавить движение каретки на слово по ctrl+Arrow
 
-const textHistory = [{'text': '', 'caretPosition': {line: 0, character: 0}}];
+const textHistory = [{'text': '', 'caretPosition': {line: 0, character: 0}, 'colorAndIndex': [{index: 0, color: 'default'}]}];
 let textHistoryIndex = 0;
 const keysDontPrint = ['Tab', 'Shift', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'F12', 'F5', 'CapsLock', 'Meta'];
 
@@ -24,7 +24,7 @@ let caretY = textY;
 let caretPosition = { line: 0, character: 0 };
 
 const Canvas = ({fontColor, lineColor, fontFamily, fontSize, isLight}) => {
-    const [colorAndIndex, ] = useState([{index: 0, color: fontColor}]);
+    const [colorAndIndex, setColorAndIndex] = useState([{index: 0, color: fontColor}]);
     const canvasRef = useRef(null);
     let canvasData;
     let link;
@@ -70,6 +70,7 @@ const Canvas = ({fontColor, lineColor, fontFamily, fontSize, isLight}) => {
         }
         for (let i = 0; i < colorAndIndex.length; i++){
             if (colorAndIndex[i].color === colorAndIndex[i+1]?.color){
+                console.log('удаляем ', colorAndIndex[i+1])
                 colorAndIndex.splice(i + 1, 1);
             }
             if (colorAndIndex[i + 1]?.index === colorAndIndex[i].index){
@@ -164,6 +165,15 @@ const Canvas = ({fontColor, lineColor, fontFamily, fontSize, isLight}) => {
         }
     }
 
+    function loadFromHistory(textHistoryIndex){
+        text = textHistory[textHistoryIndex].text;
+        caretPosition = textHistory[textHistoryIndex].caretPosition;
+        if (textHistory[textHistoryIndex].colorAndIndex[0].color !== 'default'){
+            setColorAndIndex(textHistory[textHistoryIndex].colorAndIndex);
+        }
+
+    }
+
     function onKeyDownSwitch(e) {
         if (e.ctrlKey) {
             switch (e.keyCode) {
@@ -182,8 +192,7 @@ const Canvas = ({fontColor, lineColor, fontFamily, fontSize, isLight}) => {
                         coordsDisabled.push(coords?.pop());
                     } else if (textHistoryIndex > 0) {
                         textHistoryIndex--;
-                        text = textHistory[textHistoryIndex].text;
-                        caretPosition = textHistory[textHistoryIndex].caretPosition;
+                        loadFromHistory(textHistoryIndex);
                     }
                     break;
                 case 89:
@@ -191,8 +200,7 @@ const Canvas = ({fontColor, lineColor, fontFamily, fontSize, isLight}) => {
                         coords?.push(coordsDisabled?.pop());
                     } else if (textHistoryIndex < textHistory.length - 1) {
                         textHistoryIndex++;
-                        text = textHistory[textHistoryIndex].text;
-                        caretPosition = textHistory[textHistoryIndex].caretPosition;
+                        loadFromHistory(textHistoryIndex);
                     }
                     break;
                 default:
@@ -256,8 +264,9 @@ const Canvas = ({fontColor, lineColor, fontFamily, fontSize, isLight}) => {
     }
 
     function saveToHistory(){
-        textHistory.push({text: text, caretPosition: {line: caretPosition.line, character: caretPosition.character}});
+        textHistory.push({text: text, caretPosition: {line: caretPosition.line, character: caretPosition.character}, colorAndIndex: [...colorAndIndex]});
         textHistoryIndex++;
+        console.log(textHistory[textHistoryIndex].colorAndIndex)
     }
 
     function caretMoveLeft() {
@@ -307,59 +316,27 @@ const Canvas = ({fontColor, lineColor, fontFamily, fontSize, isLight}) => {
         }
 
         //TODO поправить
-let worked = 0;
+        let worked = 0;
         for (let i = 0; i < colorAndIndex.length; i++){
             if (colorAndIndex[i].index <= txt.length && colorAndIndex[i + 1]
-                 && !(colorAndIndex[i + 1].index <= txt.length)
-               ) {
-                    if (colorAndIndex[i].color !== fontColor && !worked){
-                        colorAndIndex.splice(i + 1, 0, {index: txt.length, color: fontColor});
-                        console.log(colorAndIndex, {index: txt.length, color: fontColor});
-                        colorAndIndex.splice(i + 2, 0, {...colorAndIndex[i], index: colorAndIndex[i+1].index + 1});
-                        console.log(colorAndIndex, {...colorAndIndex[i], index: colorAndIndex[i+1].index + 1});
-                        colorAndIndex[i+3].index++;
-                        worked = 1;
-                    } else if (!worked){
-                        console.log(colorAndIndex[i], ' = ', fontColor)
-                        colorAndIndex[i+1].index++;
-                        worked = 1;
-                    }
-                    countIndexesArray();
+                && !(colorAndIndex[i + 1].index <= txt.length)
+            ) {
+                if (colorAndIndex[i].color !== fontColor && !worked){
+                    colorAndIndex.splice(i + 1, 0, {index: txt.length, color: fontColor});
+                    console.log(colorAndIndex, {index: txt.length, color: fontColor});
+                    colorAndIndex.splice(i + 2, 0, {...colorAndIndex[i], index: colorAndIndex[i+1].index + 1});
+                    console.log(colorAndIndex, {...colorAndIndex[i], index: colorAndIndex[i+1].index + 1});
+                    colorAndIndex[i+3].index++;
+                    worked = 1;
+                } else if (!worked){
+                    console.log(colorAndIndex[i], ' = ', fontColor)
+                    colorAndIndex[i+1].index++;
+                    worked = 1;
+                }
+                countIndexesArray();
             }
         }
-worked = 0;
-
-
-
-
-
-
-
-
-
-
-
-
-
-        // let currentIndex = 0;
-        // for (let i = 0; i < colorAndIndex.length; i++){
-        //     if (colorAndIndex[i].index <= txt.length) {
-        //         currentIndex = i;
-        //     } else {
-        //         break;
-        //     }
-        // }
-
-        // if (currentIndex < colorAndIndex.length - 1) {
-        //     if (colorAndIndex[currentIndex].color !== fontColor) {
-        //         colorAndIndex.splice(currentIndex, 0, {index: txt.length, color: fontColor});
-        //     }
-        //     for (let i = currentIndex + 1; i < colorAndIndex.length; i++) {
-        //         colorAndIndex[i].index++;
-        //     }
-        // } else {
-        //     colorAndIndex.push({index: txt.length + 1, color: fontColor});
-        // }
+        worked = 0;
 
         addLetterOnCaret(letter);
         for (let i = 0; i < newLines.length; i++){

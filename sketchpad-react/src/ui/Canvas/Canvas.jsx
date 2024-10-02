@@ -8,7 +8,6 @@ let ctx;
 const coords = [];
 const coordsDisabled = [];
 let text = '';
-// let colorAndIndex = [{index: 0, color: }];
 //TODO надо сделать запись цвета текста по длине текста
 
 //TODO добавить движение каретки на слово по ctrl+Arrow
@@ -31,7 +30,8 @@ const Canvas = ({fontColor, lineColor, fontFamily, fontSize, isLight}) => {
     let link;
     let isDrawing = false;
 
-    const textWrapLimit = Math.round(window.innerWidth);
+    // const textWrapLimit = Math.round(window.innerWidth);
+    const textWrapLimit = 10;
     //TODO найти все места где используется и заменить на вычисление размеров
     const coordsDisabledLimit = 10000;
 
@@ -53,50 +53,19 @@ const Canvas = ({fontColor, lineColor, fontFamily, fontSize, isLight}) => {
 
     useEffect(() => {
         countIndexesArray();
-
-
-        // for (let i = 0; i < colorAndIndex.length; i++){
-        //     //works!!!!
-        //     console.log('for ', text.substring(colorAndIndex[i].index, colorAndIndex[i + 1]?.index))
-        // }
-        // // console.log(text.substring())
-        //
-        // console.log(colorAndIndex.length-1, text.length)
-        // console.log(colorAndIndex)
-        // if (text.length > colorAndIndex[colorAndIndex.length-1].index && colorAndIndex[colorAndIndex.length-1].color !== fontColor) {
-        //     colorAndIndex.push({index: text.length, color: fontColor});
-        //     console.log('push ', colorAndIndex)
-        // }
-        // if (text.length === colorAndIndex[colorAndIndex.length-1].index && colorAndIndex[colorAndIndex.length-1].color !== fontColor){
-        //     if (colorAndIndex[colorAndIndex.length-2] && colorAndIndex[colorAndIndex.length-2].color === fontColor){
-        //         colorAndIndex.pop();
-        //         console.log('pop ', colorAndIndex)
-        //     } else {
-        //         colorAndIndex[colorAndIndex.length-1].color = fontColor;
-        //         console.log('edit ', colorAndIndex)
-        //     }
-        // }
-
     },[fontColor])
 
     function countIndexesArray(){
-        // for (let i = 0; i < colorAndIndex.length; i++){
-        //     console.log('for ', text.substring(colorAndIndex[i].index, colorAndIndex[i + 1]?.index))
-        // }
-
-        console.log(colorAndIndex.length-1, text.length)
-        console.log(colorAndIndex)
+        //TODO если в промежутке новый цвет - добавить в нужное место
+        // массива новый индекс
         if (text.length > colorAndIndex[colorAndIndex.length-1].index && colorAndIndex[colorAndIndex.length-1].color !== fontColor) {
             colorAndIndex.push({index: text.length, color: fontColor});
-            console.log('push ', colorAndIndex)
         }
         if (text.length === colorAndIndex[colorAndIndex.length-1].index && colorAndIndex[colorAndIndex.length-1].color !== fontColor){
             if (colorAndIndex[colorAndIndex.length-2] && colorAndIndex[colorAndIndex.length-2].color === fontColor){
                 colorAndIndex.pop();
-                console.log('pop ', colorAndIndex)
             } else {
                 colorAndIndex[colorAndIndex.length-1].color = fontColor;
-                console.log('edit ', colorAndIndex)
             }
         }
         for (let i = 0; i < colorAndIndex.length; i++){
@@ -106,7 +75,6 @@ const Canvas = ({fontColor, lineColor, fontFamily, fontSize, isLight}) => {
             if (colorAndIndex[i + 1]?.index === colorAndIndex[i].index){
                 colorAndIndex.splice(i, 1);
             }
-
         }
 
 
@@ -116,16 +84,13 @@ const Canvas = ({fontColor, lineColor, fontFamily, fontSize, isLight}) => {
     function updateTextOnCanvas(ctx) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         drawBg(ctx);
-        //TODO добавить проверку длинны текста и краску
-        // удалять совпадающие соседние индексы
         ctx.font = fontSize + 'px ' + fontFamily;
-        // ctx.fillStyle = fontColor;
         let lines = text.split('\n');
         let y = textY;
         let countText = 0;
         let checkIndex = 1;
         for (let i = 0; i < lines.length; i++) {
-            let x = textX; // Initialize x-coordinate for each line
+            let x = textX;
             for (let j = 0; j < lines[i].length; j++) {
 
                 if (!colorAndIndex[checkIndex] || countText < colorAndIndex[checkIndex].index){
@@ -134,20 +99,14 @@ const Canvas = ({fontColor, lineColor, fontFamily, fontSize, isLight}) => {
                     ctx.fillStyle = colorAndIndex[checkIndex].color;
                     checkIndex++;
                 }
-                // console.log(countText, colorAndIndex[countText].color)
-
-                // ctx.fillStyle = colorAndIndex[countText].color;
                 ctx.fillText(lines[i][j], x, y);
-                // console.log(lines[i][j], x, y)
                 let charWidth = ctx.measureText(lines[i][j]).width;
                 x += charWidth;
-                countText++;
-                // console.log(countText)
+                countText ++;
             }
 
-            y += fontSize + 5; // Add some space between lines
+            y += fontSize + 5;
         }
-        console.log('checkIndex ', checkIndex)
         if (!isDrawing) {
             calculateCaretPosition();
             ctx.fillStyle = fontColor;
@@ -180,7 +139,6 @@ const Canvas = ({fontColor, lineColor, fontFamily, fontSize, isLight}) => {
     }
 
     function startDrawing(e) {
-        // console.log('start drawing')
         coords.push(lineColor);
         coords.push('brake');
         coordsDisabled.length = 0;
@@ -193,7 +151,6 @@ const Canvas = ({fontColor, lineColor, fontFamily, fontSize, isLight}) => {
     function draw(e) {
         if (!isDrawing) return;
         ctx.strokeStyle = lineColor;
-        // console.log(ctx.strokeStyle)
         ctx.lineTo(e.offsetX, e.offsetY);
         ctx.stroke();
         coords.push([e.offsetX, e.offsetY]);
@@ -339,19 +296,88 @@ const Canvas = ({fontColor, lineColor, fontFamily, fontSize, isLight}) => {
         let newLine;
         let newLines;
         let currentLine = lines(caretPosition.line);
+
+        let txt = '';
+        for (let i = 0; i <= caretPosition.line; i++){
+            if (lines(i) === currentLine){
+                txt += currentLine.substring(0, caretPosition.character)
+            } else {
+                txt += lines(i)
+            }
+        }
+
+        //TODO поправить
+let worked = 0;
+        for (let i = 0; i < colorAndIndex.length; i++){
+            if (colorAndIndex[i].index <= txt.length && colorAndIndex[i + 1]
+                 && !(colorAndIndex[i + 1].index <= txt.length)
+               ) {
+                    if (colorAndIndex[i].color !== fontColor && !worked){
+                        colorAndIndex.splice(i + 1, 0, {index: txt.length, color: fontColor});
+                        console.log(colorAndIndex, {index: txt.length, color: fontColor});
+                        colorAndIndex.splice(i + 2, 0, {...colorAndIndex[i], index: colorAndIndex[i+1].index + 1});
+                        console.log(colorAndIndex, {...colorAndIndex[i], index: colorAndIndex[i+1].index + 1});
+                        colorAndIndex[i+3].index++;
+                        worked = 1;
+                    } else if (!worked){
+                        console.log(colorAndIndex[i], ' = ', fontColor)
+                        colorAndIndex[i+1].index++;
+                        worked = 1;
+                    }
+                    countIndexesArray();
+            }
+        }
+worked = 0;
+
+
+
+
+
+
+
+
+
+
+
+
+
+        // let currentIndex = 0;
+        // for (let i = 0; i < colorAndIndex.length; i++){
+        //     if (colorAndIndex[i].index <= txt.length) {
+        //         currentIndex = i;
+        //     } else {
+        //         break;
+        //     }
+        // }
+
+        // if (currentIndex < colorAndIndex.length - 1) {
+        //     if (colorAndIndex[currentIndex].color !== fontColor) {
+        //         colorAndIndex.splice(currentIndex, 0, {index: txt.length, color: fontColor});
+        //     }
+        //     for (let i = currentIndex + 1; i < colorAndIndex.length; i++) {
+        //         colorAndIndex[i].index++;
+        //     }
+        // } else {
+        //     colorAndIndex.push({index: txt.length + 1, color: fontColor});
+        // }
+
         addLetterOnCaret(letter);
         for (let i = 0; i < newLines.length; i++){
             if(newLines[i].length >= textWrapLimit) {
                 newLines[i].split(0, textWrapLimit)
                 if (!newLines[i + 1]){
+                    console.log('cоздать новую строку')
                     newLines[i + 1] = newLines[i].substring(textWrapLimit, newLines[i].length)
                 } else {
+                    console.log('добавить букву на сл строку')
                     newLines[i + 1] = newLines[i].substring(textWrapLimit, newLines[i].length) + newLines[i + 1]
                 }
                 if (caretPosition.character > textWrapLimit){
+                    console.log('перейти на сл строку')
                     caretPosition.line++;
                     caretPosition.character = 1;
                 }
+                //TODO добавить проверку позиции каретки
                 newLines[i] = newLines[i].substring(0, textWrapLimit);
             }
         }
@@ -389,7 +415,6 @@ const Canvas = ({fontColor, lineColor, fontFamily, fontSize, isLight}) => {
                     if (colorAndIndex[i].index <= txt.length && txt.length <= colorAndIndex[i + 1]?.index){
                         colorAndIndex[i + 1].index--;
                         countIndexesArray();
-
                     }
                 }
 
@@ -402,7 +427,7 @@ const Canvas = ({fontColor, lineColor, fontFamily, fontSize, isLight}) => {
                 // Удаление переноса строки
                 let previousLine = lines(caretPosition.line - 1);
                 let newPreviousLine = previousLine + (currentLine.length > 0 ? currentLine : '');
-                let newLines = lines().map((line, index) => index === caretPosition.line - 1 ? newPreviousLine : (index === caretPosition.line ? '' : line));
+                let newLines = lines().map((line, index) => index === caretPosition.line - 1 ? newPreviousLine : ( index === caretPosition.line ? '' : line));
                 newLines.splice(caretPosition.line, 1)
                 text = newLines.join('\n');
                 caretPosition.line--;
@@ -422,7 +447,7 @@ const Canvas = ({fontColor, lineColor, fontFamily, fontSize, isLight}) => {
 
                 for (let i = 0; i < colorAndIndex.length; i++){
                     if (colorAndIndex[i].index <= txt.length && txt.length <= colorAndIndex[i + 1]?.index){
-                            colorAndIndex[i + 1].index--;
+                        colorAndIndex[i + 1].index--;
                     }
                     countIndexesArray();
                 }

@@ -34,6 +34,7 @@ const Canvas = ({fontColor, lineColor, fontFamily, fontSize, isLight}) => {
     const linesLimit = window.innerHeight / (fontSize * 1.5);
 
     const drawBg = (ctx) => {
+        //TODO достать из scss переменных
         ctx.fillStyle = isLight ? '#F2F0E7FF' : '#2A2A2B';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
     }

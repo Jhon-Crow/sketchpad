@@ -11,3 +11,21 @@
       flex-basis: 45%;
     }
 }
+
+.selected {
+  box-shadow: 0 3px 10px var(--selected-shadow);
+
+  z-index: 5;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 2.364375rem;
+  height: 2.364375rem;
+  padding: 0;
+  margin: 0;
+  //shadow
+
+  border-radius: 0.625rem;
+
+  border: 1.3rem solid var(--selected-border);
+}

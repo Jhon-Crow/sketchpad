@@ -6,7 +6,7 @@ import Canvas from "../ui/Canvas/Canvas.jsx";
 import CapsLockIdentifier from "../ui/CapsLockIdentifier/CapsLockIdentifier.jsx";
 
 function App() {
-
+    //TODO доставать initialValue из localStorage
     const [isLight, setIsLight] = useState(true)
 
     const themeChecker = () => {

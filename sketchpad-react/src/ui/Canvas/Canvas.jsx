@@ -22,7 +22,7 @@ let textWrapLimit;
 
 let caretPosition = { line: 0, character: 0 };
 
-const Canvas = ({fontColor, lineColor, fontFamily, fontSize, isLight}) => {
+const Canvas = ({fontColor, lineColor, fontFamily, fontSize, isLight, getCapsLockPressed}) => {
     const [colorAndIndex, setColorAndIndex] = useState([{index: 0, color: fontColor}]);
     const canvasRef = useRef(null);
     let canvasData;
@@ -32,7 +32,7 @@ const Canvas = ({fontColor, lineColor, fontFamily, fontSize, isLight}) => {
     const coordsDisabledLimit = 10000;
 
     const linesLimit = window.innerHeight / (fontSize * 1.5);
-
+//TODO заменить проверку calsLock функцией getCapsLockPressed
     const drawBg = (ctx) => {
         //TODO достать из scss переменных как в palette
         ctx.fillStyle = isLight ? '#F2F0E7FF' : '#2A2A2B';
@@ -42,7 +42,8 @@ const Canvas = ({fontColor, lineColor, fontFamily, fontSize, isLight}) => {
     useEffect(() => {
         canvas = canvasRef.current;
         ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth / 1.56;
+        canvas.width = window.innerWidth / 1.32;
+        // canvas.width = window.innerWidth / 1.56;
         canvas.height = window.innerHeight / 1.05;
         textWrapLimit = canvas.width / 6.5;
         updateTextOnCanvas(ctx);
@@ -66,7 +67,6 @@ const Canvas = ({fontColor, lineColor, fontFamily, fontSize, isLight}) => {
         }
         for (let i = 0; i < colorAndIndex.length; i++){
             if (colorAndIndex[i].color === colorAndIndex[i+1]?.color){
-                // console.log('удаляем ', colorAndIndex[i+1])
                 colorAndIndex.splice(i + 1, 1);
             }
             if (colorAndIndex[i + 1]?.index === colorAndIndex[i].index){
@@ -171,6 +171,7 @@ const Canvas = ({fontColor, lineColor, fontFamily, fontSize, isLight}) => {
     }
 
     function onKeyDownSwitch(e) {
+        getCapsLockPressed(e.getModifierState('CapsLock'));
         if (e.ctrlKey) {
            // console.log(e.keyCode) //<-37       ->39
             switch (e.keyCode) {

@@ -9,7 +9,7 @@ import {saveToLocalStorage} from "../../helpers/saveToLocalStorage.js";
 
 const namesColorsFromScss = ['--default-red', '--default-blue', '--default-black', '--default-green'];
 
-const Palette = () => {
+const Palette = ({getPenColor, getFontColor}) => {
     //TODO
     // при изменении цвета обновлять paletteColors
 
@@ -19,7 +19,6 @@ const Palette = () => {
     const selectedPen = paletteColors[selectedColors[1]];
     const [localStorageState, setLocalStorageState] = useState({});
 
-    console.log(selectedPen)
     useEffect(() => {
     let writeColors;
         if (!getFromLocalStorage(LOCALSTORAGE_SKETCHPAD_COLORS)) {
@@ -30,9 +29,8 @@ const Palette = () => {
                 colorsFromScss = [...colorsFromScss, ...colorsFromScss];
                 saveToLocalStorage(colorsFromScss, LOCALSTORAGE_SKETCHPAD_COLORS);
                 writeColors = colorsFromScss;
-                console.log('app')
             } else {
-                console.log('not app')
+                console.error('not appElement')
             }
         } else {
             writeColors = getFromLocalStorage(LOCALSTORAGE_SKETCHPAD_COLORS);
@@ -54,6 +52,7 @@ const Palette = () => {
             writeObj.paletteColors = paletteColors;
         }
         setLocalStorageState({...writeObj})
+        // getPenColor(selectedPen);
     }, [selectedColors, paletteColors]);
 
     useEffect(() => {
@@ -80,6 +79,11 @@ const Palette = () => {
             return newSelectedColors;
         });
     };
+
+    useEffect(() => {
+        getPenColor(selectedPen);
+        getFontColor(selectedFont);
+    },[paletteColors, selectedColors])
 
     return (
         <div className={cls.Palette}>

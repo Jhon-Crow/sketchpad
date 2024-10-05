@@ -1,0 +1,53 @@
+.Wrapper {
+    //display: inline-block;
+    display: flex;
+    gap: .1rem;
+    align-items: center;
+    position: relative;
+    max-height: 3.368125rem;
+    max-width: 10.26125rem;
+}
+
+.select {
+    //position: relative;
+    background: var(--canvas-color);
+    border: none;
+    color: inherit;
+    font-weight: 600;
+    font-size: 1.2rem;
+    border-radius: 1.75rem;
+    cursor: pointer;
+    outline: none;
+    //padding: 0.9375rem .625rem 0.9375rem .125rem;
+    padding: 0.9375rem 12% 0.9375rem 10%;
+    text-align: center;
+    letter-spacing: 1px;
+
+    //background-image: url("../../../assets/Icon/angle-down.svg");
+    //background-repeat: no-repeat;
+    //background-position: right 0.625rem center, left 0.125rem center;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    width: auto;
+    height: auto;
+}
+
+.icon{
+    position: absolute;
+    right: -10px;
+    top: 1.1875rem;
+}
+
+.option {
+    background: var(--canvas-color);
+    border: none;
+    color: inherit;
+    border-radius: .3rem;
+}
+
+.readonly {
+    opacity: .7;
+    pointer-events: none;
+    cursor: none;
+}

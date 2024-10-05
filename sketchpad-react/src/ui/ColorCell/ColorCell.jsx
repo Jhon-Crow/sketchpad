@@ -18,6 +18,9 @@ const ColorCell = ({initialColor, onDoubleClick, onChangeHandler}) => {
     //     }
     // };
 
+
+
+
     return (
             <input onDoubleClick={onDoubleClick}
                    // onClick={enableOnClickHandler}

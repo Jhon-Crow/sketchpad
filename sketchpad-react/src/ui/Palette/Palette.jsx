@@ -24,21 +24,26 @@ const Palette = () => {
     let writeColors;
         if (!getFromLocalStorage(LOCALSTORAGE_SKETCHPAD_COLORS)) {
             let colorsFromScss = [];
-            const appElement = document.querySelector('.App');
-            colorsFromScss = namesColorsFromScss.map((name) => getComputedStyle(appElement).getPropertyValue(name));
-            colorsFromScss = [...colorsFromScss, ...colorsFromScss];
-            saveToLocalStorage(colorsFromScss, LOCALSTORAGE_SKETCHPAD_COLORS);
-            writeColors = colorsFromScss;
+            const appElement = document.querySelector('.App') || document.querySelector('body');
+            if (appElement){
+                colorsFromScss = namesColorsFromScss.map((name) => getComputedStyle(appElement).getPropertyValue(name));
+                colorsFromScss = [...colorsFromScss, ...colorsFromScss];
+                saveToLocalStorage(colorsFromScss, LOCALSTORAGE_SKETCHPAD_COLORS);
+                writeColors = colorsFromScss;
+                console.log('app')
+            } else {
+                console.log('not app')
+            }
         } else {
             writeColors = getFromLocalStorage(LOCALSTORAGE_SKETCHPAD_COLORS);
-        };
+        }
         setPaletteColors(writeColors);
         if (!getFromLocalStorage(SKETCHPAD_SELECTED_COLORS)){
             saveToLocalStorage(selectedColors, SKETCHPAD_SELECTED_COLORS)
         } else {
             const selectedToWrite = getFromLocalStorage(SKETCHPAD_SELECTED_COLORS);
             setSelectedColors(selectedToWrite);
-        };
+        }
     },[]);
     useEffect(() => {
         const writeObj = {};

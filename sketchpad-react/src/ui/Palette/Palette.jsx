@@ -9,7 +9,7 @@ import {saveToLocalStorage} from "../../helpers/saveToLocalStorage.js";
 
 const namesColorsFromScss = ['--default-red', '--default-blue', '--default-black', '--default-green'];
 
-const Palette = ({getPenColor, getFontColor}) => {
+const Palette = ({setPenColor, setFontColor}) => {
     //TODO
     // при изменении цвета обновлять paletteColors
 
@@ -81,8 +81,8 @@ const Palette = ({getPenColor, getFontColor}) => {
     };
 
     useEffect(() => {
-        getPenColor(selectedPen);
-        getFontColor(selectedFont);
+        setPenColor(selectedPen);
+        setFontColor(selectedFont);
     },[paletteColors, selectedColors])
 
     return (

@@ -1,0 +1,20 @@
+.wrapper {
+  position: relative;
+}
+
+.button {
+  position: absolute;
+  background-color: var(--canvas-color);
+  width: 4.4375rem;
+  height: 4.4375rem;
+  border-radius: 1.75rem;
+  text-align: center;
+  font-family: "Inter", system-ui;
+  font-weight: 700;
+  font-size: 1.3rem;
+}
+
+.input {
+  position: absolute;
+  margin-top: 5rem;
+}

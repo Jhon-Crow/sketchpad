@@ -34,8 +34,8 @@ function App() {
             onChange={setFontFamily}
             options={fontsExample} fontColor={fontColor}/>
         <Palette
-            getPenColor={setPenColor}
-            getFontColor={setFontColor}
+            setPenColor={setPenColor}
+            setFontColor={setFontColor}
         />
         <CapsLockIdentifier capsLockPressed={capsLockPressed}/>
         <ThemeSwitcher

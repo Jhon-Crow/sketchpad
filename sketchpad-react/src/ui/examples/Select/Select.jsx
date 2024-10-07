@@ -3,7 +3,7 @@ import cls from './Select.module.scss';
 import AngleDown from '../../../assets/Icon/angle-down.svg?react';
 
 export const Select = (props) => {
-    const { className, lable, options, value, onChange, readonly, fontColor } = props;
+    const { lable, options, value, onChange, readonly, fontColor } = props;
 
     const onChangeHandler = (e) => {
         onChange?.(e.target.value);
@@ -34,13 +34,9 @@ export const Select = (props) => {
                 onChange={onChangeHandler}
                 style={{
                     color: fontColor,
-                    // fill: fontColor,
-                    // backgroundImage: AngleDown
-
             }}
 
             >
-                {/*<AngleDown fill={fontColor} width={14} height={10}/>*/}
                 {optionsList}
             </select>
             <AngleDown className={cls.icon} fill={fontColor} />

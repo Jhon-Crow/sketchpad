@@ -84,7 +84,6 @@ const Canvas = ({fontColor, lineColor, lineSize, fontFamily, fontSize, isLight, 
         for (let i = 0; i < lines.length; i++) {
             let x = textX;
             for (let j = 0; j < lines[i].length; j++) {
-
                 if (!colorAndIndex[checkIndex] || countText < colorAndIndex[checkIndex].index){
                     ctx.fillStyle = colorAndIndex[checkIndex - 1].color;
                 } else if (countText >= colorAndIndex[checkIndex].index){
@@ -267,7 +266,6 @@ const Canvas = ({fontColor, lineColor, lineSize, fontFamily, fontSize, isLight, 
     function saveToHistory(){
         textHistory.push({text: text, caretPosition: {line: caretPosition.line, character: caretPosition.character}, colorAndIndex: [...colorAndIndex]});
         textHistoryIndex++;
-        // console.log(textHistory[textHistoryIndex].colorAndIndex)
     }
 
     function caretMoveLeft() {
@@ -323,13 +321,10 @@ const Canvas = ({fontColor, lineColor, lineSize, fontFamily, fontSize, isLight, 
             ) {
                 if (colorAndIndex[i].color !== fontColor && !worked){
                     colorAndIndex.splice(i + 1, 0, {index: txt.length, color: fontColor});
-                //console.log(colorAndIndex, {index: txt.length, color: fontColor});
                     colorAndIndex.splice(i + 2, 0, {...colorAndIndex[i], index: colorAndIndex[i+1].index + 1});
-                //console.log(colorAndIndex, {...colorAndIndex[i], index: colorAndIndex[i+1].index + 1});
                     colorAndIndex[i+3].index++;
                     worked = 1;
                 } else if (!worked){
-                //console.log(colorAndIndex[i], ' = ', fontColor)
                     colorAndIndex[i+1].index++;
                     worked = 1;
                 }
@@ -340,19 +335,14 @@ const Canvas = ({fontColor, lineColor, lineSize, fontFamily, fontSize, isLight, 
 
         addLetterOnCaret(letter);
         for (let i = 0; i < newLines.length; i++){
-            // console.log(ctx.measureText(newLines[i]).width)
             if(newLines[i].length >= textWrapLimit) {
-            // if(ctx.measureText(newLines[i]).width >= textWrapLimit) {
                 newLines[i].split(0, textWrapLimit)
                 if (!newLines[i + 1]){
-                //console.log('cоздать новую строку')
                     newLines[i + 1] = newLines[i].substring(textWrapLimit, newLines[i].length)
                 } else {
-                //console.log('добавить букву на сл строку')
                     newLines[i + 1] = newLines[i].substring(textWrapLimit, newLines[i].length) + newLines[i + 1]
                 }
                 if (caretPosition.character > textWrapLimit){
-                //console.log('перейти на сл строку')
                     caretPosition.line++;
                     caretPosition.character = 1;
                 }
@@ -378,8 +368,6 @@ const Canvas = ({fontColor, lineColor, lineSize, fontFamily, fontSize, isLight, 
         let currentLine = lines(caretPosition.line);
         if (direction === 'backspace') {
             if (currentLine.length > 0 && caretPosition.character > 0) {
-                // Удаление символа в середине или в конце строки
-
                 let txt = '';
                 for (let i = 0; i <= caretPosition.line; i++){
                     if (lines(i) === currentLine){
@@ -402,7 +390,6 @@ const Canvas = ({fontColor, lineColor, lineSize, fontFamily, fontSize, isLight, 
                 caretPosition.character--;
 
             } else if (caretPosition.line > 0) {
-                // Удаление переноса строки
                 let previousLine = lines(caretPosition.line - 1);
                 let newPreviousLine = previousLine + (currentLine.length > 0 ? currentLine : '');
                 let newLines = lines().map((line, index) => index === caretPosition.line - 1 ? newPreviousLine : ( index === caretPosition.line ? '' : line));
@@ -413,7 +400,6 @@ const Canvas = ({fontColor, lineColor, lineSize, fontFamily, fontSize, isLight, 
             }
         } else if (direction === 'delete') {
             if (currentLine.length > 0 && caretPosition.character < currentLine.length) {
-
                 let txt = '';
                 for (let i = 0; i <= caretPosition.line; i++){
                     if (lines(i) === currentLine){
@@ -429,7 +415,6 @@ const Canvas = ({fontColor, lineColor, lineSize, fontFamily, fontSize, isLight, 
                     }
                     countIndexesArray();
                 }
-
 
                 let newLine = currentLine.substring(0, caretPosition.character) + currentLine.substring(caretPosition.character + 1);
                 let newLines = lines().map((line, index) => index === caretPosition.line ? newLine : line);

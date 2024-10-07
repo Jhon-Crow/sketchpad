@@ -19,10 +19,13 @@
     cursor: pointer;
     outline: none;
     //padding: 0.9375rem .625rem 0.9375rem .125rem;
-    padding: 0.9375rem 12% 0.9375rem 10%;
+    padding: 0.9375rem 16% 0.9375rem 10%;
     text-align: center;
     letter-spacing: 1px;
-
+    max-width: 10.26125rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
     //background-image: url("../../../assets/Icon/angle-down.svg");
     //background-repeat: no-repeat;
     //background-position: right 0.625rem center, left 0.125rem center;

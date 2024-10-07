@@ -20,12 +20,24 @@ function App() {
     //TODO сохранять + получать сайзы LS
     const [penSize, setPenSize] = useState(1);
 
-    const fontsExample = [
-        {value: 1, content: 'AREAL'},
-        {value: 2, content: 'ROBOT'},
-        {value: 3, content: 'COMIC SANS'},
+    const fontsDefault = [
+        {value: 0, content: 'Arial'},
+        {value: 1, content: 'Times New Roman'},
+        {value: 2, content: 'Courier'},
+        {value: 3, content: 'Helvetica'},
+        {value: 4, content: 'Verdana'},
+        {value: 5, content: 'Tahoma'},
+        {value: 6, content: 'Georgia'},
+        {value: 7, content: 'Impact'},
+        {value: 8, content: 'Comic Sans MS'},
+        {value: 9, content: 'Lucida Console'},
+        {value: 10, content: 'Monaco'},
+        {value: 11, content: 'Courier New'},
+        {value: 12, content: 'Calibri'},
+        {value: 13, content: 'Segoe UI'},
+        {value: 14, content: 'Tahoma'},
+        {value: 15, content: 'Microsoft Sans Serif'},
     ];
-    //TODO это пример, нужно подгрузить реальные шрифты
 
      useEffect(() => saveToLocalStorage(isDark, THEME_LOCALSTORAGE_KEY), [isDark])
 
@@ -35,7 +47,7 @@ function App() {
         <Select
             value={fontFamily}
             onChange={setFontFamily}
-            options={fontsExample} fontColor={fontColor}/>
+            options={fontsDefault} fontColor={fontColor}/>
         <Palette
             setPenColor={setPenColor}
             setFontColor={setFontColor}
@@ -48,7 +60,7 @@ function App() {
         <ThemeSwitcher
             setIsDark={setIsDark}
             isDark={isDark}/>
-        <Canvas getCapsLockPressed={setCapsLockPressed} isLight={isDark} fontColor={fontColor} lineColor={penColor} lineSize={penSize} fontFamily={'Arial'} fontSize={fontSize}/>
+        <Canvas getCapsLockPressed={setCapsLockPressed} isLight={isDark} fontColor={fontColor} lineColor={penColor} lineSize={penSize} fontFamily={fontsDefault[fontFamily].content} fontSize={fontSize}/>
     </div>
   )
 }

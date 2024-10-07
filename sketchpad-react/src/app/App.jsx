@@ -8,6 +8,7 @@ import {Select} from "../ui/examples/Select/Select.jsx";
 import Palette from "../ui/Palette/Palette.jsx";
 import {saveToLocalStorage} from "../helpers/saveToLocalStorage.js";
 import {THEME_LOCALSTORAGE_KEY} from "./const/localStorage.js";
+import SizeInput from "../ui/SizeInput/SizeInput.jsx";
 
 function App() {
     const [isDark, setIsDark] = useState();
@@ -15,7 +16,9 @@ function App() {
     const [fontColor, setFontColor] = useState();
     const [fontFamily, setFontFamily] = useState(2);
     const [penColor, setPenColor] = useState();
-    //TODO найти где юз эффект перезаписывает selectedColors в локалСтораж
+    const [fontSize, setFontSize] = useState(16);
+    //TODO сохранять + получать сайзы LS
+    const [penSize, setPenSize] = useState(1);
 
     const fontsExample = [
         {value: 1, content: 'AREAL'},
@@ -37,12 +40,15 @@ function App() {
             setPenColor={setPenColor}
             setFontColor={setFontColor}
         />
+        <div className={cls.sizeInputWrapper}>
+            <SizeInput value={fontSize} onChange={setFontSize} color={fontColor}/>
+            <SizeInput value={penSize} onChange={setPenSize} color={penColor}/>
+        </div>
         <CapsLockIdentifier capsLockPressed={capsLockPressed}/>
         <ThemeSwitcher
             setIsDark={setIsDark}
-            // themeChecker={themeChecker}
             isDark={isDark}/>
-        <Canvas getCapsLockPressed={setCapsLockPressed} isLight={isDark} fontColor={fontColor} lineColor={penColor} fontFamily={'Arial'} fontSize={14}/>
+        <Canvas getCapsLockPressed={setCapsLockPressed} isLight={isDark} fontColor={fontColor} lineColor={penColor} lineSize={penSize} fontFamily={'Arial'} fontSize={fontSize}/>
     </div>
   )
 }

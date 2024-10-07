@@ -14,7 +14,7 @@ const Palette = ({setPenColor, setFontColor}) => {
     // при изменении цвета обновлять paletteColors
 
     const [paletteColors, setPaletteColors] = useState([]);
-    const [selectedColors, setSelectedColors] = useState([2,3]);
+    const [selectedColors, setSelectedColors] = useState([]);
     const selectedFont = paletteColors[selectedColors[0]];
     const selectedPen = paletteColors[selectedColors[1]];
     const [localStorageState, setLocalStorageState] = useState({});
@@ -37,7 +37,7 @@ const Palette = ({setPenColor, setFontColor}) => {
         }
         setPaletteColors(writeColors);
         if (!getFromLocalStorage(SKETCHPAD_SELECTED_COLORS)){
-            saveToLocalStorage(selectedColors, SKETCHPAD_SELECTED_COLORS)
+            saveToLocalStorage([2,3], SKETCHPAD_SELECTED_COLORS)
         } else {
             const selectedToWrite = getFromLocalStorage(SKETCHPAD_SELECTED_COLORS);
             setSelectedColors(selectedToWrite);
@@ -52,7 +52,6 @@ const Palette = ({setPenColor, setFontColor}) => {
             writeObj.paletteColors = paletteColors;
         }
         setLocalStorageState({...writeObj})
-        // getPenColor(selectedPen);
     }, [selectedColors, paletteColors]);
 
     useEffect(() => {

@@ -7,3 +7,11 @@
   padding: 20px;
   gap: 18px;
 }
+
+.sizeInputWrapper{
+  display: flex;
+  background-color: var(--canvas-color);
+  max-width: 10.26125rem;
+  border-radius: 1.75rem;
+  justify-content: center;
+}

@@ -22,7 +22,7 @@ let textWrapLimit;
 
 let caretPosition = { line: 0, character: 0 };
 
-const Canvas = ({fontColor, lineColor, fontFamily, fontSize, isLight, getCapsLockPressed}) => {
+const Canvas = ({fontColor, lineColor, lineSize, fontFamily, fontSize, isLight, getCapsLockPressed}) => {
     const [colorAndIndex, setColorAndIndex] = useState([{index: 0, color: fontColor}]);
     const canvasRef = useRef(null);
     let canvasData;
@@ -32,9 +32,7 @@ const Canvas = ({fontColor, lineColor, fontFamily, fontSize, isLight, getCapsLoc
     const coordsDisabledLimit = 10000;
 
     const linesLimit = window.innerHeight / (fontSize * 1.5);
-//TODO заменить проверку calsLock функцией getCapsLockPressed
     const drawBg = (ctx) => {
-        //TODO достать из scss переменных как в palette
         ctx.fillStyle = isLight ? '#F2F0E7FF' : '#2A2A2B';
         ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
@@ -73,9 +71,6 @@ const Canvas = ({fontColor, lineColor, fontFamily, fontSize, isLight, getCapsLoc
                 colorAndIndex.splice(i, 1);
             }
         }
-
-
-
     }
 
     function updateTextOnCanvas(ctx) {
@@ -101,7 +96,6 @@ const Canvas = ({fontColor, lineColor, fontFamily, fontSize, isLight, getCapsLoc
                 x += charWidth;
                 countText ++;
             }
-
             y += fontSize + 5;
         }
         if (!isDrawing) {
@@ -129,6 +123,7 @@ const Canvas = ({fontColor, lineColor, fontFamily, fontSize, isLight, getCapsLoc
             } else if (coord.includes('#')) {
                 ctx.strokeStyle = coord;
             } else {
+                ctx.lineWidth = coord[2];
                 ctx.lineTo(coord[0], coord[1]);
             }
         });
@@ -139,18 +134,20 @@ const Canvas = ({fontColor, lineColor, fontFamily, fontSize, isLight, getCapsLoc
         coords.push(lineColor);
         coords.push('brake');
         coordsDisabled.length = 0;
-        coords.push([e.offsetX, e.offsetY]);
+        coords.push([e.offsetX, e.offsetY, Number(lineSize)]);
         isDrawing = true;
         ctx.beginPath();
+        ctx.lineWidth = lineSize;
         ctx.moveTo(e.offsetX, e.offsetY);
     }
 
     function draw(e) {
         if (!isDrawing) return;
         ctx.strokeStyle = lineColor;
+        ctx.lineWidth = lineSize;
         ctx.lineTo(e.offsetX, e.offsetY);
         ctx.stroke();
-        coords.push([e.offsetX, e.offsetY]);
+        coords.push([e.offsetX, e.offsetY, Number(lineSize)]);
     }
 
     function endDrawing() {

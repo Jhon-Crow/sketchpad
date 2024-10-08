@@ -2,6 +2,7 @@ import React, {useEffect, useRef, useState} from 'react';
 import cls from './Canvas.module.scss'
 import SaveButton from "../SaveButton/SaveButton.jsx";
 
+
 let canvas;
 let ctx;
 
@@ -32,6 +33,14 @@ const Canvas = ({fontColor, lineColor, lineSize, fontFamily, fontSize, isLight, 
     const coordsDisabledLimit = 10000;
 
     const linesLimit = window.innerHeight / (fontSize * 1.5);
+
+    // const coursorSvg = '../../assets/Icon/pen.svg';
+    // const cursorUrl = `url("${coursorSvg}?color=${lineColor}"), auto`;
+
+    // console.log(cursorUrl)
+    // document.body.style.cursor = cursorUrl;
+
+
     const drawBg = (ctx) => {
         ctx.fillStyle = isLight ? '#F2F0E7FF' : '#2A2A2B';
         ctx.fillRect(0, 0, canvas.width, canvas.height);

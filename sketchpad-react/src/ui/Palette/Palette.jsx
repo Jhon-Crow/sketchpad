@@ -10,9 +10,6 @@ import {saveToLocalStorage} from "../../helpers/saveToLocalStorage.js";
 const namesColorsFromScss = ['--default-red', '--default-blue', '--default-black', '--default-green'];
 
 const Palette = ({setPenColor, setFontColor}) => {
-    //TODO
-    // при изменении цвета обновлять paletteColors
-
     const [paletteColors, setPaletteColors] = useState([]);
     const [selectedColors, setSelectedColors] = useState([]);
     const selectedFont = paletteColors[selectedColors[0]];

@@ -2,14 +2,11 @@ import React, {useEffect, useRef, useState} from 'react';
 import cls from './Canvas.module.scss'
 import SaveButton from "../SaveButton/SaveButton.jsx";
 
-
 let canvas;
 let ctx;
-
 const coords = [];
 const coordsDisabled = [];
 let text = '';
-
 
 const textHistory = [{'text': '', 'caretPosition': {line: 0, character: 0}, 'colorAndIndex': [{index: 0, color: 'default'}]}];
 let textHistoryIndex = 0;
@@ -32,14 +29,7 @@ const Canvas = ({fontColor, lineColor, lineSize, fontFamily, fontSize, isLight, 
 
     const coordsDisabledLimit = 10000;
 
-    const linesLimit = window.innerHeight / (fontSize * 1.5);
-
-    // const coursorSvg = '../../assets/Icon/pen.svg';
-    // const cursorUrl = `url("${coursorSvg}?color=${lineColor}"), auto`;
-
-    // console.log(cursorUrl)
-    // document.body.style.cursor = cursorUrl;
-
+    let linesLimit = window.innerHeight / (fontSize * 1.5);
 
     const drawBg = (ctx) => {
         ctx.fillStyle = isLight ? '#F2F0E7FF' : '#2A2A2B';
@@ -50,7 +40,6 @@ const Canvas = ({fontColor, lineColor, lineSize, fontFamily, fontSize, isLight, 
         canvas = canvasRef.current;
         ctx = canvas.getContext('2d');
         canvas.width = window.innerWidth / 1.32;
-        // canvas.width = window.innerWidth / 1.56;
         canvas.height = window.innerHeight / 1.05;
         textWrapLimit = canvas.width / 6.5;
         updateTextOnCanvas(ctx);
@@ -60,6 +49,18 @@ const Canvas = ({fontColor, lineColor, lineSize, fontFamily, fontSize, isLight, 
     useEffect(() => {
         countIndexesArray();
     },[fontColor])
+
+    //TODO при изменении сайза ломается вторая строка
+    useEffect(() => {
+        textX = 10;
+        textY = fontSize * 1.5;
+        caretX = textX;
+        caretY = textY;
+        textWrapLimit = canvas.width / (fontSize * 1.5);
+        linesLimit = window.innerHeight / (fontSize * 1.5);
+        updateTextOnCanvas(ctx);
+        console.log(textY, textX)
+    }, [fontSize]);
 
     function countIndexesArray(){
         if (text.length > colorAndIndex[colorAndIndex.length-1].index && colorAndIndex[colorAndIndex.length-1].color !== fontColor) {

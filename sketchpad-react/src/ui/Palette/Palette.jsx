@@ -24,7 +24,9 @@ const Palette = ({setPenColor, setFontColor}) => {
             if (appElement){
                 colorsFromScss = namesColorsFromScss.map((name) => getComputedStyle(appElement).getPropertyValue(name));
                 colorsFromScss = [...colorsFromScss, ...colorsFromScss];
-                saveToLocalStorage(colorsFromScss, LOCALSTORAGE_SKETCHPAD_COLORS);
+                if (!colorsFromScss.includes('')) {
+                    saveToLocalStorage(colorsFromScss, LOCALSTORAGE_SKETCHPAD_COLORS);
+                }
                 writeColors = colorsFromScss;
             } else {
                 console.error('not appElement')

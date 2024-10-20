@@ -86,7 +86,7 @@ const Palette = ({setPenColor, setFontColor}) => {
             <FontCase fill={selectedFont} width={41} height={41}/>
             <PenNib fill={selectedPen} width={35} height={35}/>
             {
-                paletteColors.map((color, index) => <div id={index} className={selectedColors.includes(index) ? cls.selected : null}><ColorCell onChangeHandler={onChangeHandler} onDoubleClick={onClickSelectHandler} key={index} initialColor={color}/></div>)
+                paletteColors.map((color, index) => <div key={index} id={index} className={selectedColors.includes(index) ? cls.selected : null}><ColorCell onChangeHandler={onChangeHandler} onDoubleClick={onClickSelectHandler} key={index} initialColor={color}/></div>)
             }
         </div>
     );

@@ -6,7 +6,6 @@ import {getFromLocalStorage} from "../../helpers/getFromLocalStorage.js";
 import {THEME_LOCALSTORAGE_KEY} from "../../app/const/localStorage.js";
 import {Theme} from "../../app/const/theme.js";
 
-
 const ThemeSwitcher = ({isDark, setIsDark}) => {
 
     useEffect(() => {

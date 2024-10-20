@@ -8,7 +8,6 @@ import {Select} from "../ui/examples/Select/Select.jsx";
 import Palette from "../ui/Palette/Palette.jsx";
 import {saveToLocalStorage} from "../helpers/saveToLocalStorage.js";
 import {THEME_LOCALSTORAGE_KEY} from "./const/localStorage.js";
-import SizeInput from "../ui/SizeInput/SizeInput.jsx";
 
 function App() {
     const [isDark, setIsDark] = useState();
@@ -16,9 +15,8 @@ function App() {
     const [fontColor, setFontColor] = useState();
     const [fontFamily, setFontFamily] = useState(2);
     const [penColor, setPenColor] = useState();
-    const [fontSize, setFontSize] = useState(16);
-    //TODO сохранять + получать сайзы LS
-    const [penSize, setPenSize] = useState(1);
+    const [fontSize, ] = useState(16);
+    const [penSize, ] = useState(1);
 
     const fontsDefault = [
         {value: 0, content: 'Arial'},
@@ -41,7 +39,6 @@ function App() {
 
      useEffect(() => saveToLocalStorage(isDark, THEME_LOCALSTORAGE_KEY), [isDark])
 
-
   return (
     <div className={cls.App}>
         <Select
@@ -52,10 +49,6 @@ function App() {
             setPenColor={setPenColor}
             setFontColor={setFontColor}
         />
-        <div className={cls.sizeInputWrapper}>
-            <SizeInput value={fontSize} onChange={setFontSize} color={fontColor}/>
-            <SizeInput value={penSize} onChange={setPenSize} color={penColor}/>
-        </div>
         <CapsLockIdentifier capsLockPressed={capsLockPressed}/>
         <ThemeSwitcher
             setIsDark={setIsDark}

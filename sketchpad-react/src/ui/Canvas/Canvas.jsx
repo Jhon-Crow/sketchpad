@@ -50,7 +50,7 @@ const Canvas = ({fontColor, lineColor, lineSize, fontFamily, fontSize, isLight, 
         countIndexesArray();
     },[fontColor])
 
-    //TODO при изменении сайза ломается вторая строка
+
     useEffect(() => {
         textX = 10;
         textY = fontSize * 1.5;
@@ -59,7 +59,6 @@ const Canvas = ({fontColor, lineColor, lineSize, fontFamily, fontSize, isLight, 
         textWrapLimit = canvas.width / (fontSize * 1.5);
         linesLimit = window.innerHeight / (fontSize * 1.5);
         updateTextOnCanvas(ctx);
-        console.log(textY, textX)
     }, [fontSize]);
 
     function countIndexesArray(){
@@ -179,7 +178,6 @@ const Canvas = ({fontColor, lineColor, lineSize, fontFamily, fontSize, isLight, 
     function onKeyDownSwitch(e) {
         getCapsLockPressed(e.getModifierState('CapsLock'));
         if (e.ctrlKey) {
-           // console.log(e.keyCode) //<-37       ->39
             switch (e.keyCode) {
                 case 37:
                     ctrlArrowJumpAction('left');
@@ -460,7 +458,6 @@ const Canvas = ({fontColor, lineColor, lineSize, fontFamily, fontSize, isLight, 
     }
 
     function ctrlArrowJumpAction (direction){
-        //TODO сделать удаление слова ctrl+del/bckspce
         let currentLine = lines(caretPosition.line);
         let wordEndIndex;
         if (direction === 'left'){

@@ -1,7 +1,7 @@
 {
-  "name": "sketchpad-react",
+  "name": "canvas-start",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -36,8 +36,10 @@
     "eslint-plugin-storybook": "^0.8.0",
     "globals": "^15.9.0",
     "prop-types": "^15.8.1",
+    "sass-embedded": "^1.80.3",
     "storybook": "^8.3.3",
-    "vite": "^5.4.1"
+    "vite": "^5.4.1",
+    "vite-plugin-svgr": "^4.2.0"
   },
   "eslintConfig": {
     "extends": [

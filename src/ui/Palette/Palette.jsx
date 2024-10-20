@@ -54,7 +54,7 @@ const Palette = ({setPenColor, setFontColor}) => {
     }, [selectedColors, paletteColors]);
 
     useEffect(() => {
-        if (paletteColors.length === 8) saveToLocalStorage(paletteColors, LOCALSTORAGE_SKETCHPAD_COLORS);
+        if (paletteColors.length === 8 && !paletteColors.includes('')) saveToLocalStorage(paletteColors, LOCALSTORAGE_SKETCHPAD_COLORS);
         if (selectedColors.length === 2) saveToLocalStorage(selectedColors, SKETCHPAD_SELECTED_COLORS);
     },[localStorageState]);
 

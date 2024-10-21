@@ -1,0 +1,24 @@
+.CapsLockIdentifier {
+  pointer-events: none;
+  cursor: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 1.75rem;
+  border: 0.0625rem solid var(--canvas-color);
+  color: var(--icon-color);
+  font-family: "Inter", system-ui;
+  background-color: inherit;
+  width: 10.193125rem;
+  height: 4.41625rem;
+  letter-spacing: 0.01875rem;
+
+  .span {
+    font-weight: 700;
+    font-size: 1.25rem;
+  }
+  .paragraph{
+    font-weight: 700;
+    font-size: 0.75rem;
+  }
+}

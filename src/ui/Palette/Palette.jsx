@@ -7,7 +7,12 @@ import {getFromLocalStorage} from "../../helpers/getFromLocalStorage.js";
 import {LOCALSTORAGE_SKETCHPAD_COLORS, SKETCHPAD_SELECTED_COLORS} from "../../app/const/localStorage.js";
 import {saveToLocalStorage} from "../../helpers/saveToLocalStorage.js";
 
-const namesColorsFromScss = ['--default-red', '--default-blue', '--default-black', '--default-green'];
+const initColors = [
+    "#EB402B","#EB402B",
+    "#375891","#375891",
+    "#000000","#000000",
+    "#377D5E","#377D5E"
+];
 
 const Palette = ({setPenColor, setFontColor}) => {
     const [paletteColors, setPaletteColors] = useState([]);
@@ -19,18 +24,8 @@ const Palette = ({setPenColor, setFontColor}) => {
     useEffect(() => {
     let writeColors;
         if (!getFromLocalStorage(LOCALSTORAGE_SKETCHPAD_COLORS)) {
-            let colorsFromScss = [];
-            const appElement = document.querySelector('.App') || document.querySelector('body');
-            if (appElement){
-                colorsFromScss = namesColorsFromScss.map((name) => getComputedStyle(appElement).getPropertyValue(name));
-                colorsFromScss = [...colorsFromScss, ...colorsFromScss];
-                if (!colorsFromScss.includes('')) {
-                    saveToLocalStorage(colorsFromScss, LOCALSTORAGE_SKETCHPAD_COLORS);
-                }
-                writeColors = colorsFromScss;
-            } else {
-                console.error('not appElement')
-            }
+            saveToLocalStorage(initColors, LOCALSTORAGE_SKETCHPAD_COLORS);
+            writeColors = initColors;
         } else {
             writeColors = getFromLocalStorage(LOCALSTORAGE_SKETCHPAD_COLORS);
         }

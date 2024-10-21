@@ -4,6 +4,7 @@ import react from '@vitejs/plugin-react'
 
 // https://vitejs.dev/config/
 export default defineConfig({
+  base: "/canvas-start",
   plugins: [
     svgr({
       svgrOptions: {
@@ -12,5 +13,4 @@ export default defineConfig({
     }),
     react(),
   ],
-  base: "/canvas-start/",
 })

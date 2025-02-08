@@ -54,7 +54,14 @@ function App() {
         <ThemeSwitcher
             setIsDark={setIsDark}
             isDark={isDark}/>
-        <Canvas getCapsLockPressed={setCapsLockPressed} isLight={isDark} fontColor={fontColor} lineColor={penColor} lineSize={penSize} fontFamily={fontsDefault[fontFamily].content} fontSize={fontSize}/>
+        <Canvas
+            getCapsLockPressed={setCapsLockPressed}
+            isLight={isDark}
+            fontColor={fontColor}
+            lineColor={penColor}
+            lineSize={penSize}
+            fontFamily={fontsDefault[fontFamily].content}
+            fontSize={fontSize}/>
     </div>
   )
 }

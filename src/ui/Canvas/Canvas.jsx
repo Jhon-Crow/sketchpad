@@ -20,8 +20,19 @@ let textWrapLimit;
 
 let caretPosition = { line: 0, character: 0 };
 
-const Canvas = ({fontColor, lineColor, lineSize, fontFamily, fontSize, isLight, getCapsLockPressed}) => {
+const Canvas = ({
+                    fontColor,
+                    lineColor,
+                    lineSize,
+                    fontFamily,
+                    fontSize,
+                    isLight,
+                    getCapsLockPressed}) => {
     const [colorAndIndex, setColorAndIndex] = useState([{index: 0, color: fontColor}]);
+    const [canvasDimensions, setCanvasDimensions] = useState({
+        width: window.innerWidth,
+        height: window.innerHeight,
+    });
     const canvasRef = useRef(null);
     let canvasData;
     let link;
@@ -39,17 +50,31 @@ const Canvas = ({fontColor, lineColor, lineSize, fontFamily, fontSize, isLight, 
     useEffect(() => {
         canvas = canvasRef.current;
         ctx = canvas.getContext('2d');
-        canvas.width = window.innerWidth / 1.32;
-        canvas.height = window.innerHeight / 1.05;
+        canvas.width = canvasDimensions.width / 1.32;
+        canvas.height = canvasDimensions.height / 1.05;
         textWrapLimit = canvas.width / 6.5;
         updateTextOnCanvas(ctx);
         canvas.focus();
-    }, [isLight])
+    }, [isLight, canvasDimensions])
+
+    useEffect(() => {
+        const handleResize = () => {
+            setCanvasDimensions({
+                width: window.innerWidth,
+                height: window.innerHeight,
+            });
+        };
+
+        window.addEventListener('resize', handleResize);
+
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
 
     useEffect(() => {
         countIndexesArray();
     },[fontColor])
-
 
     useEffect(() => {
         textX = 10;

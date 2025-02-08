@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import cls from './Palette.module.scss'
 import FontCase from '../../assets/Icon/font-case.svg?react'
 import PenNib from '../../assets/Icon/pen-nib.svg?react'
@@ -53,7 +53,7 @@ const Palette = ({setPenColor, setFontColor}) => {
         if (selectedColors.length === 2) saveToLocalStorage(selectedColors, SKETCHPAD_SELECTED_COLORS);
     },[localStorageState]);
 
-    const onChangeHandler = (event) => {
+    const onChangeHandler = useCallback((event) => {
         const newColor = event.target.value;
         const clicked = event.target.parentNode.id;
         setPaletteColors((prevPaletteColors) => {
@@ -61,9 +61,9 @@ const Palette = ({setPenColor, setFontColor}) => {
             newPaletteColors[clicked] = newColor;
             return newPaletteColors;
         })
-    };
+    },[]);
 
-    const onClickSelectHandler = (event) => {
+    const onClickSelectHandler = useCallback((event) => {
         const clicked = event.target.parentNode.id;
         const column = clicked % 2;
         setSelectedColors((prevSelectedColors) => {
@@ -71,7 +71,7 @@ const Palette = ({setPenColor, setFontColor}) => {
             newSelectedColors[column] = clicked - 0;
             return newSelectedColors;
         });
-    };
+    },[]);
 
     useEffect(() => {
         setPenColor(selectedPen);
@@ -83,7 +83,16 @@ const Palette = ({setPenColor, setFontColor}) => {
             <FontCase fill={selectedFont} width={41} height={41}/>
             <PenNib fill={selectedPen} width={35} height={35}/>
             {
-                paletteColors.map((color, index) => <div key={index} id={index} className={selectedColors.includes(index) ? cls.selected : null}><ColorCell onChangeHandler={onChangeHandler} onDoubleClick={onClickSelectHandler} key={index} initialColor={color}/></div>)
+                paletteColors.map((color, index) => <div
+                    key={index}
+                    id={index}
+                    className={
+                    selectedColors.includes(index) ? cls.selected : null
+                }><ColorCell
+                    onChangeHandler={onChangeHandler}
+                    onClick={onClickSelectHandler}
+                    key={index}
+                    initialColor={color}/></div>)
             }
         </div>
     );

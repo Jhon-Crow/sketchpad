@@ -1,31 +1,29 @@
-import React, {useState} from 'react';
+import React, {memo, useCallback, useState} from 'react';
 import cls from './ColorCell.module.scss'
 
-const ColorCell = ({initialColor, onDoubleClick, onChangeHandler}) => {
-    // const [color, setColor] = useState(initialColor);
-    // const [disabled, setDisabled] = useState(true)
-    // const onChangeHandler = (event) => {
-    //     const newColor = event.target.value;
-    //     setColor(newColor);
-    // };
-
-    // const enableOnClickHandler = (event) => {
-    //     if (disabled){
-    //         event.preventDefault();
-    //         setDisabled(false);
-    //     } else {
-    //         setDisabled(true);
-    //     }
-    // };
-
-
-
+const ColorCell = memo(({initialColor, onClick, onChangeHandler}) => {
+    const [disabled, setDisabled] = useState(true);
+    const enableOnClickHandler = useCallback((event) => {
+        if (disabled){
+            event.preventDefault();
+            setDisabled(false);
+            onClick(event);
+            setTimeout(() => {
+                setDisabled(true)
+            }, 1000)
+        } else {
+            setDisabled(true);
+        }
+    },[onClick, disabled]);
 
     return (
-            <input onDoubleClick={onDoubleClick}
-                   // onClick={enableOnClickHandler}
-                   onChange={onChangeHandler} value={initialColor} className={cls.ColorCell} type={"color"} />
+            <input
+                onClick={enableOnClickHandler}
+                onChange={onChangeHandler}
+                value={initialColor}
+                className={cls.ColorCell}
+                type={"color"} />
            );
-};
+});
 
 export default ColorCell;

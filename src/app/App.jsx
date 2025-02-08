@@ -41,10 +41,11 @@ function App() {
 
   return (
     <div className={cls.App}>
-        <Select
-            value={fontFamily}
-            onChange={setFontFamily}
-            options={fontsDefault} fontColor={fontColor}/>
+        {/*TODO удалить при релизе*/}
+        {/*<Select*/}
+        {/*    value={fontFamily}*/}
+        {/*    onChange={setFontFamily}*/}
+        {/*    options={fontsDefault} fontColor={fontColor}/>*/}
         <Palette
             setPenColor={setPenColor}
             setFontColor={setFontColor}

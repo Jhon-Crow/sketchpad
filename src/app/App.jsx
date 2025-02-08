@@ -55,7 +55,7 @@ function App() {
             setIsDark={setIsDark}
             isDark={isDark}/>
         <Canvas
-            getCapsLockPressed={setCapsLockPressed}
+            setCapsLockPressed={setCapsLockPressed}
             isLight={isDark}
             fontColor={fontColor}
             lineColor={penColor}

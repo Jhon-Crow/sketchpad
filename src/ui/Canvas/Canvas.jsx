@@ -27,7 +27,7 @@ const Canvas = ({
                     fontFamily,
                     fontSize,
                     isLight,
-                    getCapsLockPressed}) => {
+                    setCapsLockPressed}) => {
     const [colorAndIndex, setColorAndIndex] = useState([{index: 0, color: fontColor}]);
     const [canvasDimensions, setCanvasDimensions] = useState({
         width: window.innerWidth,
@@ -197,21 +197,31 @@ const Canvas = ({
         if (textHistory[textHistoryIndex].colorAndIndex[0].color !== 'default'){
             setColorAndIndex(textHistory[textHistoryIndex].colorAndIndex);
         }
-
     }
 
     function onKeyDownSwitch(e) {
-        getCapsLockPressed(e.getModifierState('CapsLock'));
+        setCapsLockPressed(e.getModifierState('CapsLock'));
         if (e.ctrlKey) {
-            switch (e.keyCode) {
-                case 37:
-                    ctrlArrowJumpAction('left');
-                    break;
-                case 39:
-                    ctrlArrowJumpAction('right');
-                    break;
-                case 86:
-                    if (lines().length > linesLimit - 1){
+            withCtrlSwitchCase(e.keyCode, e);
+        } else {
+            ctrllessSwitchCase(e.key, e)
+        }
+        updateTextOnCanvas(ctx);
+    }
+
+    function withCtrlSwitchCase(eKeyCode, e){
+        const keyCodes = {
+            37: () => ctrlArrowJumpAction('left'),
+            39: () => ctrlArrowJumpAction('right'),
+            86: () => ctrlVAction(e),
+            90: () => ctrlZAction(e),
+            89: () => ctrlYAction(e)
+        }
+        return keyCodes[eKeyCode] ? keyCodes[eKeyCode]() : null;
+    }
+
+    function ctrlVAction(e){
+        if (lines().length > linesLimit - 1){
                         e.stopPropagation();
                         e.preventDefault();
                         alert('no space on page!\n' +
@@ -219,66 +229,56 @@ const Canvas = ({
                     } else {
                         pastText(saveToHistory);
                     }
-                    break;
-                case 90 :
-                    if ((coords.length && coordsDisabled.length < coordsDisabledLimit) && e.getModifierState('CapsLock')){
+    }
+
+    function ctrlZAction(e) {
+        if ((coords.length && coordsDisabled.length < coordsDisabledLimit) && e.getModifierState('CapsLock')){
                         coordsDisabled.push(coords?.pop());
                     } else if (textHistoryIndex > 0 && !e.getModifierState('CapsLock')) {
                         textHistoryIndex--;
                         loadFromHistory(textHistoryIndex);
                     }
-                    break;
-                case 89:
-                    if (coordsDisabled.length && e.getModifierState('CapsLock')){
-                        coords?.push(coordsDisabled?.pop());
-                    } else if (textHistoryIndex < textHistory.length - 1 && !e.getModifierState('CapsLock')) {
-                        textHistoryIndex++;
-                        loadFromHistory(textHistoryIndex);
-                    }
-                    break;
-                default:
-                    break;
-            }
-        } else {
-            switch (e.key) {
-                case 'Enter':
-                    checkLinesLimit(enterKeyAction);
-                    break;
-                case 'Tab':
-                    e.preventDefault();
-                    checkLinesLimit(onTabAction);
-                    break;
-                case 'Backspace':
-                    deleteCharacter('backspace');
-                    saveToHistory();
-                    break;
-                case 'Delete':
-                    deleteCharacter('delete');
-                    saveToHistory();
-                    break;
-                case 'ArrowLeft':
-                    caretMoveLeft();
-                    break;
-                case 'ArrowRight':
-                    caretMoveRight();
-                    break;
-                case 'ArrowUp':
-                    caretMoveUp();
-                    break;
-                case 'ArrowDown':
-                    caretMoveDown();
-                    break;
-                default:
-                    if (!keysDontPrint.includes(e.key)) {
-                        if (checkLinesLimit()) {
-                            addLetter(e.key);
-                            saveToHistory();
-                        }
-                    }
-                    break;
+    }
+
+    function ctrlYAction(e) {
+        if (coordsDisabled.length && e.getModifierState('CapsLock')){
+                    coords?.push(coordsDisabled?.pop());
+                } else if (textHistoryIndex < textHistory.length - 1 && !e.getModifierState('CapsLock')) {
+                    textHistoryIndex++;
+                    loadFromHistory(textHistoryIndex);
+                }
+    }
+
+    function ctrllessSwitchCase(eKey, e) {
+        const keys = {
+            Enter: () => checkLinesLimit(enterKeyAction),
+            Tab: () => {
+                e.preventDefault();
+                checkLinesLimit(onTabAction);
+            },
+            ArrowLeft: () => caretMoveLeft(),
+            ArrowRight: () => caretMoveRight(),
+            ArrowUp: () => caretMoveUp(),
+            ArrowDown: () => caretMoveDown(),
+            Backspace: () => {
+                deleteCharacter('backspace');
+                saveToHistory();
+            },
+            Delete: () => {
+                deleteCharacter('delete');
+                saveToHistory();
             }
         }
-        updateTextOnCanvas(ctx);
+        return keys[eKey] ? keys[eKey]() : defaultKeyPressCase(eKey)
+    }
+
+    function defaultKeyPressCase(eKey){
+        if (!keysDontPrint.includes(eKey)) {
+            if (checkLinesLimit()) {
+                addLetter(eKey);
+                saveToHistory();
+            }
+        }
     }
 
 

@@ -64,7 +64,6 @@ const Canvas = ({
             fontFamily,
             textY,
             textX,
-            // colorAndIndex,
             isDrawing,
             redraw,
             calculateCaretPosition,
@@ -178,6 +177,8 @@ const Canvas = ({
         } else {
             ctrllessSwitchCase(e.key, e)
         }
+        calculateCaretPosition()
+
         updateTextOnCanvas(
             textArr,
             ctx,
@@ -187,7 +188,6 @@ const Canvas = ({
             fontFamily,
             textY,
             textX,
-            // colorAndIndex,
             isDrawing,
             redraw,
             calculateCaretPosition,
@@ -400,6 +400,7 @@ const Canvas = ({
             currentLine = newLine;
             caretPosition.character++;
         }
+        // calculateCaretPosition()
     }
 
     function onTabAction(){
@@ -407,9 +408,48 @@ const Canvas = ({
         caretPosition.character += 3;
     }
 
+    // function deleteCharacter(direction) {
+    //     console.log('deleteCharacter, direction = ', direction)
+    // }
+
     function deleteCharacter(direction) {
-        console.log('deleteCharacter, direction = ', direction)
+        let currentLine = textArrToLines(textArr, caretPosition.line);
+
+        if (direction === 'backspace') {
+            // Удаление символа перед кареткой
+            if (caretPosition.character > 0) {
+                // Формируем текст до и после позиции каретки
+                let newLine = currentLine.substring(0, caretPosition.character - 1) + currentLine.substring(caretPosition.character);
+                let newLines = textArrToLines(textArr).map((line, index) => index === caretPosition.line ? newLine : line);
+                textArr = newLines.map((line, index) => ({ text: line, color: textArr[index]?.color || 'default' })); // Сохраняем цвет
+
+                caretPosition.character--; // Уменьшаем позицию каретки
+            } else if (caretPosition.line > 0) {
+                // Объединяем текущую строку с предыдущей
+                let previousLine = textArrToLines(textArr, caretPosition.line - 1);
+                let newPreviousLine = previousLine + currentLine; // Объединяем строки
+                let newLines = textArrToLines(textArr).map((line, index) => index === caretPosition.line - 1 ? newPreviousLine : (index === caretPosition.line ? '' : line));
+                textArr = newLines.map((line, index) => ({ text: line, color: textArr[index]?.color || 'default' })); // Сохраняем цвет
+
+                caretPosition.line--; // Переход к предыдущей строке
+                caretPosition.character = newPreviousLine.length; // Устанавливаем позицию каретки в конец новой строки
+            }
+        } else if (direction === 'delete') {
+            // Удаление символа под кареткой
+            if (caretPosition.character < currentLine.length) {
+                let newLine = currentLine.substring(0, caretPosition.character) + currentLine.substring(caretPosition.character + 1);
+                let newLines = textArrToLines(textArr).map((line, index) => index === caretPosition.line ? newLine : line);
+                textArr = newLines.map((line, index) => ({ text: line, color: textArr[index]?.color || 'default' })); // Сохраняем цвет
+            } else if (caretPosition.line < textArrToLines(textArr).length - 1) {
+                // Объединяем текущую строку с следующей
+                let nextLine = textArrToLines(textArr, caretPosition.line + 1);
+                let newCurrentLine = currentLine + nextLine; // Объединяем строки
+                let newLines = textArrToLines(textArr).map((line, index) => index === caretPosition.line ? newCurrentLine : (index === caretPosition.line + 1 ? '' : line));
+                textArr = newLines.map((line, index) => ({ text: line, color: textArr[index]?.color || 'default' })); // Сохраняем цвет
+            }
+        }
     }
+
 
 
     // todo it
@@ -484,6 +524,7 @@ const Canvas = ({
         let caretMeasurement = ctx.measureText(currentLine.substring(0, caretPosition.character));
         caretX = textX + caretMeasurement.width;
         caretY = textY + (fontSize + 5) * caretPosition.line;
+        console.log(caretY, caretX)
     }
 
     function pastText(callback){

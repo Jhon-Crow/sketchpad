@@ -14,6 +14,7 @@ import {textArrToLines} from "./textArrToLines.js";
         }
     }
 
+
 export function updateTextOnCanvas(
     textArr,
     ctx,
@@ -36,25 +37,14 @@ export function updateTextOnCanvas(
     }
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
     drawBg(ctx);
 
     ctx.font = fontSize + 'px ' + fontFamily;
-    // todo
 
+    // Получаем массив строк и массив цветов
     let lines = textArrToLines(textArr);
-    let colors = textArr.map(i => i.color);
-    // console.log(colors, lines)
-    // let textObjs = textArr
-    // console.log(textObjs)
+    let colors = textArr.flatMap(item => item.text.split('').map(() => item.color)); // Получаем массив цветов для каждого символа
 
-    // let lines = textArr
-    //     .map(item => item.text)
-    //     .join(' ')
-    //     .split('\n')
-    //     .map(item => item.trim())
-    // console.log(lines)
-    // let lines = text.split('\n');
 
     let y = textY;
     let countText = 0;
@@ -62,32 +52,27 @@ export function updateTextOnCanvas(
 
     for (let i = 0; i < lines.length; i++) {
         let x = textX;
-        for (let j = 0; j < lines[i].length; j++) {
 
-            // todo переписать логику цвета
-            // if (!colorAndIndex[checkIndex] || countText < colorAndIndex[checkIndex].index){
-            //     ctx.fillStyle = colorAndIndex[checkIndex - 1].color;
-            // } else if (countText >= colorAndIndex[checkIndex].index){
-            //     ctx.fillStyle = colorAndIndex[checkIndex].color;
-            //     checkIndex++;
-            // }
-            // ctx.fillStyle = fontColor;
+        for (let j = 0; j < lines[i].length; j++) {
+            // Устанавливаем цвет для текущего символа
             ctx.fillStyle = colors[checkIndex];
-            // console.log(colors.length, checkIndex)
+
+            // Рисуем символ
             ctx.fillText(lines[i][j], x, y);
             let charWidth = ctx.measureText(lines[i][j]).width;
-            x += charWidth;
-            checkIndex++;
+            x += charWidth; // Смещаем x для следующего символа
+            checkIndex++; // Увеличиваем индекс цвета
             countText++;
         }
-        // console.log(checkIndex, colors.length)
 
-        y += fontSize + 5;
+        y += fontSize + 5; // Переход на следующую строку
     }
+
     if (!isDrawing) {
+        // console.log(caretX, caretY)
         calculateCaretPosition();
         ctx.fillStyle = fontColor;
-        ctx.fillRect(caretX, caretY - fontSize, 1, fontSize);
+        ctx.fillRect(caretX, caretY - fontSize, 1, fontSize); // Рисуем каретку
     }
     redraw();
 }

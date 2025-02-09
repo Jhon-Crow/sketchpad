@@ -524,7 +524,6 @@ const Canvas = ({
         let caretMeasurement = ctx.measureText(currentLine.substring(0, caretPosition.character));
         caretX = textX + caretMeasurement.width;
         caretY = textY + (fontSize + 5) * caretPosition.line;
-        console.log(caretY, caretX)
     }
 
     function pastText(callback){

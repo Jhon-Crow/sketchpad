@@ -1,14 +1,17 @@
 import React, {useEffect, useRef, useState} from 'react';
 import cls from './Canvas.module.scss'
 import SaveButton from "../SaveButton/SaveButton.jsx";
+import {checkLinesLimit, updateTextOnCanvas} from "./functions/updateTextOnCanvas.js";
+import {textArrToLines} from "./functions/textArrToLines.js";
 
 let canvas;
 let ctx;
 const coords = [];
 const coordsDisabled = [];
-let text = '';
 
-const textHistory = [{'text': '', 'caretPosition': {line: 0, character: 0}, 'colorAndIndex': [{index: 0, color: 'default'}]}];
+let textArr = [];
+
+const textHistory = [{'text': '', 'caretPosition': {line: 0, character: 0} }];
 let textHistoryIndex = 0;
 const keysDontPrint = ['Tab', 'Shift', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'F12', 'F5', 'CapsLock', 'Meta'];
 
@@ -28,7 +31,6 @@ const Canvas = ({
                     fontSize,
                     isLight,
                     setCapsLockPressed}) => {
-    const [colorAndIndex, setColorAndIndex] = useState([{index: 0, color: fontColor}]);
     const [canvasDimensions, setCanvasDimensions] = useState({
         width: window.innerWidth,
         height: window.innerHeight,
@@ -42,10 +44,10 @@ const Canvas = ({
 
     let linesLimit = window.innerHeight / (fontSize * 1.5);
 
-    const drawBg = (ctx) => {
-        ctx.fillStyle = isLight ? '#F2F0E7FF' : '#2A2A2B';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-    }
+    // const drawBg = (ctx) => {
+    //     ctx.fillStyle = isLight ? '#F2F0E7FF' : '#2A2A2B';
+    //     ctx.fillRect(0, 0, canvas.width, canvas.height);
+    // }
 
     useEffect(() => {
         canvas = canvasRef.current;
@@ -53,7 +55,22 @@ const Canvas = ({
         canvas.width = canvasDimensions.width / 1.32;
         canvas.height = canvasDimensions.height / 1.05;
         textWrapLimit = canvas.width / 6.5;
-        updateTextOnCanvas(ctx);
+        updateTextOnCanvas(
+            textArr,
+            ctx,
+            canvas,
+            isLight,
+            fontSize,
+            fontFamily,
+            textY,
+            textX,
+            // colorAndIndex,
+            isDrawing,
+            redraw,
+            calculateCaretPosition,
+            caretX,
+            caretY,
+            fontColor);
         canvas.focus();
     }, [isLight, canvasDimensions])
 
@@ -73,81 +90,31 @@ const Canvas = ({
     }, []);
 
     useEffect(() => {
-        countIndexesArray();
-    },[fontColor])
-
-    useEffect(() => {
         textX = 10;
         textY = fontSize * 1.5;
         caretX = textX;
         caretY = textY;
         textWrapLimit = canvas.width / (fontSize * 1.5);
         linesLimit = window.innerHeight / (fontSize * 1.5);
-        updateTextOnCanvas(ctx);
+        updateTextOnCanvas(
+            textArr,
+            ctx,
+            canvas,
+            isLight,
+            fontSize,
+            fontFamily,
+            textY,
+            textX,
+            // colorAndIndex,
+            isDrawing,
+            redraw,
+            calculateCaretPosition,
+            caretX,
+            caretY,
+            fontColor);
     }, [fontSize]);
 
-    function countIndexesArray(){
-        if (text.length > colorAndIndex[colorAndIndex.length-1].index && colorAndIndex[colorAndIndex.length-1].color !== fontColor) {
-            colorAndIndex.push({index: text.length, color: fontColor});
-        }
-        if (text.length === colorAndIndex[colorAndIndex.length-1].index && colorAndIndex[colorAndIndex.length-1].color !== fontColor){
-            if (colorAndIndex[colorAndIndex.length-2] && colorAndIndex[colorAndIndex.length-2].color === fontColor){
-                colorAndIndex.pop();
-            } else {
-                colorAndIndex[colorAndIndex.length-1].color = fontColor;
-            }
-        }
-        for (let i = 0; i < colorAndIndex.length; i++){
-            if (colorAndIndex[i].color === colorAndIndex[i+1]?.color){
-                colorAndIndex.splice(i + 1, 1);
-            }
-            if (colorAndIndex[i + 1]?.index === colorAndIndex[i].index){
-                colorAndIndex.splice(i, 1);
-            }
-        }
-    }
-
-    function updateTextOnCanvas(ctx) {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        drawBg(ctx);
-        ctx.font = fontSize + 'px ' + fontFamily;
-        let lines = text.split('\n');
-        let y = textY;
-        let countText = 0;
-        let checkIndex = 1;
-        for (let i = 0; i < lines.length; i++) {
-            let x = textX;
-            for (let j = 0; j < lines[i].length; j++) {
-                if (!colorAndIndex[checkIndex] || countText < colorAndIndex[checkIndex].index){
-                    ctx.fillStyle = colorAndIndex[checkIndex - 1].color;
-                } else if (countText >= colorAndIndex[checkIndex].index){
-                    ctx.fillStyle = colorAndIndex[checkIndex].color;
-                    checkIndex++;
-                }
-                ctx.fillText(lines[i][j], x, y);
-                let charWidth = ctx.measureText(lines[i][j]).width;
-                x += charWidth;
-                countText ++;
-            }
-            y += fontSize + 5;
-        }
-        if (!isDrawing) {
-            calculateCaretPosition();
-            ctx.fillStyle = fontColor;
-            ctx.fillRect(caretX, caretY - fontSize, 1, fontSize);
-        }
-        redraw();
-    }
-
-    function calculateCaretPosition() {
-        let lines = text.split('\n');
-        let currentLine = lines[caretPosition.line] || '';
-        let caretMeasurement = ctx.measureText(currentLine.substring(0, caretPosition.character));
-        caretX = textX + caretMeasurement.width;
-        caretY = textY + (fontSize + 5) * caretPosition.line;
-    }
-
-    function redraw() {
+   function redraw() {
         ctx.beginPath();
         coords.forEach(function(coord) {
             if (coord === 'brake') {
@@ -191,13 +158,18 @@ const Canvas = ({
         }
     }
 
+
     function loadFromHistory(textHistoryIndex){
-        text = textHistory[textHistoryIndex].text;
-        caretPosition = textHistory[textHistoryIndex].caretPosition;
-        if (textHistory[textHistoryIndex].colorAndIndex[0].color !== 'default'){
-            setColorAndIndex(textHistory[textHistoryIndex].colorAndIndex);
-        }
+        console.log('loadFromHistory, textHistoryIndex = ',textHistoryIndex )
     }
+    // todo it
+    // function loadFromHistory(textHistoryIndex){
+    //     text = textHistory[textHistoryIndex].text;
+    //     caretPosition = textHistory[textHistoryIndex].caretPosition;
+    //     if (textHistory[textHistoryIndex].colorAndIndex[0].color !== 'default'){
+    //         setColorAndIndex(textHistory[textHistoryIndex].colorAndIndex);
+    //     }
+    // }
 
     function onKeyDownSwitch(e) {
         setCapsLockPressed(e.getModifierState('CapsLock'));
@@ -206,7 +178,22 @@ const Canvas = ({
         } else {
             ctrllessSwitchCase(e.key, e)
         }
-        updateTextOnCanvas(ctx);
+        updateTextOnCanvas(
+            textArr,
+            ctx,
+            canvas,
+            isLight,
+            fontSize,
+            fontFamily,
+            textY,
+            textX,
+            // colorAndIndex,
+            isDrawing,
+            redraw,
+            calculateCaretPosition,
+            caretX,
+            caretY,
+            fontColor);
     }
 
     function withCtrlSwitchCase(eKeyCode, e){
@@ -221,7 +208,7 @@ const Canvas = ({
     }
 
     function ctrlVAction(e){
-        if (lines().length > linesLimit - 1){
+        if (textArrToLines(textArr).length > linesLimit - 1){
                         e.stopPropagation();
                         e.preventDefault();
                         alert('no space on page!\n' +
@@ -251,10 +238,10 @@ const Canvas = ({
 
     function ctrllessSwitchCase(eKey, e) {
         const keys = {
-            Enter: () => checkLinesLimit(enterKeyAction),
+            Enter: () => checkLinesLimit(enterKeyAction,textArr, saveToHistory, linesLimit),
             Tab: () => {
                 e.preventDefault();
-                checkLinesLimit(onTabAction);
+                checkLinesLimit(onTabAction,textArr, saveToHistory, linesLimit);
             },
             ArrowLeft: () => caretMoveLeft(),
             ArrowRight: () => caretMoveRight(),
@@ -273,32 +260,39 @@ const Canvas = ({
     }
 
     function defaultKeyPressCase(eKey){
-        if (!keysDontPrint.includes(eKey)) {
-            if (checkLinesLimit()) {
+        if (!keysDontPrint.includes(eKey) && checkLinesLimit(null,textArr, saveToHistory, linesLimit)) {
                 addLetter(eKey);
                 saveToHistory();
-            }
         }
     }
 
-
-    function checkLinesLimit(action) {
-        if (lines().length > linesLimit - 1) {
-            alert('no space on page!\n' +
-                'input blocked');
-            return false;
-        } else {
-            if (action){
-                action();
-                saveToHistory();
-            }
-            return true;
-        }
-    }
+//todo it
+//     function checkLinesLimit(action) {
+//         if (textArrToLines(textArr).length > linesLimit - 1) {
+//             alert('no space on page!\n' +
+//                 'input blocked');
+//             return false;
+//         } else {
+//             if (action){
+//                 action();
+//                 saveToHistory();
+//             }
+//             return true;
+//         }
+//     }
 
     function saveToHistory(){
-        textHistory.push({text: text, caretPosition: {line: caretPosition.line, character: caretPosition.character}, colorAndIndex: [...colorAndIndex]});
+        textHistory.push({
+            // todo возможно тут нужно будет кастовать в строку
+            text: textArr,
+            caretPosition: {
+                line: caretPosition.line,
+                character: caretPosition.character
+            }
+            // ,colorAndIndex: [...colorAndIndex]
+        });
         textHistoryIndex++;
+        // console.log(textHistory)
     }
 
     function caretMoveLeft() {
@@ -306,14 +300,14 @@ const Canvas = ({
             caretPosition.character--;
         } else if (caretPosition.line > 0) {
             caretPosition.line--;
-            caretPosition.character = lines(caretPosition.line).length;
+            caretPosition.character = textArrToLines(textArr, caretPosition.line).length;
         }
     }
 
     function caretMoveRight() {
-        if (caretPosition.character < lines(caretPosition.line).length) {
+        if (caretPosition.character < textArrToLines(textArr, caretPosition.line).length) {
             caretPosition.character++;
-        } else if (caretPosition.line < lines().length - 1) {
+        } else if (caretPosition.line < textArrToLines(textArr).length - 1) {
             caretPosition.line++;
             caretPosition.character = 0;
         }
@@ -322,71 +316,87 @@ const Canvas = ({
     function caretMoveUp() {
         if (caretPosition.line > 0) {
             caretPosition.line--;
-            caretPosition.character = Math.min(caretPosition.character, lines(caretPosition.line).length);
+            caretPosition.character = Math.min(caretPosition.character, textArrToLines(textArr, caretPosition.line).length);
         }
     }
 
     function caretMoveDown() {
-        if (caretPosition.line < lines().length - 1) {
+        if (caretPosition.line < textArrToLines(textArr).length - 1) {
             caretPosition.line++;
-            caretPosition.character = Math.min(caretPosition.character, lines(caretPosition.line).length);
+            caretPosition.character = Math.min(caretPosition.character, textArrToLines(textArr, caretPosition.line).length);
         }
     }
 
     function addLetter(letter){
         let newLine;
         let newLines;
-        let currentLine = lines(caretPosition.line);
+        let currentLine = textArrToLines(textArr, caretPosition.line);
 
-        let txt = '';
-        for (let i = 0; i <= caretPosition.line; i++){
-            if (lines(i) === currentLine){
-                txt += currentLine.substring(0, caretPosition.character)
-            } else {
-                txt += lines(i)
-            }
-        }
 
-        let worked = 0;
-        for (let i = 0; i < colorAndIndex.length; i++){
-            if (colorAndIndex[i].index <= txt.length && colorAndIndex[i + 1]
-                && !(colorAndIndex[i + 1].index <= txt.length)
-            ) {
-                if (colorAndIndex[i].color !== fontColor && !worked){
-                    colorAndIndex.splice(i + 1, 0, {index: txt.length, color: fontColor});
-                    colorAndIndex.splice(i + 2, 0, {...colorAndIndex[i], index: colorAndIndex[i+1].index + 1});
-                    colorAndIndex[i+3].index++;
-                    worked = 1;
-                } else if (!worked){
-                    colorAndIndex[i+1].index++;
-                    worked = 1;
-                }
-                countIndexesArray();
-            }
-        }
-        worked = 0;
+        // let txt = '';
+        // for (let i = 0; i <= caretPosition.line; i++){
+        //     if (textArrToLines(textArr, i) === currentLine){
+        //         txt += currentLine.substring(0, caretPosition.character)
+        //     } else {
+        //         txt += textArrToLines(textArr, i)
+        //     }
+        // }
+
+        // let worked = 0;
+        // for (let i = 0; i < colorAndIndex.length; i++){
+        //     if (colorAndIndex[i].index <= txt.length && colorAndIndex[i + 1]
+        //         && !(colorAndIndex[i + 1].index <= txt.length)
+        //     ) {
+        //         if (colorAndIndex[i].color !== fontColor && !worked){
+        //             colorAndIndex.splice(i + 1, 0, {index: txt.length, color: fontColor});
+        //             colorAndIndex.splice(i + 2, 0, {...colorAndIndex[i], index: colorAndIndex[i+1].index + 1});
+        //             colorAndIndex[i+3].index++;
+        //             worked = 1;
+        //         } else if (!worked){
+        //             colorAndIndex[i+1].index++;
+        //             worked = 1;
+        //         }
+        //         countIndexesArray();
+        //     }
+        // }
+        // worked = 0;
 
         addLetterOnCaret(letter);
-        for (let i = 0; i < newLines.length; i++){
-            if(newLines[i].length >= textWrapLimit) {
-                newLines[i].split(0, textWrapLimit)
-                if (!newLines[i + 1]){
-                    newLines[i + 1] = newLines[i].substring(textWrapLimit, newLines[i].length)
-                } else {
-                    newLines[i + 1] = newLines[i].substring(textWrapLimit, newLines[i].length) + newLines[i + 1]
-                }
-                if (caretPosition.character > textWrapLimit){
-                    caretPosition.line++;
-                    caretPosition.character = 1;
-                }
-                newLines[i] = newLines[i].substring(0, textWrapLimit);
-            }
-        }
-        text = newLines.join('\n');
 
+
+        // todo добавить проверку на лимит строки
+        // for (let i = 0; i < newLines.length; i++){
+        //     if(newLines[i].length >= textWrapLimit) {
+        //         newLines[i].split(0, textWrapLimit)
+        //         if (!newLines[i + 1]){
+        //             newLines[i + 1] = newLines[i].substring(textWrapLimit, newLines[i].length)
+        //         } else {
+        //             newLines[i + 1] = newLines[i].substring(textWrapLimit, newLines[i].length) + newLines[i + 1]
+        //         }
+        //         if (caretPosition.character > textWrapLimit){
+        //             caretPosition.line++;
+        //             caretPosition.character = 1;
+        //         }
+        //         newLines[i] = newLines[i].substring(0, textWrapLimit);
+        //     }
+        // }
+
+        // let text = newLines.join('\n');
+        // let newArr = [];
+        // for (let i = 0; i < text.length; i++){
+        //     newArr.push({
+        //         text: text[i],
+        //         id: i
+        //     })
+        // }
+        // textArr = newArr;
+
+        // console.log(textArr)
+
+        textArr.push({text: letter, color: fontColor, id: textArr.length})
         function addLetterOnCaret(letter) {
             newLine = currentLine.substring(0, caretPosition.character) + letter + currentLine.substring(caretPosition.character);
-            newLines = lines().map((line, index) => index === caretPosition.line ? newLine : line);
+            newLines = textArrToLines(textArr).map((line, index) => index === caretPosition.line ? newLine : line);
             currentLine = newLine;
             caretPosition.character++;
         }
@@ -398,68 +408,82 @@ const Canvas = ({
     }
 
     function deleteCharacter(direction) {
-        let currentLine = lines(caretPosition.line);
-        if (direction === 'backspace') {
-            if (currentLine.length > 0 && caretPosition.character > 0) {
-                let txt = '';
-                for (let i = 0; i <= caretPosition.line; i++){
-                    if (lines(i) === currentLine){
-                        txt += currentLine.substring(0, caretPosition.character)
-                    } else {
-                        txt += lines(i)
-                    }
-                }
+        console.log('deleteCharacter, direction = ', direction)
+    }
 
-                for (let i = 0; i < colorAndIndex.length; i++){
-                    if (colorAndIndex[i].index <= txt.length && txt.length <= colorAndIndex[i + 1]?.index){
-                        colorAndIndex[i + 1].index--;
-                        countIndexesArray();
-                    }
-                }
 
-                let newLine = currentLine.substring(0, caretPosition.character - 1) + currentLine.substring(caretPosition.character);
-                let newLines = lines().map((line, index) => index === caretPosition.line ? newLine : line);
-                text = newLines.join('\n');
-                caretPosition.character--;
+    // todo it
+    // function deleteCharacter(direction) {
+    //     let currentLine = lines(caretPosition.line);
+    //     if (direction === 'backspace') {
+    //         if (currentLine.length > 0 && caretPosition.character > 0) {
+    //             let txt = '';
+    //             for (let i = 0; i <= caretPosition.line; i++){
+    //                 if (lines(i) === currentLine){
+    //                     txt += currentLine.substring(0, caretPosition.character)
+    //                 } else {
+    //                     txt += lines(i)
+    //                 }
+    //             }
+    //
+    //             for (let i = 0; i < colorAndIndex.length; i++){
+    //                 if (colorAndIndex[i].index <= txt.length && txt.length <= colorAndIndex[i + 1]?.index){
+    //                     colorAndIndex[i + 1].index--;
+    //                     countIndexesArray();
+    //                 }
+    //             }
+    //
+    //             let newLine = currentLine.substring(0, caretPosition.character - 1) + currentLine.substring(caretPosition.character);
+    //             let newLines = textArrToLines(textArr).map((line, index) => index === caretPosition.line ? newLine : line);
+    //             text = newLines.join('\n');
+    //             caretPosition.character--;
+    //
+    //         } else if (caretPosition.line > 0) {
+    //             let previousLine = lines(caretPosition.line - 1);
+    //             let newPreviousLine = previousLine + (currentLine.length > 0 ? currentLine : '');
+    //             let newLines = textArrToLines(textArr).map((line, index) => index === caretPosition.line - 1 ? newPreviousLine : ( index === caretPosition.line ? '' : line));
+    //             newLines.splice(caretPosition.line, 1)
+    //             text = newLines.join('\n');
+    //             caretPosition.line--;
+    //             caretPosition.character = previousLine.length
+    //         }
+    //     } else if (direction === 'delete') {
+    //         if (currentLine.length > 0 && caretPosition.character < currentLine.length) {
+    //             let txt = '';
+    //             for (let i = 0; i <= caretPosition.line; i++){
+    //                 if (lines(i) === currentLine){
+    //                     txt += currentLine.substring(0, caretPosition.character + 1)
+    //                 } else {
+    //                     txt += lines(i)
+    //                 }
+    //             }
+    //
+    //             for (let i = 0; i < colorAndIndex.length; i++){
+    //                 if (colorAndIndex[i].index <= txt.length && txt.length <= colorAndIndex[i + 1]?.index){
+    //                     colorAndIndex[i + 1].index--;
+    //                 }
+    //                 countIndexesArray();
+    //             }
+    //
+    //             let newLine = currentLine.substring(0, caretPosition.character) + currentLine.substring(caretPosition.character + 1);
+    //             let newLines = textArrToLines(textArr).map((line, index) => index === caretPosition.line ? newLine : line);
+    //             text = newLines.join('\n');
+    //         } else if (caretPosition.line < textArrToLines(textArr).length - 1) {
+    //             let nextLine = lines(caretPosition.line + 1);
+    //             let newCurrentLine = currentLine + (nextLine.length > 0 ? nextLine : '');
+    //             let newLines = textArrToLines(textArr).map((line, index) => index === caretPosition.line ? newCurrentLine : (index === caretPosition.line + 1 ? '' : line));
+    //             newLines.splice(caretPosition.line + 1, 1);
+    //             text = newLines.join('\n');
+    //         }
+    //     }
+    // }
 
-            } else if (caretPosition.line > 0) {
-                let previousLine = lines(caretPosition.line - 1);
-                let newPreviousLine = previousLine + (currentLine.length > 0 ? currentLine : '');
-                let newLines = lines().map((line, index) => index === caretPosition.line - 1 ? newPreviousLine : ( index === caretPosition.line ? '' : line));
-                newLines.splice(caretPosition.line, 1)
-                text = newLines.join('\n');
-                caretPosition.line--;
-                caretPosition.character = previousLine.length
-            }
-        } else if (direction === 'delete') {
-            if (currentLine.length > 0 && caretPosition.character < currentLine.length) {
-                let txt = '';
-                for (let i = 0; i <= caretPosition.line; i++){
-                    if (lines(i) === currentLine){
-                        txt += currentLine.substring(0, caretPosition.character + 1)
-                    } else {
-                        txt += lines(i)
-                    }
-                }
-
-                for (let i = 0; i < colorAndIndex.length; i++){
-                    if (colorAndIndex[i].index <= txt.length && txt.length <= colorAndIndex[i + 1]?.index){
-                        colorAndIndex[i + 1].index--;
-                    }
-                    countIndexesArray();
-                }
-
-                let newLine = currentLine.substring(0, caretPosition.character) + currentLine.substring(caretPosition.character + 1);
-                let newLines = lines().map((line, index) => index === caretPosition.line ? newLine : line);
-                text = newLines.join('\n');
-            } else if (caretPosition.line < lines().length - 1) {
-                let nextLine = lines(caretPosition.line + 1);
-                let newCurrentLine = currentLine + (nextLine.length > 0 ? nextLine : '');
-                let newLines = lines().map((line, index) => index === caretPosition.line ? newCurrentLine : (index === caretPosition.line + 1 ? '' : line));
-                newLines.splice(caretPosition.line + 1, 1);
-                text = newLines.join('\n');
-            }
-        }
+    function calculateCaretPosition() {
+        let lines = textArrToLines(textArr);
+        let currentLine = lines[caretPosition.line] || '';
+        let caretMeasurement = ctx.measureText(currentLine.substring(0, caretPosition.character));
+        caretX = textX + caretMeasurement.width;
+        caretY = textY + (fontSize + 5) * caretPosition.line;
     }
 
     function pastText(callback){
@@ -467,20 +491,40 @@ const Canvas = ({
             addLetter(str);
             caretPosition.character--;
             calculateCaretPosition();
-            updateTextOnCanvas(ctx);
+            updateTextOnCanvas(
+                textArr,
+                ctx,
+                canvas,
+                isLight,
+                fontSize,
+                fontFamily,
+                textY,
+                textX,
+                // colorAndIndex,
+                isDrawing,
+                redraw,
+                calculateCaretPosition,
+                caretX,
+                caretY,
+                fontColor);
             callback();
         })
     }
 
     function enterKeyAction() {
-        let currentLine = lines(caretPosition.line);
-        let newLine = currentLine.substring(0, caretPosition.character);
-        let newLines = lines().map((line, index) => index === caretPosition.line ? newLine : line);
-        newLines.splice(caretPosition.line + 1, 0, currentLine.substring(caretPosition.character));
-        text = newLines.join('\n');
-        caretPosition.line++;
-        caretPosition.character = 0;
+        console.log('enterKeyAction')
     }
+
+    // todo it
+    // function enterKeyAction() {
+    //     let currentLine = lines(caretPosition.line);
+    //     let newLine = currentLine.substring(0, caretPosition.character);
+    //     let newLines = textArrToLines(textArr).map((line, index) => index === caretPosition.line ? newLine : line);
+    //     newLines.splice(caretPosition.line + 1, 0, currentLine.substring(caretPosition.character));
+    //     text = newLines.join('\n');
+    //     caretPosition.line++;
+    //     caretPosition.character = 0;
+    // }
 
     function ctrlArrowJumpAction (direction){
         let currentLine = lines(caretPosition.line);
@@ -505,12 +549,17 @@ const Canvas = ({
     }
 
     function lines(lineNumber = null) {
-        let linesArray = text.split('\n');
-        if (lineNumber !== null) {
-            return linesArray[lineNumber] || '';
-        }
-        return linesArray;
+        console.log('lines')
     }
+
+    //todo it
+    // function lines(lineNumber = null) {
+    //     let linesArray = text.split('\n');
+    //     if (lineNumber !== null) {
+    //         return linesArray[lineNumber] || '';
+    //     }
+    //     return linesArray;
+    // }
 
     async function getPasteText() {
         try {

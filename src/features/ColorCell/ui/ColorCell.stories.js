@@ -1,6 +1,6 @@
 import ColorCell from "./ColorCell.jsx";
-import ThemeDecorator from "../../../.storybook/decorators/themeDecorator.jsx";
-import {Theme} from "../../app/const/theme.js";
+import ThemeDecorator from "../../../../.storybook/decorators/themeDecorator.jsx";
+import {Theme} from "../../../app/const/theme.js";
 
 
 export default {

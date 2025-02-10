@@ -1,7 +1,7 @@
 import React from 'react';
 import cls from './SaveButton.module.scss'
-import SaveIcon from '../../assets/Icon/save-icon.svg?react'
-import WhiteSaveIcon from '../../assets/Icon/white/white-save-icon.svg?react'
+import SaveIcon from '../../../assets/Icon/save-icon.svg?react'
+import WhiteSaveIcon from '../../../assets/Icon/white/white-save-icon.svg?react'
 
 const SaveButton = ({isLight, onClick}) => {
 

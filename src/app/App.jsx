@@ -1,11 +1,11 @@
 import './styles/index.scss'
 import cls from './App.module.scss'
-import ThemeSwitcher from "../ui/themeSwitcher/themeSwitcher.jsx";
+import ThemeSwitcher from "../features/ThemeSwitcher/ui/ThemeSwitcher.jsx";
 import {useEffect, useState} from "react";
-import Canvas from "../ui/Canvas/Canvas.jsx";
-import CapsLockIdentifier from "../ui/CapsLockIdentifier/CapsLockIdentifier.jsx";
-import {Select} from "../ui/examples/Select/Select.jsx";
-import Palette from "../ui/Palette/Palette.jsx";
+import Canvas from "../features/Canvas/ui/Canvas.jsx";
+import CapsLockIdentifier from "../entities/CapsLockIdentifier/ui/CapsLockIdentifier.jsx";
+import {Select} from "../shared/Select/ui/Select.jsx";
+import Palette from "../widgets/Palette/ui/Palette.jsx";
 import {saveToLocalStorage} from "../helpers/saveToLocalStorage.js";
 import {THEME_LOCALSTORAGE_KEY} from "./const/localStorage.js";
 

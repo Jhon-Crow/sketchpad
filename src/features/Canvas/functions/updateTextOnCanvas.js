@@ -45,7 +45,6 @@ export function updateTextOnCanvas(
     let lines = textArrToLines(textArr);
     let colors = textArr.flatMap(item => item.text.split('').map(() => item.color)); // Получаем массив цветов для каждого символа
 
-
     let y = textY;
     let countText = 0;
     let checkIndex = 0;

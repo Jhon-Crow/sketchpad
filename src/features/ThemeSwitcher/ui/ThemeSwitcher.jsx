@@ -1,10 +1,10 @@
 import React, {useEffect} from 'react';
-import cls from './themeSwitcher.module.scss'
-import Sun from '../../assets/Icon/sun.svg?react'
-import Moon from '../../assets/Icon/white/moon.svg?react'
-import {getFromLocalStorage} from "../../helpers/getFromLocalStorage.js";
-import {THEME_LOCALSTORAGE_KEY} from "../../app/const/localStorage.js";
-import {Theme} from "../../app/const/theme.js";
+import cls from './ThemeSwitcher.module.scss'
+import Sun from '../../../assets/Icon/sun.svg?react'
+import Moon from '../../../assets/Icon/white/moon.svg?react'
+import {getFromLocalStorage} from "../../../helpers/getFromLocalStorage.js";
+import {THEME_LOCALSTORAGE_KEY} from "../../../app/const/localStorage.js";
+import {Theme} from "../../../app/const/theme.js";
 
 const ThemeSwitcher = ({isDark, setIsDark}) => {
 

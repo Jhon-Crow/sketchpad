@@ -1,8 +1,8 @@
 import React, {useEffect, useRef, useState} from 'react';
 import cls from './Canvas.module.scss'
-import SaveButton from "../SaveButton/SaveButton.jsx";
-import {checkLinesLimit, updateTextOnCanvas} from "./functions/updateTextOnCanvas.js";
-import {textArrToLines} from "./functions/textArrToLines.js";
+import SaveButton from "../../SaveButton/ui/SaveButton.jsx";
+import {checkLinesLimit, updateTextOnCanvas} from "../functions/updateTextOnCanvas.js";
+import {textArrToLines} from "../functions/textArrToLines.js";
 
 let canvas;
 let ctx;
@@ -157,11 +157,11 @@ const Canvas = ({
         }
     }
 
-
     function loadFromHistory(textHistoryIndex){
         console.log('loadFromHistory, textHistoryIndex = ',textHistoryIndex )
     }
-    // todo it
+    //todo it просто достать объект из истории и добавить в textArr
+    // логика та же что и с текстом
     // function loadFromHistory(textHistoryIndex){
     //     text = textHistory[textHistoryIndex].text;
     //     caretPosition = textHistory[textHistoryIndex].caretPosition;
@@ -452,7 +452,7 @@ const Canvas = ({
 
 
 
-    // todo it
+    // todo it зменить lines на textArrToLines(textArr, caretPosition.line) и поколдовать с text
     // function deleteCharacter(direction) {
     //     let currentLine = lines(caretPosition.line);
     //     if (direction === 'backspace') {
@@ -567,7 +567,7 @@ const Canvas = ({
     // }
 
     function ctrlArrowJumpAction (direction){
-        let currentLine = lines(caretPosition.line);
+        let currentLine = textArrToLines(textArr, caretPosition.line);
         let wordEndIndex;
         if (direction === 'left'){
             wordEndIndex = currentLine.lastIndexOf(' ', caretPosition.character - 1);
@@ -587,19 +587,6 @@ const Canvas = ({
         }
         caretPosition.character = wordEndIndex;
     }
-
-    function lines(lineNumber = null) {
-        console.log('lines')
-    }
-
-    //todo it
-    // function lines(lineNumber = null) {
-    //     let linesArray = text.split('\n');
-    //     if (lineNumber !== null) {
-    //         return linesArray[lineNumber] || '';
-    //     }
-    //     return linesArray;
-    // }
 
     async function getPasteText() {
         try {

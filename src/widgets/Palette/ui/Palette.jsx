@@ -1,11 +1,11 @@
 import React, {useCallback, useEffect, useState} from 'react';
 import cls from './Palette.module.scss'
-import FontCase from '../../assets/Icon/font-case.svg?react'
-import PenNib from '../../assets/Icon/pen-nib.svg?react'
-import ColorCell from "../ColorCell/ColorCell.jsx";
-import {getFromLocalStorage} from "../../helpers/getFromLocalStorage.js";
-import {LOCALSTORAGE_SKETCHPAD_COLORS, SKETCHPAD_SELECTED_COLORS} from "../../app/const/localStorage.js";
-import {saveToLocalStorage} from "../../helpers/saveToLocalStorage.js";
+import FontCase from '../../../assets/Icon/font-case.svg?react'
+import PenNib from '../../../assets/Icon/pen-nib.svg?react'
+import ColorCell from "../../../features/ColorCell/ui/ColorCell.jsx";
+import {getFromLocalStorage} from "../../../helpers/getFromLocalStorage.js";
+import {LOCALSTORAGE_SKETCHPAD_COLORS, SKETCHPAD_SELECTED_COLORS} from "../../../app/const/localStorage.js";
+import {saveToLocalStorage} from "../../../helpers/saveToLocalStorage.js";
 
 const initColors = [
     "#EB402B","#EB402B",

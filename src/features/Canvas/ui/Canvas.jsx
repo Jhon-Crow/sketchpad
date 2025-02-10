@@ -333,118 +333,21 @@ const Canvas = ({
     }
 
     function addLetter(letter){
-        let newLine;
-        let newLines;
-        let currentLine = textArrToLines(textArr, caretPosition.line);
-
-
-        // let txt = '';
-        // for (let i = 0; i <= caretPosition.line; i++){
-        //     if (textArrToLines(textArr, i) === currentLine){
-        //         txt += currentLine.substring(0, caretPosition.character)
-        //     } else {
-        //         txt += textArrToLines(textArr, i)
-        //     }
-        // }
-
-        // let worked = 0;
-        // for (let i = 0; i < colorAndIndex.length; i++){
-        //     if (colorAndIndex[i].index <= txt.length && colorAndIndex[i + 1]
-        //         && !(colorAndIndex[i + 1].index <= txt.length)
-        //     ) {
-        //         if (colorAndIndex[i].color !== fontColor && !worked){
-        //             colorAndIndex.splice(i + 1, 0, {index: txt.length, color: fontColor});
-        //             colorAndIndex.splice(i + 2, 0, {...colorAndIndex[i], index: colorAndIndex[i+1].index + 1});
-        //             colorAndIndex[i+3].index++;
-        //             worked = 1;
-        //         } else if (!worked){
-        //             colorAndIndex[i+1].index++;
-        //             worked = 1;
-        //         }
-        //         countIndexesArray();
-        //     }
-        // }
-        // worked = 0;
-
-        addLetterOnCaret(letter);
-
 
         // todo добавить проверку на лимит строки
-        // for (let i = 0; i < newLines.length; i++){
-        //     if(newLines[i].length >= textWrapLimit) {
-        //         newLines[i].split(0, textWrapLimit)
-        //         if (!newLines[i + 1]){
-        //             newLines[i + 1] = newLines[i].substring(textWrapLimit, newLines[i].length)
-        //         } else {
-        //             newLines[i + 1] = newLines[i].substring(textWrapLimit, newLines[i].length) + newLines[i + 1]
-        //         }
-        //         if (caretPosition.character > textWrapLimit){
-        //             caretPosition.line++;
-        //             caretPosition.character = 1;
-        //         }
-        //         newLines[i] = newLines[i].substring(0, textWrapLimit);
-        //     }
-        // }
-
-        // let text = newLines.join('\n');
-        // let newArr = [];
-        // for (let i = 0; i < text.length; i++){
-        //     newArr.push({
-        //         text: text[i],
-        //         id: i
-        //     })
-        // }
-        // textArr = newArr;
-
-        // console.log(textArr)
-
-        function addLetterOnCaret(letter) {
-            // console.log(caretPosition)
-            // newLine = currentLine.substring(0, caretPosition.character) + letter + currentLine.substring(caretPosition.character);
-            // console.log(newLine)
-            // newLines = textArrToLines(textArr).map((line, index) => index === caretPosition.line ? newLine : line);
-            // console.log(newLines)
-            // currentLine = newLine;
-            // console.log(textArr, caretPosition)
-            // console.log(newLines[caretPosition.line].length, caretPosition.character)
-
-            // if (textArr.find(i => i.character === caretPosition.character && i.line === caretPosition.line)){
-            //     textArr.find(i => i.character === caretPosition.character && i.line === caretPosition.line).character++;
-            //     console.log(textArr.find(i => i.character === caretPosition.character && i.line === caretPosition.line))
-            // }
-            // // textArr.sort((a,b) => a.character - b.character)
-            // textArr.push({text: letter, color: fontColor, line: caretPosition.line, character: caretPosition.character})
-            // console.log('push')
-            // todo добавление символа
             let itemToArr = {text: letter, color: fontColor, line: caretPosition.line, character: caretPosition.character};
             if (!textArr.length || textArr[textArr.length - 1] === lineLengthLimit){
-                textArr.push([itemToArr])
-                // console.log(textArr)
+                // todo проверить автоперенос
+                textArr.push([itemToArr]);
             } else {
-                // console.log('else')
-
-                // if (textArr[caretPosition.line]) {
-                    // Получаем текущую строку
                     const currentLine = textArr[caretPosition.line];
-
-                    // Разделяем строку на две части: до и после позиции курсора
                     const beforeCaret = currentLine.slice(0, caretPosition.character);
                     const afterCaret = currentLine.slice(caretPosition.character);
-
-                    // Вставляем новый элемент между двумя частями
                     textArr[caretPosition.line] = [...beforeCaret, itemToArr, ...afterCaret];
-                // }
-
-
-
-
-
-                // textArr[caretPosition.line].push(itemToArr);
-                // console.log(textArr)
             }
 
             caretPosition.character++;
-        }
+        // }
         calculateCaretPosition()
     }
 
@@ -598,19 +501,25 @@ const Canvas = ({
     }
 
     function enterKeyAction() {
-        console.log('enterKeyAction')
+       if (!textArr.length) textArr.push([])
+        // Получаем текущую строку
+        const currentLine = textArr[caretPosition.line];
+
+        // Разделяем текущую строку на две части: до и после курсора
+        const beforeCaret = currentLine.slice(0, caretPosition.character);
+        const afterCaret = currentLine.slice(caretPosition.character);
+
+        // Обновляем текущую строку с новой частью до курсора
+        textArr[caretPosition.line] = [...beforeCaret];
+
+        // Вставляем новую строку после текущей
+        textArr.splice(caretPosition.line + 1, 0, [...afterCaret]);
+
+        // Обновляем позицию курсора
+        caretPosition.line++;
+        caretPosition.character = 0;
     }
 
-    // todo it
-    // function enterKeyAction() {
-    //     let currentLine = lines(caretPosition.line);
-    //     let newLine = currentLine.substring(0, caretPosition.character);
-    //     let newLines = textArrToLines(textArr).map((line, index) => index === caretPosition.line ? newLine : line);
-    //     newLines.splice(caretPosition.line + 1, 0, currentLine.substring(caretPosition.character));
-    //     text = newLines.join('\n');
-    //     caretPosition.line++;
-    //     caretPosition.character = 0;
-    // }
 
     function ctrlArrowJumpAction (direction){
         let currentLine = textArrToLines(textArr, caretPosition.line);

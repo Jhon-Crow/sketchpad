@@ -604,9 +604,11 @@ const Canvas = ({
         link.click();
     }
 
+    const noBlur = (e) => e.target.focus();
+
     return (
         <>
-            <canvas tabIndex={0} onKeyDown={(e) => onKeyDownSwitch(e)} onMouseDown={(e) => startDrawing(e.nativeEvent)} onMouseMove={(e) => draw(e.nativeEvent)} onMouseUp={endDrawing} onMouseOut={endDrawing} id='canvas' ref={canvasRef} className={cls.Canvas}></canvas>
+            <canvas onBlur={noBlur} tabIndex={0} onKeyDown={(e) => onKeyDownSwitch(e)} onMouseDown={(e) => startDrawing(e.nativeEvent)} onMouseMove={(e) => draw(e.nativeEvent)} onMouseUp={endDrawing} onMouseOut={endDrawing} id='canvas' ref={canvasRef} className={cls.Canvas}></canvas>
             <SaveButton isLight={isLight} onClick={savePng}/>
         </>
     );

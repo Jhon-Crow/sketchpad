@@ -51,11 +51,19 @@ function App() {
             setPenColor={setPenColor}
             setFontColor={setFontColor}
         />
-        {/*<div style={{display: 'flex', alignItems: "center", gap: '1.2rem'}}>*/}
+        <div style={{
+            display: 'flex',
+            alignItems: "center",
+            width: '163.09px',
+            backgroundColor: 'var(--canvas-color)',
+            justifyContent: "center",
+            borderRadius: '28px',
+            boxShadow: 'var(--shadow)'
+        }}>
 
-        {/*    <SizeInput color={fontColor} value={fontSize} />*/}
-        {/*    <SizeInput color={penColor} value={penSize} onChange={setPenSize}/>*/}
-        {/*</div>*/}
+            <SizeInput color={fontColor} value={fontSize} />
+            <SizeInput color={penColor} value={penSize} onChange={setPenSize}/>
+        </div>
         <CapsLockIdentifier capsLockPressed={capsLockPressed}/>
         <ThemeSwitcher
             setIsDark={setIsDark}

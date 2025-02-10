@@ -8,6 +8,7 @@ import {Select} from "../shared/Select/ui/Select.jsx";
 import Palette from "../widgets/Palette/ui/Palette.jsx";
 import {saveToLocalStorage} from "../helpers/saveToLocalStorage.js";
 import {THEME_LOCALSTORAGE_KEY} from "./const/localStorage.js";
+import SizeInput from "../features/SizeInput/ui/SizeInput.jsx";
 
 function App() {
     const [isDark, setIsDark] = useState();
@@ -15,8 +16,8 @@ function App() {
     const [fontColor, setFontColor] = useState();
     const [fontFamily, setFontFamily] = useState(2);
     const [penColor, setPenColor] = useState();
-    const [fontSize, ] = useState(16);
-    const [penSize, ] = useState(1);
+    const [fontSize, setFontSize] = useState(16);
+    const [penSize, setPenSize] = useState(1);
 
     const fontsDefault = [
         {value: 0, content: 'Arial'},
@@ -41,15 +42,20 @@ function App() {
 
   return (
     <div className={cls.App}>
-        {/*TODO удалить при релизе*/}
-        {/*<Select*/}
-        {/*    value={fontFamily}*/}
-        {/*    onChange={setFontFamily}*/}
-        {/*    options={fontsDefault} fontColor={fontColor}/>*/}
+        {/*TODO удалить при релизе если не доведу до ума*/}
+        <Select
+            value={fontFamily}
+            onChange={setFontFamily}
+            options={fontsDefault} fontColor={fontColor}/>
         <Palette
             setPenColor={setPenColor}
             setFontColor={setFontColor}
         />
+        {/*<div style={{display: 'flex', alignItems: "center", gap: '1.2rem'}}>*/}
+
+        {/*    <SizeInput color={fontColor} value={fontSize} />*/}
+        {/*    <SizeInput color={penColor} value={penSize} onChange={setPenSize}/>*/}
+        {/*</div>*/}
         <CapsLockIdentifier capsLockPressed={capsLockPressed}/>
         <ThemeSwitcher
             setIsDark={setIsDark}

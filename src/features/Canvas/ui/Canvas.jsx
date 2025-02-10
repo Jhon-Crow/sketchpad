@@ -162,7 +162,8 @@ const Canvas = ({
     function loadFromHistory(textHistoryIndex){
         console.log('loadFromHistory, textHistoryIndex = ',textHistoryIndex )
     }
-    //todo it просто достать объект из истории и добавить в textArr
+    //todo понять как это должно работать (сохранять весь стэйт может?)
+
     // логика та же что и с текстом
     // function loadFromHistory(textHistoryIndex){
     //     text = textHistory[textHistoryIndex].text;
@@ -171,6 +172,20 @@ const Canvas = ({
     //         setColorAndIndex(textHistory[textHistoryIndex].colorAndIndex);
     //     }
     // }
+
+    function saveToHistory(){
+        textHistory.push({
+            // todo возможно тут нужно будет кастовать в строку
+            text: textArr,
+            caretPosition: {
+                line: caretPosition.line,
+                character: caretPosition.character
+            }
+            // ,colorAndIndex: [...colorAndIndex]
+        });
+        textHistoryIndex++;
+        // console.log(textHistory)
+    }
 
     function onKeyDownSwitch(e) {
         setCapsLockPressed(e.getModifierState('CapsLock'));
@@ -283,21 +298,10 @@ const Canvas = ({
 //         }
 //     }
 
-    function saveToHistory(){
-        textHistory.push({
-            // todo возможно тут нужно будет кастовать в строку
-            text: textArr,
-            caretPosition: {
-                line: caretPosition.line,
-                character: caretPosition.character
-            }
-            // ,colorAndIndex: [...colorAndIndex]
-        });
-        textHistoryIndex++;
-        // console.log(textHistory)
-    }
+
 
     function caretMoveLeft() {
+        // todo при переносе на пред. строку caretPosition.character = 0, а так не надо
         if (caretPosition.character > 0) {
             caretPosition.character--;
             console.log(caretPosition.character)
@@ -308,6 +312,7 @@ const Canvas = ({
     }
 
     function caretMoveRight() {
+        // todo вроде работает правильно
         if (caretPosition.character < textArr[caretPosition.line].length) {
             caretPosition.character++;
             // console.log(caretPosition.character)
@@ -319,6 +324,7 @@ const Canvas = ({
     }
 
     function caretMoveUp() {
+        // todo сделать чтоб надёжно работало
         if (caretPosition.line > 0) {
             caretPosition.line--;
             caretPosition.character = Math.min(caretPosition.character, textArrToLines(textArr, caretPosition.line).length);
@@ -326,6 +332,7 @@ const Canvas = ({
     }
 
     function caretMoveDown() {
+        // todo сделать чтоб надёжно работало
         if (caretPosition.line < textArrToLines(textArr).length - 1) {
             caretPosition.line++;
             caretPosition.character = Math.min(caretPosition.character, textArrToLines(textArr, caretPosition.line).length);
@@ -333,9 +340,15 @@ const Canvas = ({
     }
 
     function addLetter(letter){
-
         // todo добавить проверку на лимит строки
-            let itemToArr = {text: letter, color: fontColor, line: caretPosition.line, character: caretPosition.character};
+            let itemToArr = {
+                text: letter,
+                color: fontColor,
+                fontFamily,
+                fontSize,
+                line: caretPosition.line,
+                character: caretPosition.character
+            };
             if (!textArr.length || textArr[textArr.length - 1] === lineLengthLimit){
                 // todo проверить автоперенос
                 textArr.push([itemToArr]);
@@ -345,9 +358,7 @@ const Canvas = ({
                     const afterCaret = currentLine.slice(caretPosition.character);
                     textArr[caretPosition.line] = [...beforeCaret, itemToArr, ...afterCaret];
             }
-
             caretPosition.character++;
-        // }
         calculateCaretPosition()
     }
 
@@ -363,6 +374,7 @@ const Canvas = ({
     // }
 
     function deleteCharacter(direction) {
+        // todo не работает
         let currentLine = textArrToLines(textArr, caretPosition.line);
 
         if (direction === 'backspace') {
@@ -400,82 +412,32 @@ const Canvas = ({
         }
     }
 
-
-
-    // todo it зменить lines на textArrToLines(textArr, caretPosition.line) и поколдовать с text
-    // function deleteCharacter(direction) {
-    //     let currentLine = lines(caretPosition.line);
-    //     if (direction === 'backspace') {
-    //         if (currentLine.length > 0 && caretPosition.character > 0) {
-    //             let txt = '';
-    //             for (let i = 0; i <= caretPosition.line; i++){
-    //                 if (lines(i) === currentLine){
-    //                     txt += currentLine.substring(0, caretPosition.character)
-    //                 } else {
-    //                     txt += lines(i)
-    //                 }
-    //             }
-    //
-    //             for (let i = 0; i < colorAndIndex.length; i++){
-    //                 if (colorAndIndex[i].index <= txt.length && txt.length <= colorAndIndex[i + 1]?.index){
-    //                     colorAndIndex[i + 1].index--;
-    //                     countIndexesArray();
-    //                 }
-    //             }
-    //
-    //             let newLine = currentLine.substring(0, caretPosition.character - 1) + currentLine.substring(caretPosition.character);
-    //             let newLines = textArrToLines(textArr).map((line, index) => index === caretPosition.line ? newLine : line);
-    //             text = newLines.join('\n');
-    //             caretPosition.character--;
-    //
-    //         } else if (caretPosition.line > 0) {
-    //             let previousLine = lines(caretPosition.line - 1);
-    //             let newPreviousLine = previousLine + (currentLine.length > 0 ? currentLine : '');
-    //             let newLines = textArrToLines(textArr).map((line, index) => index === caretPosition.line - 1 ? newPreviousLine : ( index === caretPosition.line ? '' : line));
-    //             newLines.splice(caretPosition.line, 1)
-    //             text = newLines.join('\n');
-    //             caretPosition.line--;
-    //             caretPosition.character = previousLine.length
-    //         }
-    //     } else if (direction === 'delete') {
-    //         if (currentLine.length > 0 && caretPosition.character < currentLine.length) {
-    //             let txt = '';
-    //             for (let i = 0; i <= caretPosition.line; i++){
-    //                 if (lines(i) === currentLine){
-    //                     txt += currentLine.substring(0, caretPosition.character + 1)
-    //                 } else {
-    //                     txt += lines(i)
-    //                 }
-    //             }
-    //
-    //             for (let i = 0; i < colorAndIndex.length; i++){
-    //                 if (colorAndIndex[i].index <= txt.length && txt.length <= colorAndIndex[i + 1]?.index){
-    //                     colorAndIndex[i + 1].index--;
-    //                 }
-    //                 countIndexesArray();
-    //             }
-    //
-    //             let newLine = currentLine.substring(0, caretPosition.character) + currentLine.substring(caretPosition.character + 1);
-    //             let newLines = textArrToLines(textArr).map((line, index) => index === caretPosition.line ? newLine : line);
-    //             text = newLines.join('\n');
-    //         } else if (caretPosition.line < textArrToLines(textArr).length - 1) {
-    //             let nextLine = lines(caretPosition.line + 1);
-    //             let newCurrentLine = currentLine + (nextLine.length > 0 ? nextLine : '');
-    //             let newLines = textArrToLines(textArr).map((line, index) => index === caretPosition.line ? newCurrentLine : (index === caretPosition.line + 1 ? '' : line));
-    //             newLines.splice(caretPosition.line + 1, 1);
-    //             text = newLines.join('\n');
-    //         }
-    //     }
-    // }
-
     function calculateCaretPosition() {
         let currentLine = textArr[caretPosition.line]?.map(i => i.text).join('') || '';
+
+        // todo проитерироваться по строке и считать размер с учётом фонтФэмли
         let caretMeasurement = ctx.measureText(currentLine.substring(0, caretPosition.character));
         caretX = textX + caretMeasurement.width;
+
         caretY = textY + (fontSize + 5) * caretPosition.line;
     }
 
+    // function calculateCaretPosition(fontOfLetter) {
+    //     let currentLine = textArr[caretPosition.line]?.map(i => i.text).join('') || '';
+    //     caretX = textX; // Начальная позиция по X
+    //
+    //     // Проходим по каждому символу до позиции курсора
+    //     for (let i = 0; i < caretPosition.character; i++) {
+    //         // Устанавливаем текущий шрифт для символа
+    //         ctx.font = fontOfLetter; // Предполагается, что у вас есть функция, возвращающая шрифт для символа
+    //         caretX += ctx.measureText(currentLine[i]).width; // Добавляем ширину символа к позиции курсора
+    //     }
+    //
+    //     caretY = textY + (fontSize + 5) * caretPosition.line; // Позиция по Y остается прежней
+    // }
+
     function pastText(callback){
+        // todo надо правильно распределить строки
         getPasteText().then(str => {
             addLetter(str);
             caretPosition.character--;
@@ -522,7 +484,8 @@ const Canvas = ({
 
 
     function ctrlArrowJumpAction (direction){
-        let currentLine = textArrToLines(textArr, caretPosition.line);
+        // todo скачет по краям строки а не по словам
+        let currentLine = textArr[caretPosition.line];
         let wordEndIndex;
         if (direction === 'left'){
             wordEndIndex = currentLine.lastIndexOf(' ', caretPosition.character - 1);

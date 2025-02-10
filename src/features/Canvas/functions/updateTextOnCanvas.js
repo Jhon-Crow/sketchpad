@@ -39,7 +39,6 @@ export function updateTextOnCanvas(
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawBg(ctx);
 
-    ctx.font = fontSize + 'px ' + fontFamily;
 
     // Получаем массив строк и массив цветов
 
@@ -48,8 +47,8 @@ export function updateTextOnCanvas(
     // console.log(textArr, lines)
 
     let y = textY;
-    let countText = 0;
-    let checkIndex = 0;
+    // let countText = 0;
+    // let checkIndex = 0;
 
     for (let i = 0; i < textArr.length; i++) {
         let x = textX;
@@ -58,21 +57,23 @@ export function updateTextOnCanvas(
             // Устанавливаем цвет для текущего символа
             ctx.fillStyle = textArr[i][j].color;
 
+            ctx.font = textArr[i][j].fontSize + 'px ' + textArr[i][j].fontFamily;
+
+
             // Рисуем символ
             ctx.fillText(textArr[i][j].text, x, y);
             let charWidth = ctx.measureText(textArr[i][j].text).width;
             x += charWidth; // Смещаем x для следующего символа
-            // x += 2
-            checkIndex++; // Увеличиваем индекс цвета
-            countText++;
+            // checkIndex++; // Увеличиваем индекс цвета
+            // countText++;
         }
 
         y += fontSize + 5; // Переход на следующую строку
     }
 
+    calculateCaretPosition();
     if (!isDrawing) {
         // console.log(caretX, caretY)
-        calculateCaretPosition();
         ctx.fillStyle = fontColor;
         ctx.fillRect(caretX, caretY - fontSize, 1, fontSize); // Рисуем каретку
     }

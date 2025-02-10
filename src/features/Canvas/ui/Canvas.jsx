@@ -3,6 +3,7 @@ import cls from './Canvas.module.scss'
 import SaveButton from "../../SaveButton/ui/SaveButton.jsx";
 import {checkLinesLimit, updateTextOnCanvas} from "../functions/updateTextOnCanvas.js";
 import {textArrToLines} from "../functions/textArrToLines.js";
+import {doSeveralTimes} from "../../../helpers/doSeveralTimes.js";
 
 let canvas;
 let ctx;
@@ -43,6 +44,7 @@ const Canvas = ({
     const coordsDisabledLimit = 10000;
 
     let linesLimit = window.innerHeight / (fontSize * 1.5);
+    const lineLengthLimit = 30;
 
     // const drawBg = (ctx) => {
     //     ctx.fillStyle = isLight ? '#F2F0E7FF' : '#2A2A2B';
@@ -393,20 +395,62 @@ const Canvas = ({
 
         // console.log(textArr)
 
-        textArr.push({text: letter, color: fontColor, id: textArr.length})
         function addLetterOnCaret(letter) {
-            newLine = currentLine.substring(0, caretPosition.character) + letter + currentLine.substring(caretPosition.character);
-            newLines = textArrToLines(textArr).map((line, index) => index === caretPosition.line ? newLine : line);
-            currentLine = newLine;
+            // console.log(caretPosition)
+            // newLine = currentLine.substring(0, caretPosition.character) + letter + currentLine.substring(caretPosition.character);
+            // console.log(newLine)
+            // newLines = textArrToLines(textArr).map((line, index) => index === caretPosition.line ? newLine : line);
+            // console.log(newLines)
+            // currentLine = newLine;
+            // console.log(textArr, caretPosition)
+            // console.log(newLines[caretPosition.line].length, caretPosition.character)
+
+            // if (textArr.find(i => i.character === caretPosition.character && i.line === caretPosition.line)){
+            //     textArr.find(i => i.character === caretPosition.character && i.line === caretPosition.line).character++;
+            //     console.log(textArr.find(i => i.character === caretPosition.character && i.line === caretPosition.line))
+            // }
+            // // textArr.sort((a,b) => a.character - b.character)
+            // textArr.push({text: letter, color: fontColor, line: caretPosition.line, character: caretPosition.character})
+            // console.log('push')
+            // todo добавление символа
+            let itemToArr = {text: letter, color: fontColor, line: caretPosition.line, character: caretPosition.character};
+            if (!textArr.length || textArr[textArr.length - 1] === lineLengthLimit){
+                textArr.push([itemToArr])
+                console.log(textArr)
+            } else {
+                console.log('else')
+
+                // if (textArr[caretPosition.line]) {
+                    // Получаем текущую строку
+                    const currentLine = textArr[caretPosition.line];
+
+                    // Разделяем строку на две части: до и после позиции курсора
+                    const beforeCaret = currentLine.slice(0, caretPosition.character);
+                    const afterCaret = currentLine.slice(caretPosition.character);
+
+                    // Вставляем новый элемент между двумя частями
+                    textArr[caretPosition.line] = [...beforeCaret, itemToArr, ...afterCaret];
+                // }
+
+
+
+
+
+                // textArr[caretPosition.line].push(itemToArr);
+                console.log(textArr)
+            }
+
             caretPosition.character++;
         }
-        // calculateCaretPosition()
+        calculateCaretPosition()
     }
 
     function onTabAction(){
-        addLetter('    ');
-        caretPosition.character += 3;
+        // addLetter('    ');
+        doSeveralTimes(() => addLetter(' '), 4)
+        // caretPosition.character += 3;
     }
+
 
     // function deleteCharacter(direction) {
     //     console.log('deleteCharacter, direction = ', direction)
@@ -519,8 +563,7 @@ const Canvas = ({
     // }
 
     function calculateCaretPosition() {
-        let lines = textArrToLines(textArr);
-        let currentLine = lines[caretPosition.line] || '';
+        let currentLine = textArr[caretPosition.line]?.map(i => i.text).join('') || '';
         let caretMeasurement = ctx.measureText(currentLine.substring(0, caretPosition.character));
         caretX = textX + caretMeasurement.width;
         caretY = textY + (fontSize + 5) * caretPosition.line;

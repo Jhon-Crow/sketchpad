@@ -1,7 +1,7 @@
 import {textArrToLines} from "./textArrToLines.js";
 
    export function checkLinesLimit(action, textArr, saveToHistory, linesLimit) {
-        if (textArrToLines(textArr).length > linesLimit - 1) {
+        if (textArr.length > linesLimit - 1) {
             alert('no space on page!\n' +
                 'input blocked');
             return false;
@@ -42,23 +42,25 @@ export function updateTextOnCanvas(
     ctx.font = fontSize + 'px ' + fontFamily;
 
     // Получаем массив строк и массив цветов
-    let lines = textArrToLines(textArr);
-    let colors = textArr.flatMap(item => item.text.split('').map(() => item.color)); // Получаем массив цветов для каждого символа
+
+    // let colors = textArr.flatMap(item => item.text.split('').map(() => item.color)); // Получаем массив цветов для каждого символа
+
+    // console.log(textArr, lines)
 
     let y = textY;
     let countText = 0;
     let checkIndex = 0;
 
-    for (let i = 0; i < lines.length; i++) {
+    for (let i = 0; i < textArr.length; i++) {
         let x = textX;
 
-        for (let j = 0; j < lines[i].length; j++) {
+        for (let j = 0; j < textArr[i].length; j++) {
             // Устанавливаем цвет для текущего символа
-            ctx.fillStyle = colors[checkIndex];
+            ctx.fillStyle = textArr[i][j].color;
 
             // Рисуем символ
-            ctx.fillText(lines[i][j], x, y);
-            let charWidth = ctx.measureText(lines[i][j]).width;
+            ctx.fillText(textArr[i][j].text, x, y);
+            let charWidth = ctx.measureText(textArr[i][j]).width;
             x += charWidth; // Смещаем x для следующего символа
             checkIndex++; // Увеличиваем индекс цвета
             countText++;

@@ -300,6 +300,7 @@ const Canvas = ({
     function caretMoveLeft() {
         if (caretPosition.character > 0) {
             caretPosition.character--;
+            console.log(caretPosition.character)
         } else if (caretPosition.line > 0) {
             caretPosition.line--;
             caretPosition.character = textArrToLines(textArr, caretPosition.line).length;
@@ -307,9 +308,11 @@ const Canvas = ({
     }
 
     function caretMoveRight() {
-        if (caretPosition.character < textArrToLines(textArr, caretPosition.line).length) {
+        if (caretPosition.character < textArr[caretPosition.line].length) {
             caretPosition.character++;
-        } else if (caretPosition.line < textArrToLines(textArr).length - 1) {
+            // console.log(caretPosition.character)
+        } else if (caretPosition.line < textArr[caretPosition.line].length - 1 && textArr[caretPosition.line+1]) {
+            // console.log(caretPosition.character)
             caretPosition.line++;
             caretPosition.character = 0;
         }
@@ -416,9 +419,9 @@ const Canvas = ({
             let itemToArr = {text: letter, color: fontColor, line: caretPosition.line, character: caretPosition.character};
             if (!textArr.length || textArr[textArr.length - 1] === lineLengthLimit){
                 textArr.push([itemToArr])
-                console.log(textArr)
+                // console.log(textArr)
             } else {
-                console.log('else')
+                // console.log('else')
 
                 // if (textArr[caretPosition.line]) {
                     // Получаем текущую строку
@@ -437,7 +440,7 @@ const Canvas = ({
 
 
                 // textArr[caretPosition.line].push(itemToArr);
-                console.log(textArr)
+                // console.log(textArr)
             }
 
             caretPosition.character++;

@@ -60,8 +60,9 @@ export function updateTextOnCanvas(
 
             // Рисуем символ
             ctx.fillText(textArr[i][j].text, x, y);
-            let charWidth = ctx.measureText(textArr[i][j]).width;
+            let charWidth = ctx.measureText(textArr[i][j].text).width;
             x += charWidth; // Смещаем x для следующего символа
+            // x += 2
             checkIndex++; // Увеличиваем индекс цвета
             countText++;
         }

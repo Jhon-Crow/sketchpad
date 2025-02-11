@@ -303,7 +303,6 @@ const Canvas = ({
     function caretMoveLeft() {
         if (caretPosition.character > 0) {
             caretPosition.character--;
-            console.log(caretPosition.character)
         } else if (caretPosition.line > 0) {
             caretPosition.line--;
             caretPosition.character = textArr[caretPosition.line].length;
@@ -311,12 +310,9 @@ const Canvas = ({
     }
 
     function caretMoveRight() {
-        // todo вроде работает правильно
         if (caretPosition.character < textArr[caretPosition.line].length) {
             caretPosition.character++;
-            // console.log(caretPosition.character)
         } else if (caretPosition.line < textArr[caretPosition.line].length - 1 && textArr[caretPosition.line+1]) {
-            // console.log(caretPosition.character)
             caretPosition.line++;
             caretPosition.character = 0;
         }
@@ -388,7 +384,7 @@ const Canvas = ({
                 textArr[caretPosition.line - 1] = [...previousLine, ...currentLine];
                 textArr.splice(caretPosition.line, 1);
                 caretPosition.line--;
-                caretPosition.character = previousLine.length; // Устанавливаем позицию каретки в конец новой строки
+                caretPosition.character = previousLine.length;
             }
 
 
@@ -396,18 +392,15 @@ const Canvas = ({
 
 
         } else if (direction === 'delete') {
-            // todo не работает
             // Удаление символа под кареткой
             if (caretPosition.character < currentLine.length) {
-                let newLine = currentLine.substring(0, caretPosition.character) + currentLine.substring(caretPosition.character + 1);
-                let newLines = textArrToLines(textArr).map((line, index) => index === caretPosition.line ? newLine : line);
-                textArr = newLines.map((line, index) => ({ text: line, color: textArr[index]?.color || 'default' })); // Сохраняем цвет
-            } else if (caretPosition.line < textArrToLines(textArr).length - 1) {
+                // Удаляем символ под курсором
+                currentLine.splice(caretPosition.character, 1);
+            } else if (caretPosition.line < textArr.length - 1) {
                 // Объединяем текущую строку с следующей
-                let nextLine = textArrToLines(textArr, caretPosition.line + 1);
-                let newCurrentLine = currentLine + nextLine; // Объединяем строки
-                let newLines = textArrToLines(textArr).map((line, index) => index === caretPosition.line ? newCurrentLine : (index === caretPosition.line + 1 ? '' : line));
-                textArr = newLines.map((line, index) => ({ text: line, color: textArr[index]?.color || 'default' })); // Сохраняем цвет
+                let nextLine = textArr[caretPosition.line + 1];
+                currentLine.push(...nextLine); // Объединяем строки
+                textArr.splice(caretPosition.line + 1, 1); // Удаляем следующую строку
             }
         }
     }
@@ -484,23 +477,31 @@ const Canvas = ({
 
 
     function ctrlArrowJumpAction (direction){
-        // todo скачет по краям строки а не по словам
-        let currentLine = textArr[caretPosition.line];
+        // todo сделать чтоб скакала через любое кол-во пробелов
+        const currentLine = textArr[caretPosition.line];
+        let lineStr = currentLine.map(i => i.text).join('');
         let wordEndIndex;
-        if (direction === 'left'){
-            wordEndIndex = currentLine.lastIndexOf(' ', caretPosition.character - 1);
-            if (wordEndIndex === -1) {
-                wordEndIndex = 0;
-            } else if(caretPosition.character - wordEndIndex !== 1){
-                wordEndIndex++;
+        if (direction === 'left') {
+            let searchStr = lineStr.slice(0, caretPosition.character);
+            if (!searchStr.trim().length || caretPosition.character === 0) {
+                wordEndIndex = -1
+            }else {
+                wordEndIndex = searchStr.lastIndexOf(' ', caretPosition.character)+1;
+                if (caretPosition.character === -1) return;
+            }
+            if (caretPosition.character === wordEndIndex){
+                const letterToFind = searchStr.trimEnd().slice(-1);
+                wordEndIndex = searchStr.lastIndexOf(letterToFind, caretPosition) + 1;
             }
         }
         if (direction === 'right'){
-            wordEndIndex = currentLine.indexOf(' ', caretPosition.character);
+            // todo прилипает к левой стенке если рядом нет лова
+            wordEndIndex = lineStr.indexOf(' ', caretPosition.character);
             if (wordEndIndex === -1) {
                 wordEndIndex = currentLine.length;
-            }  else if(caretPosition.character === wordEndIndex){
-                wordEndIndex++;
+            } else if(caretPosition.character === wordEndIndex){
+                const letterToFind = lineStr.slice(caretPosition.character, lineStr.length).trimStart();
+                wordEndIndex = lineStr.indexOf(letterToFind, caretPosition.character);
             }
         }
         caretPosition.character = wordEndIndex;

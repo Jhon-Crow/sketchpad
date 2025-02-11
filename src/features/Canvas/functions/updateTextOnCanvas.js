@@ -72,6 +72,8 @@ export function updateTextOnCanvas(
     }
 
     calculateCaretPosition();
+    // todo добавить автоперенос
+
     if (!isDrawing) {
         // console.log(caretX, caretY)
         ctx.fillStyle = fontColor;

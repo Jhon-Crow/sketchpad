@@ -349,32 +349,20 @@ const Canvas = ({
                     const beforeCaret = currentLine.slice(0, caretPosition.character);
                     const afterCaret = currentLine.slice(caretPosition.character);
                     textArr[caretPosition.line] = [...beforeCaret, itemToArr, ...afterCaret];
-                // todo добавить автоперенос
 
             }
             caretPosition.character++;
         calculateCaretPosition()
+        // todo добавить автоперенос
+
     }
 
     function onTabAction(){
-        // addLetter('    ');
-        doSeveralTimes(() => addLetter(' '), 4)
-        // caretPosition.character += 3;
+        doSeveralTimes(() => addLetter(' '), 4);
     }
-
-
-    // function deleteCharacter(direction) {
-    //     console.log('deleteCharacter, direction = ', direction)
-    // }
 
     function deleteCharacter(direction) {
         let currentLine = textArr[caretPosition.line];
-
-
-
-
-
-
         if (direction === 'backspace') {
             if (caretPosition.character > 0) {
                 currentLine.splice(caretPosition.character - 1, 1);
@@ -386,11 +374,6 @@ const Canvas = ({
                 caretPosition.line--;
                 caretPosition.character = previousLine.length;
             }
-
-
-
-
-
         } else if (direction === 'delete') {
             // Удаление символа под кареткой
             if (caretPosition.character < currentLine.length) {
@@ -408,7 +391,9 @@ const Canvas = ({
     function calculateCaretPosition() {
         let currentLine = textArr[caretPosition.line]?.map(i => i.text).join('') || '';
 
-        // todo проитерироваться по строке и считать размер с учётом фонтФэмли
+        //todo проитерироваться по строке и считать размер с учётом фонтФэмли
+        // возможно сравнивать позицию каретки с размером холста
+        //
         let caretMeasurement = ctx.measureText(currentLine.substring(0, caretPosition.character));
         caretX = textX + caretMeasurement.width;
 
@@ -477,7 +462,6 @@ const Canvas = ({
 
 
     function ctrlArrowJumpAction (direction){
-        // todo сделать чтоб скакала через любое кол-во пробелов
         const currentLine = textArr[caretPosition.line];
         let lineStr = currentLine.map(i => i.text).join('');
         let wordEndIndex;

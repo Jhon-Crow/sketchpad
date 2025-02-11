@@ -43,27 +43,30 @@ function App() {
   return (
     <div className={cls.App}>
         {/*TODO удалить при релизе если не доведу до ума*/}
-        <Select
-            value={fontFamily}
-            onChange={setFontFamily}
-            options={fontsDefault} fontColor={fontColor}/>
+        {/*<Select*/}
+        {/*    value={fontFamily}*/}
+        {/*    onChange={setFontFamily}*/}
+        {/*    options={fontsDefault} fontColor={fontColor}/>*/}
         <Palette
             setPenColor={setPenColor}
             setFontColor={setFontColor}
         />
-        <div style={{
-            display: 'flex',
-            alignItems: "center",
-            width: '163.09px',
-            backgroundColor: 'var(--canvas-color)',
-            justifyContent: "center",
-            borderRadius: '28px',
-            boxShadow: 'var(--shadow)'
-        }}>
 
-            <SizeInput color={fontColor} value={fontSize} />
-            <SizeInput color={penColor} value={penSize} onChange={setPenSize}/>
-        </div>
+        {/*<div style={{*/}
+        {/*    display: 'flex',*/}
+        {/*    alignItems: "center",*/}
+        {/*    width: '163.09px',*/}
+        {/*    backgroundColor: 'var(--canvas-color)',*/}
+        {/*    justifyContent: "center",*/}
+        {/*    borderRadius: '28px',*/}
+        {/*    boxShadow: 'var(--shadow)'*/}
+        {/*}}>*/}
+
+        {/*    <SizeInput color={fontColor} value={fontSize} />*/}
+        {/*    <SizeInput color={penColor} value={penSize} onChange={setPenSize}/>*/}
+        {/*</div>*/}
+
+
         <CapsLockIdentifier capsLockPressed={capsLockPressed}/>
         <ThemeSwitcher
             setIsDark={setIsDark}

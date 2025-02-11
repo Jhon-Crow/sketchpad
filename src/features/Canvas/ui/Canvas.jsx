@@ -301,13 +301,12 @@ const Canvas = ({
 
 
     function caretMoveLeft() {
-        // todo при переносе на пред. строку caretPosition.character = 0, а так не надо
         if (caretPosition.character > 0) {
             caretPosition.character--;
             console.log(caretPosition.character)
         } else if (caretPosition.line > 0) {
             caretPosition.line--;
-            caretPosition.character = textArrToLines(textArr, caretPosition.line).length;
+            caretPosition.character = textArr[caretPosition.line].length;
         }
     }
 
@@ -463,7 +462,7 @@ const Canvas = ({
     }
 
     function enterKeyAction() {
-       if (!textArr.length) textArr.push([])
+       if (!textArr.length) textArr.push([]);
         // Получаем текущую строку
         const currentLine = textArr[caretPosition.line];
 

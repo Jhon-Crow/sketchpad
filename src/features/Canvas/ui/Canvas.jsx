@@ -323,18 +323,16 @@ const Canvas = ({
     }
 
     function caretMoveUp() {
-        // todo сделать чтоб надёжно работало
         if (caretPosition.line > 0) {
             caretPosition.line--;
-            caretPosition.character = Math.min(caretPosition.character, textArrToLines(textArr, caretPosition.line).length);
+            caretPosition.character = Math.min(caretPosition.character, textArr[caretPosition.line].length);
         }
     }
 
     function caretMoveDown() {
-        // todo сделать чтоб надёжно работало
-        if (caretPosition.line < textArrToLines(textArr).length - 1) {
+        if (caretPosition.line < textArr.length - 1) {
             caretPosition.line++;
-            caretPosition.character = Math.min(caretPosition.character, textArrToLines(textArr, caretPosition.line).length);
+            caretPosition.character = Math.min(caretPosition.character, textArr[caretPosition.line].length);
         }
     }
 
@@ -348,14 +346,15 @@ const Canvas = ({
                 line: caretPosition.line,
                 character: caretPosition.character
             };
-            if (!textArr.length || textArr[textArr.length - 1] === lineLengthLimit){
-                // todo проверить автоперенос
+            if (!textArr.length){
                 textArr.push([itemToArr]);
             } else {
                     const currentLine = textArr[caretPosition.line];
                     const beforeCaret = currentLine.slice(0, caretPosition.character);
                     const afterCaret = currentLine.slice(caretPosition.character);
                     textArr[caretPosition.line] = [...beforeCaret, itemToArr, ...afterCaret];
+                // todo добавить автоперенос
+
             }
             caretPosition.character++;
         calculateCaretPosition()
@@ -373,29 +372,31 @@ const Canvas = ({
     // }
 
     function deleteCharacter(direction) {
-        // todo не работает
-        let currentLine = textArrToLines(textArr, caretPosition.line);
+        let currentLine = textArr[caretPosition.line];
+
+
+
+
+
 
         if (direction === 'backspace') {
-            // Удаление символа перед кареткой
             if (caretPosition.character > 0) {
-                // Формируем текст до и после позиции каретки
-                let newLine = currentLine.substring(0, caretPosition.character - 1) + currentLine.substring(caretPosition.character);
-                let newLines = textArrToLines(textArr).map((line, index) => index === caretPosition.line ? newLine : line);
-                textArr = newLines.map((line, index) => ({ text: line, color: textArr[index]?.color || 'default' })); // Сохраняем цвет
-
-                caretPosition.character--; // Уменьшаем позицию каретки
+                currentLine.splice(caretPosition.character - 1, 1);
+                caretPosition.character--;
             } else if (caretPosition.line > 0) {
-                // Объединяем текущую строку с предыдущей
-                let previousLine = textArrToLines(textArr, caretPosition.line - 1);
-                let newPreviousLine = previousLine + currentLine; // Объединяем строки
-                let newLines = textArrToLines(textArr).map((line, index) => index === caretPosition.line - 1 ? newPreviousLine : (index === caretPosition.line ? '' : line));
-                textArr = newLines.map((line, index) => ({ text: line, color: textArr[index]?.color || 'default' })); // Сохраняем цвет
-
-                caretPosition.line--; // Переход к предыдущей строке
-                caretPosition.character = newPreviousLine.length; // Устанавливаем позицию каретки в конец новой строки
+                let previousLine = textArr[caretPosition.line - 1];
+                textArr[caretPosition.line - 1] = [...previousLine, ...currentLine];
+                textArr.splice(caretPosition.line, 1);
+                caretPosition.line--;
+                caretPosition.character = previousLine.length; // Устанавливаем позицию каретки в конец новой строки
             }
+
+
+
+
+
         } else if (direction === 'delete') {
+            // todo не работает
             // Удаление символа под кареткой
             if (caretPosition.character < currentLine.length) {
                 let newLine = currentLine.substring(0, caretPosition.character) + currentLine.substring(caretPosition.character + 1);

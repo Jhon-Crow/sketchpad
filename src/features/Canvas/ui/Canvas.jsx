@@ -12,6 +12,7 @@ const coordsDisabled = [];
 
 let textArr = [];
 
+// const textHistory = [];
 const textHistory = [{'text': '', 'caretPosition': {line: 0, character: 0} }];
 let textHistoryIndex = 0;
 const keysDontPrint = ['Tab', 'Shift', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'F12', 'F5', 'CapsLock', 'Meta'];
@@ -160,7 +161,11 @@ const Canvas = ({
     }
 
     function loadFromHistory(textHistoryIndex){
-        console.log('loadFromHistory, textHistoryIndex = ',textHistoryIndex )
+        // console.log('loadFromHistory, textHistoryIndex = ',textHistoryIndex )
+        console.log(textHistory[textHistoryIndex].text)
+        textArr = textHistory[textHistoryIndex].text;
+        caretPosition = textHistory[textHistoryIndex].caretPosition;
+
     }
     //todo понять как это должно работать (сохранять весь стэйт может?)
 
@@ -174,17 +179,16 @@ const Canvas = ({
     // }
 
     function saveToHistory(){
+       // todo добавить проверку на беспольезное сохранение (когда 2 раза подряд сохраняю пустой текст)
+       let textArrToPush = structuredClone(textArr);
         textHistory.push({
-            // todo возможно тут нужно будет кастовать в строку
-            text: textArr,
+            text: textArrToPush,
             caretPosition: {
                 line: caretPosition.line,
                 character: caretPosition.character
             }
-            // ,colorAndIndex: [...colorAndIndex]
         });
         textHistoryIndex++;
-        // console.log(textHistory)
     }
 
     function onKeyDownSwitch(e) {
@@ -266,11 +270,11 @@ const Canvas = ({
             ArrowDown: () => caretMoveDown(),
             Backspace: () => {
                 deleteCharacter('backspace');
-                saveToHistory();
+                // saveToHistory();
             },
             Delete: () => {
                 deleteCharacter('delete');
-                saveToHistory();
+                // saveToHistory();
             }
         }
         return keys[eKey] ? keys[eKey]() : defaultKeyPressCase(eKey)
@@ -362,6 +366,7 @@ const Canvas = ({
     }
 
     function deleteCharacter(direction) {
+
         let currentLine = textArr[caretPosition.line];
         if (direction === 'backspace') {
             if (caretPosition.character > 0) {
@@ -386,7 +391,8 @@ const Canvas = ({
                 textArr.splice(caretPosition.line + 1, 1); // Удаляем следующую строку
             }
         }
-    }
+        saveToHistory();
+   }
 
     function calculateCaretPosition() {
         let currentLine = textArr[caretPosition.line]?.map(i => i.text).join('') || '';

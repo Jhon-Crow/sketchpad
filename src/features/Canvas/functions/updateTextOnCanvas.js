@@ -1,6 +1,4 @@
-import {textArrToLines} from "./textArrToLines.js";
-
-   export function checkLinesLimit(action, textArr, saveToHistory, linesLimit) {
+export function checkLinesLimit(action, textArr, saveToHistory, linesLimit) {
         if (textArr.length > linesLimit - 1) {
             alert('no space on page!\n' +
                 'input blocked');

@@ -45,7 +45,7 @@ const Canvas = ({
     const coordsDisabledLimit = 10000;
 
     let linesLimit = window.innerHeight / (fontSize * 1.5);
-    const lineLengthLimit = 30;
+    const lineLengthLimit = window.innerWidth / (fontSize - 2);
 
     // const drawBg = (ctx) => {
     //     ctx.fillStyle = isLight ? '#F2F0E7FF' : '#2A2A2B';
@@ -161,22 +161,10 @@ const Canvas = ({
     }
 
     function loadFromHistory(textHistoryIndex){
-        // console.log('loadFromHistory, textHistoryIndex = ',textHistoryIndex )
-        console.log(textHistory[textHistoryIndex].text)
         textArr = textHistory[textHistoryIndex].text;
         caretPosition = textHistory[textHistoryIndex].caretPosition;
-
     }
-    //todo понять как это должно работать (сохранять весь стэйт может?)
 
-    // логика та же что и с текстом
-    // function loadFromHistory(textHistoryIndex){
-    //     text = textHistory[textHistoryIndex].text;
-    //     caretPosition = textHistory[textHistoryIndex].caretPosition;
-    //     if (textHistory[textHistoryIndex].colorAndIndex[0].color !== 'default'){
-    //         setColorAndIndex(textHistory[textHistoryIndex].colorAndIndex);
-    //     }
-    // }
 
     function saveToHistory(){
        // todo добавить проверку на беспольезное сохранение (когда 2 раза подряд сохраняю пустой текст)
@@ -240,6 +228,7 @@ const Canvas = ({
     }
 
     function ctrlZAction(e) {
+        // todo при ctrl+v => ctrl+z ломается textArr
         if ((coords.length && coordsDisabled.length < coordsDisabledLimit) && e.getModifierState('CapsLock')){
                         coordsDisabled.push(coords?.pop());
                     } else if (textHistoryIndex > 0 && !e.getModifierState('CapsLock')) {
@@ -287,23 +276,6 @@ const Canvas = ({
         }
     }
 
-//todo it
-//     function checkLinesLimit(action) {
-//         if (textArrToLines(textArr).length > linesLimit - 1) {
-//             alert('no space on page!\n' +
-//                 'input blocked');
-//             return false;
-//         } else {
-//             if (action){
-//                 action();
-//                 saveToHistory();
-//             }
-//             return true;
-//         }
-//     }
-
-
-
     function caretMoveLeft() {
         if (caretPosition.character > 0) {
             caretPosition.character--;
@@ -337,7 +309,12 @@ const Canvas = ({
     }
 
     function addLetter(letter){
-        // todo добавить проверку на лимит строки
+       function simpleAddLetter(){
+           const currentLine = textArr[caretPosition.line];
+           const beforeCaret = currentLine.slice(0, caretPosition.character);
+           const afterCaret = currentLine.slice(caretPosition.character);
+           textArr[caretPosition.line] = [...beforeCaret, itemToArr, ...afterCaret];
+       }
             let itemToArr = {
                 text: letter,
                 color: fontColor,
@@ -349,16 +326,13 @@ const Canvas = ({
             if (!textArr.length){
                 textArr.push([itemToArr]);
             } else {
-                    const currentLine = textArr[caretPosition.line];
-                    const beforeCaret = currentLine.slice(0, caretPosition.character);
-                    const afterCaret = currentLine.slice(caretPosition.character);
-                    textArr[caretPosition.line] = [...beforeCaret, itemToArr, ...afterCaret];
-
+                if (textArr[caretPosition.line].length >= lineLengthLimit) {
+                    enterKeyAction();
+                }
+                simpleAddLetter();
             }
             caretPosition.character++;
         calculateCaretPosition()
-        // todo добавить автоперенос
-
     }
 
     function onTabAction(){
@@ -421,11 +395,12 @@ const Canvas = ({
     // }
 
     function pastText(callback){
-        // todo надо правильно распределить строки
         getPasteText().then(str => {
-            addLetter(str);
-            caretPosition.character--;
-            calculateCaretPosition();
+            str = str.trimStart();
+            for (let i = 0; i < str.length; i++){
+                addLetter(str[i]);
+            }
+            // caretPosition.character--;
             updateTextOnCanvas(
                 textArr,
                 ctx,
@@ -444,6 +419,7 @@ const Canvas = ({
                 fontColor);
             callback();
         })
+        // calculateCaretPosition();
     }
 
     function enterKeyAction() {
@@ -485,7 +461,7 @@ const Canvas = ({
             }
         }
         if (direction === 'right'){
-            // todo прилипает к левой стенке если рядом нет лова
+            // todo прилипает к левой стенке если рядом нет cлова
             wordEndIndex = lineStr.indexOf(' ', caretPosition.character);
             if (wordEndIndex === -1) {
                 wordEndIndex = currentLine.length;
@@ -498,12 +474,28 @@ const Canvas = ({
     }
 
     async function getPasteText() {
+       if (!navigator.clipboard) return getPasteTextWithAlert();
+
         try {
             return await navigator.clipboard.readText();
         } catch (error) {
         console.error('Error reading from clipboard:', error);
         }
     }
+
+    function getPasteTextWithAlert() {
+        // Запрашиваем пользователя вставить текст
+        const pastedText = prompt("Пожалуйста, вставьте текст, который вы скопировали:", "");
+
+        if (pastedText !== null) {
+            // Если пользователь ввел текст, возвращаем его
+            return pastedText;
+        } else {
+            // Если пользователь отменил ввод
+            return 'Ввод отменен';
+        }
+    }
+
 
     const savePng = () => {
         canvasData = canvas.toDataURL('image/png');

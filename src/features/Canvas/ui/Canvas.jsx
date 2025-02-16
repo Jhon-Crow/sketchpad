@@ -45,7 +45,7 @@ const Canvas = ({
     const coordsDisabledLimit = 10000;
 
     let linesLimit = window.innerHeight / (fontSize * 1.5);
-    const lineLengthLimit = window.innerWidth / (fontSize - 2);
+    const lineLengthLimit = Math.floor(window.innerWidth / (fontSize - 2));
 
     // const drawBg = (ctx) => {
     //     ctx.fillStyle = isLight ? '#F2F0E7FF' : '#2A2A2B';

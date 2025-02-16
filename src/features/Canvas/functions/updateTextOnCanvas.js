@@ -37,43 +37,27 @@ export function updateTextOnCanvas(
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     drawBg(ctx);
 
-
-    // Получаем массив строк и массив цветов
-
-    // let colors = textArr.flatMap(item => item.text.split('').map(() => item.color)); // Получаем массив цветов для каждого символа
-
-    // console.log(textArr, lines)
-
     let y = textY;
-    // let countText = 0;
-    // let checkIndex = 0;
 
     for (let i = 0; i < textArr.length; i++) {
         let x = textX;
 
         for (let j = 0; j < textArr[i].length; j++) {
-            // Устанавливаем цвет для текущего символа
             ctx.fillStyle = textArr[i][j].color;
 
             ctx.font = textArr[i][j].fontSize + 'px ' + textArr[i][j].fontFamily;
 
-
-            // Рисуем символ
             ctx.fillText(textArr[i][j].text, x, y);
             let charWidth = ctx.measureText(textArr[i][j].text).width;
             x += charWidth; // Смещаем x для следующего символа
-            // checkIndex++; // Увеличиваем индекс цвета
-            // countText++;
         }
 
         y += fontSize + 5; // Переход на следующую строку
     }
 
     calculateCaretPosition();
-    // todo добавить автоперенос
 
     if (!isDrawing) {
-        // console.log(caretX, caretY)
         ctx.fillStyle = fontColor;
         ctx.fillRect(caretX, caretY - fontSize, 1, fontSize); // Рисуем каретку
     }

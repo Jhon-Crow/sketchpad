@@ -15,6 +15,8 @@ let textArr = [];
 const textHistory = [{'text': [[{character: 0, color: 'black', fontFamily: 'Courier', fontSize: 16, line: 0, text: ''}]], 'caretPosition': {line: 0, character: 0} }];
 let textHistoryIndex = 0;
 const keysDontPrint = ['Tab', 'Shift', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'F12', 'F5', 'CapsLock', 'Meta'];
+const delDirections = {back: 'backspace', forward: 'delete'};
+
 
 let textX = 10;
 let textY = 20;
@@ -167,7 +169,7 @@ const Canvas = ({
 
 
     function saveToHistory(){
-       // todo добавить проверку на беспольезное сохранение (когда 2 раза подряд сохраняю пустой текст)
+       // todo UPDATE добавить проверку на беспольезное сохранение (когда 2 раза подряд сохраняю пустой текст)
        let textArrToPush = structuredClone(textArr);
         textHistory.push({
             text: textArrToPush,
@@ -207,12 +209,15 @@ const Canvas = ({
     }
 
     function withCtrlSwitchCase(eKeyCode, e){
+        console.log(eKeyCode)
         const keyCodes = {
             37: () => ctrlArrowJumpAction('left'),
             39: () => ctrlArrowJumpAction('right'),
             86: () => ctrlVAction(e),
             90: () => ctrlZAction(e),
-            89: () => ctrlYAction(e)
+            89: () => ctrlYAction(e),
+            8: () => ctrlDeleteAction(delDirections.back),
+            46: () => ctrlDeleteAction(delDirections.forward)
         }
         return keyCodes[eKeyCode] ? keyCodes[eKeyCode]() : null;
     }
@@ -229,7 +234,7 @@ const Canvas = ({
     }
 
     function ctrlZAction(e) {
-        // todo добавить восстановление позиции каретки
+        // todo UPDATE добавить восстановление позиции каретки
         if ((coords.length && coordsDisabled.length < coordsDisabledLimit) && e.getModifierState('CapsLock')){
                         coordsDisabled.push(coords?.pop());
                     } else if (textHistoryIndex > 0 && !e.getModifierState('CapsLock')) {
@@ -248,6 +253,7 @@ const Canvas = ({
                 }
     }
 
+
     function ctrllessSwitchCase(eKey, e) {
         const keys = {
             Enter: () => checkLinesLimit(enterKeyAction,textArr, saveToHistory, linesLimit),
@@ -260,12 +266,10 @@ const Canvas = ({
             ArrowUp: () => caretMoveUp(),
             ArrowDown: () => caretMoveDown(),
             Backspace: () => {
-                deleteCharacter('backspace');
-                // saveToHistory();
+                deleteCharacter(delDirections.back);
             },
             Delete: () => {
-                deleteCharacter('delete');
-                // saveToHistory();
+                deleteCharacter(delDirections.forward);
             }
         }
         return keys[eKey] ? keys[eKey]() : defaultKeyPressCase(eKey)
@@ -343,9 +347,8 @@ const Canvas = ({
     }
 
     function deleteCharacter(direction) {
-
         let currentLine = textArr[caretPosition.line];
-        if (direction === 'backspace') {
+        if (direction === delDirections.back) {
             if (caretPosition.character > 0) {
                 currentLine.splice(caretPosition.character - 1, 1);
                 caretPosition.character--;
@@ -356,7 +359,7 @@ const Canvas = ({
                 caretPosition.line--;
                 caretPosition.character = previousLine.length;
             }
-        } else if (direction === 'delete') {
+        } else if (direction === delDirections.forward) {
             // Удаление символа под кареткой
             if (caretPosition.character < currentLine.length) {
                 // Удаляем символ под курсором
@@ -371,10 +374,29 @@ const Canvas = ({
         saveToHistory();
    }
 
+   function ctrlDeleteAction(direction){
+        // todo ловить баги!!!
+        if (direction === delDirections.back){
+            const endIndex = caretPosition.character;
+            ctrlArrowJumpAction('left');
+            const startIndex = caretPosition.character;
+            textArr[caretPosition.line].splice(startIndex, endIndex - startIndex);
+            saveToHistory();
+        }
+        if (direction === delDirections.forward){
+            const startIndex = caretPosition.character;
+            ctrlArrowJumpAction('right');
+            const endIndex = caretPosition.character;
+            textArr[caretPosition.line].splice(startIndex, endIndex - startIndex)
+            caretPosition.character = startIndex;
+            saveToHistory();
+        }
+   }
+
     function calculateCaretPosition() {
         let currentLine = textArr[caretPosition.line]?.map(i => i.text).join('') || '';
 
-        //todo проитерироваться по строке и считать размер с учётом фонтФэмли
+        //todo UPDATE проитерироваться по строке и считать размер с учётом фонтФэмли
         // возможно сравнивать позицию каретки с размером холста
         //
         let caretMeasurement = ctx.measureText(currentLine.substring(0, caretPosition.character));
@@ -465,7 +487,7 @@ const Canvas = ({
             }
         }
         if (direction === 'right'){
-            // todo прилипает к левой стенке если рядом нет cлова
+            // todo FIX прилипает к левой стенке если рядом нет cлова
             wordEndIndex = lineStr.indexOf(' ', caretPosition.character);
             if (wordEndIndex === -1) {
                 wordEndIndex = currentLine.length;

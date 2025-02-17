@@ -229,12 +229,13 @@ const Canvas = ({
     }
 
     function ctrlZAction(e) {
+        // todo добавить восстановление позиции каретки
         if ((coords.length && coordsDisabled.length < coordsDisabledLimit) && e.getModifierState('CapsLock')){
                         coordsDisabled.push(coords?.pop());
                     } else if (textHistoryIndex > 0 && !e.getModifierState('CapsLock')) {
                         textHistoryIndex--;
                         loadFromHistory(textHistoryIndex);
-                        console.log(textArr, typeof textArr)
+                        // console.log(textArr, typeof textArr)
                     }
     }
 
@@ -400,9 +401,12 @@ const Canvas = ({
         getPasteText().then(str => {
             str = str.trimStart();
             for (let i = 0; i < str.length; i++){
-                addLetter(str[i]);
+                if (str[i] === '\n'){
+                    checkLinesLimit(enterKeyAction,textArr, saveToHistory, linesLimit);
+                } else {
+                    addLetter(str[i]);
+                }
             }
-            // caretPosition.character--;
             updateTextOnCanvas(
                 textArr,
                 ctx,
@@ -412,7 +416,6 @@ const Canvas = ({
                 fontFamily,
                 textY,
                 textX,
-                // colorAndIndex,
                 isDrawing,
                 redraw,
                 calculateCaretPosition,
@@ -421,7 +424,6 @@ const Canvas = ({
                 fontColor);
             callback();
         })
-        // calculateCaretPosition();
     }
 
     function enterKeyAction() {

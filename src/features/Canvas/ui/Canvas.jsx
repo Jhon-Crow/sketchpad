@@ -12,8 +12,7 @@ const coordsDisabled = [];
 
 let textArr = [];
 
-// const textHistory = [];
-const textHistory = [{'text': '', 'caretPosition': {line: 0, character: 0} }];
+const textHistory = [{'text': [[{character: 0, color: 'black', fontFamily: 'Courier', fontSize: 16, line: 0, text: ''}]], 'caretPosition': {line: 0, character: 0} }];
 let textHistoryIndex = 0;
 const keysDontPrint = ['Tab', 'Shift', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'F12', 'F5', 'CapsLock', 'Meta'];
 
@@ -161,6 +160,7 @@ const Canvas = ({
     }
 
     function loadFromHistory(textHistoryIndex){
+        console.log(textArr, textHistory[textHistoryIndex])
         textArr = textHistory[textHistoryIndex].text;
         caretPosition = textHistory[textHistoryIndex].caretPosition;
     }
@@ -176,6 +176,7 @@ const Canvas = ({
                 character: caretPosition.character
             }
         });
+        console.log(textArrToPush)
         textHistoryIndex++;
     }
 
@@ -228,12 +229,12 @@ const Canvas = ({
     }
 
     function ctrlZAction(e) {
-        // todo при ctrl+v => ctrl+z ломается textArr
         if ((coords.length && coordsDisabled.length < coordsDisabledLimit) && e.getModifierState('CapsLock')){
                         coordsDisabled.push(coords?.pop());
                     } else if (textHistoryIndex > 0 && !e.getModifierState('CapsLock')) {
                         textHistoryIndex--;
                         loadFromHistory(textHistoryIndex);
+                        console.log(textArr, typeof textArr)
                     }
     }
 
@@ -309,6 +310,7 @@ const Canvas = ({
     }
 
     function addLetter(letter){
+        console.log(typeof textArr)
        function simpleAddLetter(){
            const currentLine = textArr[caretPosition.line];
            const beforeCaret = currentLine.slice(0, caretPosition.character);

@@ -10,13 +10,14 @@ let ctx;
 const coords = [];
 const coordsDisabled = [];
 
-let textArr = [];
+// let textArr = [];
 
 const textHistory = [{'text': [[{character: 0, color: 'black', fontFamily: 'Courier', fontSize: 16, line: 0, text: ''}]], 'caretPosition': {line: 0, character: 0} }];
 let textHistoryIndex = 0;
 const keysDontPrint = ['Tab', 'Shift', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'F12', 'F5', 'CapsLock', 'Meta'];
 const delDirections = {back: 'backspace', forward: 'delete'};
-
+// todo BEFORE PULL -> RELEASE branch
+//  отрефакторить код!
 
 let textX = 10;
 let textY = 20;
@@ -38,6 +39,7 @@ const Canvas = ({
         width: window.innerWidth,
         height: window.innerHeight,
     });
+    let [textArr, _] = useState([]);
     const canvasRef = useRef(null);
     let canvasData;
     let link;
@@ -209,7 +211,7 @@ const Canvas = ({
     }
 
     function withCtrlSwitchCase(eKeyCode, e){
-        console.log(eKeyCode)
+        // console.log(eKeyCode)
         const keyCodes = {
             37: () => ctrlArrowJumpAction('left'),
             39: () => ctrlArrowJumpAction('right'),
@@ -223,6 +225,7 @@ const Canvas = ({
     }
 
     function ctrlVAction(e){
+        // todo FIX позиция каретки обновляется не сразу после вставки, а только после нажатия стрелки
         if (textArrToLines(textArr).length > linesLimit - 1){
                         e.stopPropagation();
                         e.preventDefault();
@@ -230,7 +233,7 @@ const Canvas = ({
                             'input blocked')
                     } else {
                         pastText(saveToHistory);
-                    }
+        }
     }
 
     function ctrlZAction(e) {
@@ -363,6 +366,8 @@ const Canvas = ({
             // Удаление символа под кареткой
             if (caretPosition.character < currentLine.length) {
                 // Удаляем символ под курсором
+                if (caretPosition.character === -1) caretPosition.character = 0;
+                console.log(caretPosition.character)
                 currentLine.splice(caretPosition.character, 1);
             } else if (caretPosition.line < textArr.length - 1) {
                 // Объединяем текущую строку с следующей
@@ -375,7 +380,8 @@ const Canvas = ({
    }
 
    function ctrlDeleteAction(direction){
-        // todo ловить баги!!!
+        // todo FIX ловить баги!!! вероятно срабатывает и обычное удаление
+        //
         if (direction === delDirections.back){
             const endIndex = caretPosition.character;
             ctrlArrowJumpAction('left');
@@ -384,6 +390,7 @@ const Canvas = ({
             saveToHistory();
         }
         if (direction === delDirections.forward){
+            if (caretPosition.character === -1) caretPosition.character = 0;
             const startIndex = caretPosition.character;
             ctrlArrowJumpAction('right');
             const endIndex = caretPosition.character;
@@ -443,7 +450,8 @@ const Canvas = ({
                 calculateCaretPosition,
                 caretX,
                 caretY,
-                fontColor);
+                fontColor
+            );
             callback();
         })
     }
@@ -487,14 +495,20 @@ const Canvas = ({
             }
         }
         if (direction === 'right'){
-            // todo FIX прилипает к левой стенке если рядом нет cлова
             wordEndIndex = lineStr.indexOf(' ', caretPosition.character);
-            if (wordEndIndex === -1) {
+            if (wordEndIndex === 0){
+                const letterToFind = lineStr.slice(caretPosition.character + 1, lineStr.length).trimStart();
+                wordEndIndex = lineStr.indexOf(letterToFind, caretPosition.character);
+            } else if (wordEndIndex === -1) {
                 wordEndIndex = currentLine.length;
-            } else if(caretPosition.character === wordEndIndex){
+            } else if(caretPosition.character === wordEndIndex && wordEndIndex < currentLine.length){
                 const letterToFind = lineStr.slice(caretPosition.character, lineStr.length).trimStart();
                 wordEndIndex = lineStr.indexOf(letterToFind, caretPosition.character);
+                if (!letterToFind) {
+                    wordEndIndex = currentLine.length;
+                }
             }
+
         }
         caretPosition.character = wordEndIndex;
     }

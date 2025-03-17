@@ -9,16 +9,12 @@ let ctx;
 const coords = [];
 const coordsDisabled = [];
 
-// let textArr = [];
-
 const textHistory = [{'text': [[{character: 0, color: 'black', fontFamily: 'Courier', fontSize: 16, line: 0, text: ''}]], 'caretPosition': {line: 0, character: 0} }];
 let textHistoryIndex = 0;
-// todo FIX история работает не правильно
-const keysDontPrint = ['Tab', 'Shift', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'F12', 'F5', 'CapsLock', 'Meta'];
+// const keysDontPrint = ['Esc', 'Alt', 'Tab', 'Shift', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'F12', 'F5', 'CapsLock', 'Meta'];
 const delDirections = {back: 'backspace', forward: 'delete'};
-// todo BEFORE PULL -> RELEASE branch
-//  отрефакторить код!
 
+// todo UPDATE ctrl+s сохранить png
 let textX = 10;
 let textY = 20;
 let caretX = textX;
@@ -41,8 +37,8 @@ const Canvas = ({
     });
     let [textArr, _] = useState([]);
     const canvasRef = useRef(null);
-    // const textHistoryIndexRef = useRef(null);
-    // let [textHistoryIndex, ] = useMemo(0);
+
+    const [, forceUpdate] = useReducer(x => x + 1, 0);
 
     let canvasData;
     let link;
@@ -52,11 +48,6 @@ const Canvas = ({
 
     let linesLimit = window.innerHeight / (fontSize * 1.5);
     const lineLengthLimit = Math.floor(window.innerWidth / (fontSize - 2));
-
-    // const drawBg = (ctx) => {
-    //     ctx.fillStyle = isLight ? '#F2F0E7FF' : '#2A2A2B';
-    //     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    // }
 
     useEffect(() => {
         canvas = canvasRef.current;
@@ -166,13 +157,7 @@ const Canvas = ({
         }
     }
 
-    const [, forceUpdate] = useReducer(x => x + 1, 0);
 
-    // function loadFromHistory(textHistoryIndex){
-    //     console.log(textArr, textHistory[textHistoryIndex])
-    //     caretPosition = textHistory[textHistoryIndex].caretPosition;
-    //     textArr = structuredClone(textHistory[textHistoryIndex].text);
-    // }
 
     function loadFromHistory(index) {
         // Обновляем состояние через новый массив
@@ -184,22 +169,6 @@ const Canvas = ({
         // Форсируем обновление интерфейса
         forceUpdate();
     }
-
-    // function saveToHistory(){
-    //    // todo UPDATE добавить проверку на беспольезное сохранение (когда 2 раза подряд сохраняю пустой текст)
-    //    let textArrToPush = structuredClone(textArr);
-    //     textHistory.push({
-    //         text: textArrToPush,
-    //         caretPosition: {
-    //             line: caretPosition.line,
-    //             character: caretPosition.character
-    //         }
-    //     });
-    //     console.log(textArrToPush)
-    //     textHistoryIndex = textHistory.length - 1;
-    // }
-
-
 
     function saveToHistory() {
         // Удаляем все записи после текущего индекса при наличии новых изменений
@@ -322,9 +291,12 @@ const Canvas = ({
     }
 
     function defaultKeyPressCase(eKey){
-        if (!keysDontPrint.includes(eKey) && checkLinesLimit(null,textArr, saveToHistory, linesLimit)) {
+        if (
+            // !keysDontPrint.includes(eKey)
+            eKey.length < 2 && checkLinesLimit(null,textArr, saveToHistory, linesLimit)) {
                 addLetter(eKey);
                 saveToHistory();
+            console.log(eKey.length)
         }
     }
 
@@ -361,7 +333,7 @@ const Canvas = ({
     }
 
     function addLetter(letter){
-        console.log(typeof textArr)
+        // console.log(typeof textArr)
        function simpleAddLetter(){
            const currentLine = textArr[caretPosition.line];
            const beforeCaret = currentLine.slice(0, caretPosition.character);
@@ -410,7 +382,7 @@ const Canvas = ({
             if (caretPosition.character < currentLine.length) {
                 // Удаляем символ под курсором
                 if (caretPosition.character === -1) caretPosition.character = 0;
-                console.log(caretPosition.character)
+                // console.log(caretPosition.character)
                 currentLine.splice(caretPosition.character, 1);
             } else if (caretPosition.line < textArr.length - 1) {
                 // Объединяем текущую строку с следующей

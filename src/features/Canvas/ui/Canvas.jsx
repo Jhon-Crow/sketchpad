@@ -5,9 +5,7 @@ import {checkLinesLimit, updateTextOnCanvas} from "../functions/updateTextOnCanv
 import {textArrToLines} from "../functions/textArrToLines.js";
 import {doSeveralTimes} from "../../../helpers/doSeveralTimes.js";
 
-let canvas;
-let ctx;
-const coords = [];
+// const coords = [];
 const coordsDisabled = [];
 const textHistory = [{'text': [[{character: 0, color: 'black', fontFamily: 'Courier', fontSize: 16, line: 0, text: ''}]], 'caretPosition': {line: 0, character: 0} }];
 let textHistoryIndex = 0;
@@ -32,12 +30,14 @@ const Canvas = ({
                     fontSize,
                     isLight,
                     setCapsLockPressed}) => {
+    const coords = useRef([]);
     const [canvasDimensions, setCanvasDimensions] = useState({
         width: window.innerWidth,
         height: window.innerHeight,
     });
     let [textArr, _] = useState([]);
     const canvasRef = useRef(null);
+    const ctxRef = useRef(null);
     let canvasData;
     let link;
     let isDrawing = false;
@@ -53,15 +53,15 @@ const Canvas = ({
     // }
 
     useEffect(() => {
-        canvas = canvasRef.current;
-        ctx = canvas.getContext('2d');
-        canvas.width = canvasDimensions.width / 1.32;
-        canvas.height = canvasDimensions.height / 1.05;
-        textWrapLimit = canvas.width / 6.5;
+        // canvas = canvasRef.current;
+        ctxRef.current = canvasRef.current.getContext('2d');
+        canvasRef.current.width = canvasDimensions.width / 1.32;
+        canvasRef.current.height = canvasDimensions.height / 1.05;
+        textWrapLimit = canvasRef.current.width / 6.5;
         updateTextOnCanvas(
             textArr,
-            ctx,
-            canvas,
+            ctxRef.current,
+            canvasRef.current,
             isLight,
             fontSize,
             fontFamily,
@@ -73,8 +73,10 @@ const Canvas = ({
             caretX,
             caretY,
             fontColor);
-        canvas.focus();
+        canvasRef.current.focus();
     }, [isLight, canvasDimensions])
+
+
 
     useEffect(() => {
         const handleResize = () => {
@@ -96,12 +98,12 @@ const Canvas = ({
         textY = fontSize * 1.5;
         caretX = textX;
         caretY = textY;
-        textWrapLimit = canvas.width / (fontSize * 1.5);
+        textWrapLimit = canvasRef.current.width / (fontSize * 1.5);
         linesLimit = window.innerHeight / (fontSize * 1.5);
         updateTextOnCanvas(
             textArr,
-            ctx,
-            canvas,
+            ctxRef.current,
+            canvasRef.current,
             isLight,
             fontSize,
             fontFamily,
@@ -116,46 +118,46 @@ const Canvas = ({
             fontColor);
     }, [fontSize]);
 
-   function redraw() {
-        ctx.beginPath();
-        coords.forEach(function(coord) {
+    function redraw() {
+        ctxRef.current.beginPath();
+        coords.current.forEach(function(coord) {
             if (coord === 'brake') {
-                ctx.stroke();
-                ctx.beginPath();
+                ctxRef.current.stroke();
+                ctxRef.current.beginPath();
             } else if (coord.includes('#')) {
-                ctx.strokeStyle = coord;
+                ctxRef.current.strokeStyle = coord;
             } else {
-                ctx.lineWidth = coord[2];
-                ctx.lineTo(coord[0], coord[1]);
+                ctxRef.current.lineWidth = coord[2];
+                ctxRef.current.lineTo(coord[0], coord[1]);
             }
         });
-        ctx.stroke();
+        ctxRef.current.stroke();
     }
 
     function startDrawing(e) {
-        coords.push(lineColor);
-        coords.push('brake');
+        coords.current.push(lineColor);
+        coords.current.push('brake');
         coordsDisabled.length = 0;
-        coords.push([e.offsetX, e.offsetY, Number(lineSize)]);
+        coords.current.push([e.offsetX, e.offsetY, Number(lineSize)]);
         isDrawing = true;
-        ctx.beginPath();
-        ctx.lineWidth = lineSize;
-        ctx.moveTo(e.offsetX, e.offsetY);
+        ctxRef.current.beginPath();
+        ctxRef.current.lineWidth = lineSize;
+        ctxRef.current.moveTo(e.offsetX, e.offsetY);
     }
 
     function draw(e) {
         if (!isDrawing) return;
-        ctx.strokeStyle = lineColor;
-        ctx.lineWidth = lineSize;
-        ctx.lineTo(e.offsetX, e.offsetY);
-        ctx.stroke();
-        coords.push([e.offsetX, e.offsetY, Number(lineSize)]);
+        ctxRef.current.strokeStyle = lineColor;
+        ctxRef.current.lineWidth = lineSize;
+        ctxRef.current.lineTo(e.offsetX, e.offsetY);
+        ctxRef.current.stroke();
+        coords.current.push([e.offsetX, e.offsetY, Number(lineSize)]);
     }
 
     function endDrawing() {
         if (isDrawing) {
-            coords.push('brake');
-            ctx.closePath();
+            coords.current.push('brake');
+            ctxRef.current.closePath();
             isDrawing = false;
         }
     }
@@ -168,8 +170,8 @@ const Canvas = ({
 
 
     function saveToHistory(){
-       // todo UPDATE добавить проверку на беспольезное сохранение (когда 2 раза подряд сохраняю пустой текст)
-       let textArrToPush = structuredClone(textArr);
+        // todo UPDATE добавить проверку на беспольезное сохранение (когда 2 раза подряд сохраняю пустой текст)
+        let textArrToPush = structuredClone(textArr);
         textHistory.push({
             text: textArrToPush,
             caretPosition: {
@@ -192,8 +194,8 @@ const Canvas = ({
 
         updateTextOnCanvas(
             textArr,
-            ctx,
-            canvas,
+            ctxRef.current,
+            canvasRef.current,
             isLight,
             fontSize,
             fontFamily,
@@ -208,6 +210,7 @@ const Canvas = ({
     }
 
     function withCtrlSwitchCase(eKeyCode, e){
+        // todo UPDATE добавить ctrl+S для сохранения png
         // console.log(eKeyCode)
         const keyCodes = {
             37: () => ctrlArrowJumpAction('left'),
@@ -224,33 +227,33 @@ const Canvas = ({
     function ctrlVAction(e){
         // todo fixed позиция каретки обновляется не сразу после вставки, а только после нажатия стрелки
         if (textArrToLines(textArr).length > linesLimit - 1){
-                        e.stopPropagation();
-                        e.preventDefault();
-                        alert('no space on page!\n' +
-                            'input blocked')
-                    } else {
-                        pastText(saveToHistory);
+            e.stopPropagation();
+            e.preventDefault();
+            alert('no space on page!\n' +
+                'input blocked')
+        } else {
+            pastText(saveToHistory);
         }
     }
 
     function ctrlZAction(e) {
         // todo UPDATE добавить восстановление позиции каретки
-        if ((coords.length && coordsDisabled.length < coordsDisabledLimit) && e.getModifierState('CapsLock')){
-                        coordsDisabled.push(coords?.pop());
-                    } else if (textHistoryIndex > 0 && !e.getModifierState('CapsLock')) {
-                        textHistoryIndex--;
-                        loadFromHistory(textHistoryIndex);
-                        // console.log(textArr, typeof textArr)
-                    }
+        if ((coords.current.length && coordsDisabled.length < coordsDisabledLimit) && e.getModifierState('CapsLock')){
+            coordsDisabled.push(coords.current?.pop());
+        } else if (textHistoryIndex > 0 && !e.getModifierState('CapsLock')) {
+            textHistoryIndex--;
+            loadFromHistory(textHistoryIndex);
+            // console.log(textArr, typeof textArr)
+        }
     }
 
     function ctrlYAction(e) {
         if (coordsDisabled.length && e.getModifierState('CapsLock')){
-                    coords?.push(coordsDisabled?.pop());
-                } else if (textHistoryIndex < textHistory.length - 1 && !e.getModifierState('CapsLock')) {
-                    textHistoryIndex++;
-                    loadFromHistory(textHistoryIndex);
-                }
+            coords.current?.push(coordsDisabled?.pop());
+        } else if (textHistoryIndex < textHistory.length - 1 && !e.getModifierState('CapsLock')) {
+            textHistoryIndex++;
+            loadFromHistory(textHistoryIndex);
+        }
     }
 
 
@@ -277,8 +280,8 @@ const Canvas = ({
 
     function defaultKeyPressCase(eKey){
         if (!keysDontPrint.includes(eKey) && checkLinesLimit(null,textArr, saveToHistory, linesLimit)) {
-                addLetter(eKey);
-                saveToHistory();
+            addLetter(eKey);
+            saveToHistory();
         }
     }
 
@@ -316,29 +319,29 @@ const Canvas = ({
 
     function addLetter(letter){
         console.log(typeof textArr)
-       function simpleAddLetter(){
-           const currentLine = textArr[caretPosition.line];
-           const beforeCaret = currentLine.slice(0, caretPosition.character);
-           const afterCaret = currentLine.slice(caretPosition.character);
-           textArr[caretPosition.line] = [...beforeCaret, itemToArr, ...afterCaret];
-       }
-            let itemToArr = {
-                text: letter,
-                color: fontColor,
-                fontFamily,
-                fontSize,
-                line: caretPosition.line,
-                character: caretPosition.character
-            };
-            if (!textArr.length){
-                textArr.push([itemToArr]);
-            } else {
-                if (textArr[caretPosition.line].length >= lineLengthLimit) {
-                    enterKeyAction();
-                }
-                simpleAddLetter();
+        function simpleAddLetter(){
+            const currentLine = textArr[caretPosition.line];
+            const beforeCaret = currentLine.slice(0, caretPosition.character);
+            const afterCaret = currentLine.slice(caretPosition.character);
+            textArr[caretPosition.line] = [...beforeCaret, itemToArr, ...afterCaret];
+        }
+        let itemToArr = {
+            text: letter,
+            color: fontColor,
+            fontFamily,
+            fontSize,
+            line: caretPosition.line,
+            character: caretPosition.character
+        };
+        if (!textArr.length){
+            textArr.push([itemToArr]);
+        } else {
+            if (textArr[caretPosition.line].length >= lineLengthLimit) {
+                enterKeyAction();
             }
-            caretPosition.character++;
+            simpleAddLetter();
+        }
+        caretPosition.character++;
         calculateCaretPosition()
     }
 
@@ -374,10 +377,10 @@ const Canvas = ({
             }
         }
         saveToHistory();
-   }
+    }
 
-   function ctrlDeleteAction(direction){
-        // todo fixed ловить баги!!! при удалении в лево до края удаляется символ с правого края
+    function ctrlDeleteAction(direction){
+        // todo fixed ловить баги!!! при удалении в лево до края удаляется символ с правого края (проблема как и везде в позиции каретки = -1)
         if (direction === delDirections.back){
             const endIndex = caretPosition.character;
             ctrlArrowJumpAction('left');
@@ -394,7 +397,7 @@ const Canvas = ({
             caretPosition.character = startIndex;
             saveToHistory();
         }
-   }
+    }
 
     function calculateCaretPosition() {
         let currentLine = textArr[caretPosition.line]?.map(i => i.text).join('') || '';
@@ -402,7 +405,7 @@ const Canvas = ({
         //todo UPDATE проитерироваться по строке и считать размер с учётом фонтФэмли
         // возможно сравнивать позицию каретки с размером холста
         //
-        let caretMeasurement = ctx.measureText(currentLine.substring(0, caretPosition.character));
+        let caretMeasurement = ctxRef.current.measureText(currentLine.substring(0, caretPosition.character));
         caretX = textX + caretMeasurement.width;
 
         caretY = textY + (fontSize + 5) * caretPosition.line;
@@ -415,8 +418,8 @@ const Canvas = ({
     //     // Проходим по каждому символу до позиции курсора
     //     for (let i = 0; i < caretPosition.character; i++) {
     //         // Устанавливаем текущий шрифт для символа
-    //         ctx.font = fontOfLetter; // Предполагается, что у вас есть функция, возвращающая шрифт для символа
-    //         caretX += ctx.measureText(currentLine[i]).width; // Добавляем ширину символа к позиции курсора
+    //         ctxRef.current.font = fontOfLetter; // Предполагается, что у вас есть функция, возвращающая шрифт для символа
+    //         caretX += ctxRef.current.measureText(currentLine[i]).width; // Добавляем ширину символа к позиции курсора
     //     }
     //
     //     caretY = textY + (fontSize + 5) * caretPosition.line; // Позиция по Y остается прежней
@@ -433,8 +436,8 @@ const Canvas = ({
                 }
                 updateTextOnCanvas(
                     textArr,
-                    ctx,
-                    canvas,
+                    ctxRef.current,
+                    canvasRef.current,
                     isLight,
                     fontSize,
                     fontFamily,
@@ -453,7 +456,7 @@ const Canvas = ({
     }
 
     function enterKeyAction() {
-       if (!textArr.length) textArr.push([]);
+        if (!textArr.length) textArr.push([]);
         // Получаем текущую строку
         const currentLine = textArr[caretPosition.line];
 
@@ -506,16 +509,18 @@ const Canvas = ({
             }
 
         }
-        caretPosition.character = wordEndIndex;
+        caretPosition.character = wordEndIndex !== -1 ? wordEndIndex : 0;
+        console.log(caretPosition.character)
+
     }
 
     async function getPasteText() {
-       if (!navigator.clipboard) return getPasteTextWithAlert();
+        if (!navigator.clipboard) return getPasteTextWithAlert();
 
         try {
             return await navigator.clipboard.readText();
         } catch (error) {
-        console.error('Error reading from clipboard:', error);
+            console.error('Error reading from clipboard:', error);
         }
     }
 
@@ -534,7 +539,7 @@ const Canvas = ({
 
 
     const savePng = () => {
-        canvasData = canvas.toDataURL('image/png');
+        canvasData = canvasRef.current.toDataURL('image/png');
         link = document.createElement('a');
         link.href = canvasData;
         link.download = 'canvas_note_image.png';

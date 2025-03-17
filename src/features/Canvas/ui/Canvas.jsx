@@ -380,12 +380,11 @@ const Canvas = ({
    }
 
    function ctrlDeleteAction(direction){
-        // todo FIX ловить баги!!! вероятно срабатывает и обычное удаление
-        //
+        // todo fixed ловить баги!!! при удалении в лево до края удаляется символ с правого края
         if (direction === delDirections.back){
             const endIndex = caretPosition.character;
             ctrlArrowJumpAction('left');
-            const startIndex = caretPosition.character;
+            const startIndex = caretPosition.character !== -1 ? caretPosition.character : 0;
             textArr[caretPosition.line].splice(startIndex, endIndex - startIndex);
             saveToHistory();
         }

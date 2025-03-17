@@ -9,9 +9,6 @@ let canvas;
 let ctx;
 const coords = [];
 const coordsDisabled = [];
-
-// let textArr = [];
-
 const textHistory = [{'text': [[{character: 0, color: 'black', fontFamily: 'Courier', fontSize: 16, line: 0, text: ''}]], 'caretPosition': {line: 0, character: 0} }];
 let textHistoryIndex = 0;
 const keysDontPrint = ['Tab', 'Shift', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'F12', 'F5', 'CapsLock', 'Meta'];
@@ -225,7 +222,7 @@ const Canvas = ({
     }
 
     function ctrlVAction(e){
-        // todo FIX позиция каретки обновляется не сразу после вставки, а только после нажатия стрелки
+        // todo fixed позиция каретки обновляется не сразу после вставки, а только после нажатия стрелки
         if (textArrToLines(textArr).length > linesLimit - 1){
                         e.stopPropagation();
                         e.preventDefault();
@@ -434,23 +431,23 @@ const Canvas = ({
                 } else {
                     addLetter(str[i]);
                 }
+                updateTextOnCanvas(
+                    textArr,
+                    ctx,
+                    canvas,
+                    isLight,
+                    fontSize,
+                    fontFamily,
+                    textY,
+                    textX,
+                    isDrawing,
+                    redraw,
+                    calculateCaretPosition,
+                    caretX,
+                    caretY,
+                    fontColor
+                );
             }
-            updateTextOnCanvas(
-                textArr,
-                ctx,
-                canvas,
-                isLight,
-                fontSize,
-                fontFamily,
-                textY,
-                textX,
-                isDrawing,
-                redraw,
-                calculateCaretPosition,
-                caretX,
-                caretY,
-                fontColor
-            );
             callback();
         })
     }

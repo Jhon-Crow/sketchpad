@@ -1,8 +1,7 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useMemo, useReducer, useRef, useState} from 'react';
 import cls from './Canvas.module.scss'
 import SaveButton from "../../SaveButton/ui/SaveButton.jsx";
 import {checkLinesLimit, updateTextOnCanvas} from "../functions/updateTextOnCanvas.js";
-import {textArrToLines} from "../functions/textArrToLines.js";
 import {doSeveralTimes} from "../../../helpers/doSeveralTimes.js";
 
 let canvas;
@@ -14,6 +13,7 @@ const coordsDisabled = [];
 
 const textHistory = [{'text': [[{character: 0, color: 'black', fontFamily: 'Courier', fontSize: 16, line: 0, text: ''}]], 'caretPosition': {line: 0, character: 0} }];
 let textHistoryIndex = 0;
+// todo FIX история работает не правильно
 const keysDontPrint = ['Tab', 'Shift', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'F12', 'F5', 'CapsLock', 'Meta'];
 const delDirections = {back: 'backspace', forward: 'delete'};
 // todo BEFORE PULL -> RELEASE branch
@@ -41,6 +41,9 @@ const Canvas = ({
     });
     let [textArr, _] = useState([]);
     const canvasRef = useRef(null);
+    // const textHistoryIndexRef = useRef(null);
+    // let [textHistoryIndex, ] = useMemo(0);
+
     let canvasData;
     let link;
     let isDrawing = false;
@@ -163,25 +166,64 @@ const Canvas = ({
         }
     }
 
-    function loadFromHistory(textHistoryIndex){
-        console.log(textArr, textHistory[textHistoryIndex])
-        textArr = textHistory[textHistoryIndex].text;
-        caretPosition = textHistory[textHistoryIndex].caretPosition;
+    const [, forceUpdate] = useReducer(x => x + 1, 0);
+
+    // function loadFromHistory(textHistoryIndex){
+    //     console.log(textArr, textHistory[textHistoryIndex])
+    //     caretPosition = textHistory[textHistoryIndex].caretPosition;
+    //     textArr = structuredClone(textHistory[textHistoryIndex].text);
+    // }
+
+    function loadFromHistory(index) {
+        // Обновляем состояние через новый массив
+        textArr.splice(0, textArr.length, ...structuredClone(textHistory[index].text));
+
+        // Обновляем позицию каретки
+        Object.assign(caretPosition, textHistory[index].caretPosition);
+
+        // Форсируем обновление интерфейса
+        forceUpdate();
     }
 
+    // function saveToHistory(){
+    //    // todo UPDATE добавить проверку на беспольезное сохранение (когда 2 раза подряд сохраняю пустой текст)
+    //    let textArrToPush = structuredClone(textArr);
+    //     textHistory.push({
+    //         text: textArrToPush,
+    //         caretPosition: {
+    //             line: caretPosition.line,
+    //             character: caretPosition.character
+    //         }
+    //     });
+    //     console.log(textArrToPush)
+    //     textHistoryIndex = textHistory.length - 1;
+    // }
 
-    function saveToHistory(){
-       // todo UPDATE добавить проверку на беспольезное сохранение (когда 2 раза подряд сохраняю пустой текст)
-       let textArrToPush = structuredClone(textArr);
-        textHistory.push({
-            text: textArrToPush,
-            caretPosition: {
-                line: caretPosition.line,
-                character: caretPosition.character
-            }
-        });
-        console.log(textArrToPush)
-        textHistoryIndex++;
+
+
+    function saveToHistory() {
+        // Удаляем все записи после текущего индекса при наличии новых изменений
+        if (textHistoryIndex < textHistory.length - 1) {
+            textHistory.splice(textHistoryIndex + 1);
+        }
+
+        const newEntry = {
+            text: structuredClone(textArr.map(line =>
+                line.map(char => ({...char}))
+            )),
+            caretPosition: {...caretPosition}
+        };
+
+        // Проверка на дубликаты с предыдущим состоянием
+        const lastEntry = textHistory[textHistory.length - 1];
+        if (!lastEntry || !isEqualDeep(lastEntry, newEntry)) {
+            textHistory.push(newEntry);
+            textHistoryIndex = textHistory.length - 1;
+        }
+    }
+
+    function isEqualDeep(a, b) {
+        return JSON.stringify(a) === JSON.stringify(b);
     }
 
     function onKeyDownSwitch(e) {
@@ -225,13 +267,14 @@ const Canvas = ({
     }
 
     function ctrlVAction(e){
-        // todo FIX позиция каретки обновляется не сразу после вставки, а только после нажатия стрелки
-        if (textArrToLines(textArr).length > linesLimit - 1){
+        if (textArr.length > linesLimit - 1){
                         e.stopPropagation();
                         e.preventDefault();
                         alert('no space on page!\n' +
                             'input blocked')
                     } else {
+                        e.stopPropagation();
+                        e.preventDefault();
                         pastText(saveToHistory);
         }
     }
@@ -380,12 +423,10 @@ const Canvas = ({
    }
 
    function ctrlDeleteAction(direction){
-        // todo FIX ловить баги!!! вероятно срабатывает и обычное удаление
-        //
         if (direction === delDirections.back){
             const endIndex = caretPosition.character;
             ctrlArrowJumpAction('left');
-            const startIndex = caretPosition.character;
+            const startIndex = caretPosition.character !== -1 ? caretPosition.character : 0;
             textArr[caretPosition.line].splice(startIndex, endIndex - startIndex);
             saveToHistory();
         }
@@ -427,31 +468,34 @@ const Canvas = ({
     // }
 
     function pastText(callback){
+        if (textArr.length > linesLimit - 1) return false;
         getPasteText().then(str => {
             str = str.trimStart();
             for (let i = 0; i < str.length; i++){
+                if (textArr.length > linesLimit - 1) return false;
+
                 if (str[i] === '\n'){
                     checkLinesLimit(enterKeyAction,textArr, saveToHistory, linesLimit);
                 } else {
                     addLetter(str[i]);
                 }
+                updateTextOnCanvas(
+                    textArr,
+                    ctx,
+                    canvas,
+                    isLight,
+                    fontSize,
+                    fontFamily,
+                    textY,
+                    textX,
+                    isDrawing,
+                    redraw,
+                    calculateCaretPosition,
+                    caretX,
+                    caretY,
+                    fontColor
+                );
             }
-            updateTextOnCanvas(
-                textArr,
-                ctx,
-                canvas,
-                isLight,
-                fontSize,
-                fontFamily,
-                textY,
-                textX,
-                isDrawing,
-                redraw,
-                calculateCaretPosition,
-                caretX,
-                caretY,
-                fontColor
-            );
             callback();
         })
     }
@@ -510,7 +554,7 @@ const Canvas = ({
             }
 
         }
-        caretPosition.character = wordEndIndex;
+        caretPosition.character = wordEndIndex !== -1 ? wordEndIndex : 0;
     }
 
     async function getPasteText() {

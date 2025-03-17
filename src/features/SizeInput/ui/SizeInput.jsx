@@ -21,6 +21,7 @@ const SizeInput = ({value, onChange, color}) => {
                 style={{color: color}}
             >{value}</button>
             {isOpen && <input
+                min='1'
                 className={cls.input}
                 onMouseUp={() => setIsOpen(false)}
                 onChange={onChangeHandler}

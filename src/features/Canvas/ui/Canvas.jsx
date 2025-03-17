@@ -13,7 +13,7 @@ const textHistory = [{'text': [[{character: 0, color: 'black', fontFamily: 'Cour
 // todo BEFORE PULL -> RELEASE branch
 //  отрефакторить код!
 
-
+// todo FIX полностью переделать текстовую истроию
 
 
 // let textX = 10;
@@ -154,6 +154,8 @@ const Canvas = ({
             caretX.current,
             caretY.current,
             fontColor);
+        console.log(textHistory)
+        // console.log(textHistory[textHistoryIndex].text[caretPosition.current.line].map(i => i.text).join(''))
     }, [textArr, fontColor])
 
     function redraw() {
@@ -163,6 +165,7 @@ const Canvas = ({
                 ctxRef.current.stroke();
                 ctxRef.current.beginPath();
             } else if (coord.includes('#')) {
+                console.log(coord)
                 ctxRef.current.strokeStyle = coord;
             } else {
                 ctxRef.current.lineWidth = coord[2];
@@ -202,10 +205,9 @@ const Canvas = ({
 
     function loadFromHistory(textHistoryIndex){
         // console.log(textArr, textHistory[textHistoryIndex])
-        setTextArr([...textHistory[textHistoryIndex].text]);
-
-        // textArr = textHistory[textHistoryIndex].text;
         caretPosition.current = textHistory[textHistoryIndex].caretPosition;
+        setTextArr(structuredClone(textHistory[textHistoryIndex].text));
+        // textArr = textHistory[textHistoryIndex].text;
         console.log(textHistoryIndex)
     }
 
@@ -285,7 +287,7 @@ const Canvas = ({
     function ctrlZAction(e) {
         // todo UPDATE добавить восстановление позиции каретки
         if ((coords.current.length && coordsDisabled.length < coordsDisabledLimit) && e.getModifierState('CapsLock')){
-            coordsDisabled.push(coords.current?.pop());
+            coordsDisabled.push(structuredClone(coords.current?.pop()));
         } else if (textHistoryIndex > 0 && !e.getModifierState('CapsLock')) {
             textHistoryIndex--;
             loadFromHistory(textHistoryIndex);
@@ -295,7 +297,7 @@ const Canvas = ({
 
     function ctrlYAction(e) {
         if (coordsDisabled.length && e.getModifierState('CapsLock')){
-            coords.current?.push(coordsDisabled?.pop());
+            coords.current?.push(structuredClone(coordsDisabled?.pop()));
         } else if (textHistoryIndex < textHistory.length - 1 && !e.getModifierState('CapsLock')) {
             textHistoryIndex++;
             loadFromHistory(textHistoryIndex);

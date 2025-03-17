@@ -2,15 +2,14 @@ import React, {useEffect, useRef, useState} from 'react';
 import cls from './Canvas.module.scss'
 import SaveButton from "../../SaveButton/ui/SaveButton.jsx";
 import {checkLinesLimit, updateTextOnCanvas} from "../functions/updateTextOnCanvas.js";
-import {textArrToLines} from "../functions/textArrToLines.js";
 import {doSeveralTimes} from "../../../helpers/doSeveralTimes.js";
 
-// const coords = [];
-const coordsDisabled = [];
-const textHistory = [{'text': [[{character: 0, color: 'black', fontFamily: 'Courier', fontSize: 16, line: 0, text: ''}]], 'caretPosition': {line: 0, character: 0} }];
-let textHistoryIndex = 0;
 const keysDontPrint = ['Tab', 'Shift', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'F12', 'F5', 'CapsLock', 'Meta'];
 const delDirections = {back: 'backspace', forward: 'delete'};
+
+const coordsDisabled = [];
+let textHistoryIndex = 0;
+const textHistory = [{'text': [[{character: 0, color: 'black', fontFamily: 'Courier', fontSize: 16, line: 0, text: ''}]], 'caretPosition': {line: 0, character: 0} }];
 // todo BEFORE PULL -> RELEASE branch
 //  отрефакторить код!
 
@@ -18,8 +17,8 @@ let textX = 10;
 let textY = 20;
 let caretX = textX;
 let caretY = textY;
-let textWrapLimit;
-
+// let textWrapLimit;
+// присвивалась но не использовалась
 let caretPosition = { line: 0, character: 0 };
 
 const Canvas = ({
@@ -57,7 +56,7 @@ const Canvas = ({
         ctxRef.current = canvasRef.current.getContext('2d');
         canvasRef.current.width = canvasDimensions.width / 1.32;
         canvasRef.current.height = canvasDimensions.height / 1.05;
-        textWrapLimit = canvasRef.current.width / 6.5;
+        // textWrapLimit = canvasRef.current.width / 6.5;
         updateTextOnCanvas(
             textArr,
             ctxRef.current,
@@ -98,7 +97,7 @@ const Canvas = ({
         textY = fontSize * 1.5;
         caretX = textX;
         caretY = textY;
-        textWrapLimit = canvasRef.current.width / (fontSize * 1.5);
+        // textWrapLimit = canvasRef.current.width / (fontSize * 1.5);
         linesLimit = window.innerHeight / (fontSize * 1.5);
         updateTextOnCanvas(
             textArr,
@@ -163,7 +162,7 @@ const Canvas = ({
     }
 
     function loadFromHistory(textHistoryIndex){
-        console.log(textArr, textHistory[textHistoryIndex])
+        // console.log(textArr, textHistory[textHistoryIndex])
         textArr = textHistory[textHistoryIndex].text;
         caretPosition = textHistory[textHistoryIndex].caretPosition;
     }
@@ -179,7 +178,7 @@ const Canvas = ({
                 character: caretPosition.character
             }
         });
-        console.log(textArrToPush)
+        // console.log(textArrToPush)
         textHistoryIndex++;
     }
 
@@ -225,13 +224,17 @@ const Canvas = ({
     }
 
     function ctrlVAction(e){
-        // todo fixed позиция каретки обновляется не сразу после вставки, а только после нажатия стрелки
-        if (textArrToLines(textArr).length > linesLimit - 1){
+        // todo fixed при привышении лимита всё равно происходит вставка
+        if (textArr.length > linesLimit - 1){
             e.stopPropagation();
             e.preventDefault();
             alert('no space on page!\n' +
                 'input blocked')
+            return false;
         } else {
+            console.log(textArr.length, linesLimit - 1)
+            e.stopPropagation();
+            e.preventDefault();
             pastText(saveToHistory);
         }
     }
@@ -318,7 +321,7 @@ const Canvas = ({
     }
 
     function addLetter(letter){
-        console.log(typeof textArr)
+        // console.log(typeof textArr)
         function simpleAddLetter(){
             const currentLine = textArr[caretPosition.line];
             const beforeCaret = currentLine.slice(0, caretPosition.character);
@@ -426,9 +429,12 @@ const Canvas = ({
     // }
 
     function pastText(callback){
+        if (textArr.length > linesLimit - 1) return false;
         getPasteText().then(str => {
             str = str.trimStart();
             for (let i = 0; i < str.length; i++){
+                if (textArr.length > linesLimit - 1) return false;
+
                 if (str[i] === '\n'){
                     checkLinesLimit(enterKeyAction,textArr, saveToHistory, linesLimit);
                 } else {

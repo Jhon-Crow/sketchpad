@@ -13,13 +13,19 @@ const textHistory = [{'text': [[{character: 0, color: 'black', fontFamily: 'Cour
 // todo BEFORE PULL -> RELEASE branch
 //  отрефакторить код!
 
-let textX = 10;
-let textY = 20;
-let caretX = textX;
-let caretY = textY;
+
+
+
+// let textX = 10;
+// let textY = 20;
+// let caretX = textX;
+// let caretY = textY;
+// let caretPosition = { line: 0, character: 0 };
+
+
+
 // let textWrapLimit;
 // присвивалась но не использовалась
-let caretPosition = { line: 0, character: 0 };
 
 const Canvas = ({
                     fontColor,
@@ -30,11 +36,22 @@ const Canvas = ({
                     isLight,
                     setCapsLockPressed}) => {
     const coords = useRef([]);
+
+    const textX = useRef(10);
+    const textY = useRef(20);
+    const caretX = useRef(textX.current);
+    const caretY = useRef(textY.current);
+    const caretPosition = useRef({
+        line: 0,
+        character: 0
+    });
+
     const [canvasDimensions, setCanvasDimensions] = useState({
         width: window.innerWidth,
         height: window.innerHeight,
     });
-    let [textArr, _] = useState([]);
+    let [textArr, setTextArr] = useState([]);
+    // let textArr = [];
     const canvasRef = useRef(null);
     const ctxRef = useRef(null);
     let canvasData;
@@ -51,6 +68,8 @@ const Canvas = ({
     //     ctx.fillRect(0, 0, canvas.width, canvas.height);
     // }
 
+
+
     useEffect(() => {
         // canvas = canvasRef.current;
         ctxRef.current = canvasRef.current.getContext('2d');
@@ -64,13 +83,13 @@ const Canvas = ({
             isLight,
             fontSize,
             fontFamily,
-            textY,
-            textX,
+            textY.current,
+            textX.current,
             isDrawing,
             redraw,
             calculateCaretPosition,
-            caretX,
-            caretY,
+            caretX.current,
+            caretY.current,
             fontColor);
         canvasRef.current.focus();
     }, [isLight, canvasDimensions])
@@ -93,10 +112,10 @@ const Canvas = ({
     }, []);
 
     useEffect(() => {
-        textX = 10;
-        textY = fontSize * 1.5;
-        caretX = textX;
-        caretY = textY;
+        textX.current = 10;
+        textY.current = fontSize * 1.5;
+        caretX.current = textX.current;
+        caretY.current = textY.current;
         // textWrapLimit = canvasRef.current.width / (fontSize * 1.5);
         linesLimit = window.innerHeight / (fontSize * 1.5);
         updateTextOnCanvas(
@@ -106,16 +125,36 @@ const Canvas = ({
             isLight,
             fontSize,
             fontFamily,
-            textY,
-            textX,
+            textY.current,
+            textX.current,
             // colorAndIndex,
             isDrawing,
             redraw,
             calculateCaretPosition,
-            caretX,
-            caretY,
+            caretX.current,
+            caretY.current,
             fontColor);
     }, [fontSize]);
+
+    useEffect(() => {
+        console.log(textArr)
+        updateTextOnCanvas(
+            textArr,
+            ctxRef.current,
+            canvasRef.current,
+            isLight,
+            fontSize,
+            fontFamily,
+            textY.current,
+            textX.current,
+            // colorAndIndex,
+            isDrawing,
+            redraw,
+            calculateCaretPosition,
+            caretX.current,
+            caretY.current,
+            fontColor);
+    }, [textArr, fontColor])
 
     function redraw() {
         ctxRef.current.beginPath();
@@ -163,8 +202,11 @@ const Canvas = ({
 
     function loadFromHistory(textHistoryIndex){
         // console.log(textArr, textHistory[textHistoryIndex])
-        textArr = textHistory[textHistoryIndex].text;
-        caretPosition = textHistory[textHistoryIndex].caretPosition;
+        setTextArr([...textHistory[textHistoryIndex].text]);
+
+        // textArr = textHistory[textHistoryIndex].text;
+        caretPosition.current = textHistory[textHistoryIndex].caretPosition;
+        console.log(textHistoryIndex)
     }
 
 
@@ -174,12 +216,13 @@ const Canvas = ({
         textHistory.push({
             text: textArrToPush,
             caretPosition: {
-                line: caretPosition.line,
-                character: caretPosition.character
+                line: caretPosition.current.line,
+                character: caretPosition.current.character
             }
         });
         // console.log(textArrToPush)
         textHistoryIndex++;
+        console.log(textHistoryIndex)
     }
 
     function onKeyDownSwitch(e) {
@@ -198,13 +241,13 @@ const Canvas = ({
             isLight,
             fontSize,
             fontFamily,
-            textY,
-            textX,
+            textY.current,
+            textX.current,
             isDrawing,
             redraw,
             calculateCaretPosition,
-            caretX,
-            caretY,
+            caretX.current,
+            caretY.current,
             fontColor);
     }
 
@@ -289,62 +332,62 @@ const Canvas = ({
     }
 
     function caretMoveLeft() {
-        if (caretPosition.character > 0) {
-            caretPosition.character--;
-        } else if (caretPosition.line > 0) {
-            caretPosition.line--;
-            caretPosition.character = textArr[caretPosition.line].length;
+        if (caretPosition.current.character > 0) {
+            caretPosition.current.character--;
+        } else if (caretPosition.current.line > 0) {
+            caretPosition.current.line--;
+            caretPosition.current.character = textArr[caretPosition.current.line].length;
         }
     }
 
     function caretMoveRight() {
-        if (caretPosition.character < textArr[caretPosition.line].length) {
-            caretPosition.character++;
-        } else if (caretPosition.line < textArr[caretPosition.line].length - 1 && textArr[caretPosition.line+1]) {
-            caretPosition.line++;
-            caretPosition.character = 0;
+        if (caretPosition.current.character < textArr[caretPosition.current.line].length) {
+            caretPosition.current.character++;
+        } else if (caretPosition.current.line < textArr[caretPosition.current.line].length - 1 && textArr[caretPosition.current.line+1]) {
+            caretPosition.current.line++;
+            caretPosition.current.character = 0;
         }
     }
 
     function caretMoveUp() {
-        if (caretPosition.line > 0) {
-            caretPosition.line--;
-            caretPosition.character = Math.min(caretPosition.character, textArr[caretPosition.line].length);
+        if (caretPosition.current.line > 0) {
+            caretPosition.current.line--;
+            caretPosition.current.character = Math.min(caretPosition.current.character, textArr[caretPosition.current.line].length);
         }
     }
 
     function caretMoveDown() {
-        if (caretPosition.line < textArr.length - 1) {
-            caretPosition.line++;
-            caretPosition.character = Math.min(caretPosition.character, textArr[caretPosition.line].length);
+        if (caretPosition.current.line < textArr.length - 1) {
+            caretPosition.current.line++;
+            caretPosition.current.character = Math.min(caretPosition.current.character, textArr[caretPosition.current.line].length);
         }
     }
 
     function addLetter(letter){
         // console.log(typeof textArr)
         function simpleAddLetter(){
-            const currentLine = textArr[caretPosition.line];
-            const beforeCaret = currentLine.slice(0, caretPosition.character);
-            const afterCaret = currentLine.slice(caretPosition.character);
-            textArr[caretPosition.line] = [...beforeCaret, itemToArr, ...afterCaret];
+            const currentLine = textArr[caretPosition.current.line];
+            const beforeCaret = currentLine.slice(0, caretPosition.current.character);
+            const afterCaret = currentLine.slice(caretPosition.current.character);
+            textArr[caretPosition.current.line] = [...beforeCaret, itemToArr, ...afterCaret];
         }
         let itemToArr = {
             text: letter,
             color: fontColor,
             fontFamily,
             fontSize,
-            line: caretPosition.line,
-            character: caretPosition.character
+            line: caretPosition.current.line,
+            character: caretPosition.current.character
         };
         if (!textArr.length){
             textArr.push([itemToArr]);
         } else {
-            if (textArr[caretPosition.line].length >= lineLengthLimit) {
+            if (textArr[caretPosition.current.line].length >= lineLengthLimit) {
                 enterKeyAction();
             }
             simpleAddLetter();
         }
-        caretPosition.character++;
+        caretPosition.current.character++;
         calculateCaretPosition()
     }
 
@@ -353,30 +396,30 @@ const Canvas = ({
     }
 
     function deleteCharacter(direction) {
-        let currentLine = textArr[caretPosition.line];
+        let currentLine = textArr[caretPosition.current.line];
         if (direction === delDirections.back) {
-            if (caretPosition.character > 0) {
-                currentLine.splice(caretPosition.character - 1, 1);
-                caretPosition.character--;
-            } else if (caretPosition.line > 0) {
-                let previousLine = textArr[caretPosition.line - 1];
-                textArr[caretPosition.line - 1] = [...previousLine, ...currentLine];
-                textArr.splice(caretPosition.line, 1);
-                caretPosition.line--;
-                caretPosition.character = previousLine.length;
+            if (caretPosition.current.character > 0) {
+                currentLine.splice(caretPosition.current.character - 1, 1);
+                caretPosition.current.character--;
+            } else if (caretPosition.current.line > 0) {
+                let previousLine = textArr[caretPosition.current.line - 1];
+                textArr[caretPosition.current.line - 1] = [...previousLine, ...currentLine];
+                textArr.splice(caretPosition.current.line, 1);
+                caretPosition.current.line--;
+                caretPosition.current.character = previousLine.length;
             }
         } else if (direction === delDirections.forward) {
             // Удаление символа под кареткой
-            if (caretPosition.character < currentLine.length) {
+            if (caretPosition.current.character < currentLine.length) {
                 // Удаляем символ под курсором
-                if (caretPosition.character === -1) caretPosition.character = 0;
-                console.log(caretPosition.character)
-                currentLine.splice(caretPosition.character, 1);
-            } else if (caretPosition.line < textArr.length - 1) {
+                if (caretPosition.current.character === -1) caretPosition.current.character = 0;
+                console.log(caretPosition.current.character)
+                currentLine.splice(caretPosition.current.character, 1);
+            } else if (caretPosition.current.line < textArr.length - 1) {
                 // Объединяем текущую строку с следующей
-                let nextLine = textArr[caretPosition.line + 1];
+                let nextLine = textArr[caretPosition.current.line + 1];
                 currentLine.push(...nextLine); // Объединяем строки
-                textArr.splice(caretPosition.line + 1, 1); // Удаляем следующую строку
+                textArr.splice(caretPosition.current.line + 1, 1); // Удаляем следующую строку
             }
         }
         saveToHistory();
@@ -385,33 +428,33 @@ const Canvas = ({
     function ctrlDeleteAction(direction){
         // todo fixed ловить баги!!! при удалении в лево до края удаляется символ с правого края (проблема как и везде в позиции каретки = -1)
         if (direction === delDirections.back){
-            const endIndex = caretPosition.character;
+            const endIndex = caretPosition.current.character;
             ctrlArrowJumpAction('left');
-            const startIndex = caretPosition.character !== -1 ? caretPosition.character : 0;
-            textArr[caretPosition.line].splice(startIndex, endIndex - startIndex);
+            const startIndex = caretPosition.current.character !== -1 ? caretPosition.current.character : 0;
+            textArr[caretPosition.current.line].splice(startIndex, endIndex - startIndex);
             saveToHistory();
         }
         if (direction === delDirections.forward){
-            if (caretPosition.character === -1) caretPosition.character = 0;
-            const startIndex = caretPosition.character;
+            if (caretPosition.current.character === -1) caretPosition.current.character = 0;
+            const startIndex = caretPosition.current.character;
             ctrlArrowJumpAction('right');
-            const endIndex = caretPosition.character;
-            textArr[caretPosition.line].splice(startIndex, endIndex - startIndex)
-            caretPosition.character = startIndex;
+            const endIndex = caretPosition.current.character;
+            textArr[caretPosition.current.line].splice(startIndex, endIndex - startIndex)
+            caretPosition.current.character = startIndex;
             saveToHistory();
         }
     }
 
     function calculateCaretPosition() {
-        let currentLine = textArr[caretPosition.line]?.map(i => i.text).join('') || '';
+        let currentLine = textArr[caretPosition.current.line]?.map(i => i.text).join('') || '';
 
         //todo UPDATE проитерироваться по строке и считать размер с учётом фонтФэмли
         // возможно сравнивать позицию каретки с размером холста
         //
-        let caretMeasurement = ctxRef.current.measureText(currentLine.substring(0, caretPosition.character));
-        caretX = textX + caretMeasurement.width;
+        let caretMeasurement = ctxRef.current.measureText(currentLine.substring(0, caretPosition.current.character));
+        caretX.current = textX.current + caretMeasurement.width;
 
-        caretY = textY + (fontSize + 5) * caretPosition.line;
+        caretY.current = textY.current + (fontSize + 5) * caretPosition.current.line;
     }
 
     // function calculateCaretPosition(fontOfLetter) {
@@ -447,13 +490,13 @@ const Canvas = ({
                     isLight,
                     fontSize,
                     fontFamily,
-                    textY,
-                    textX,
+                    textY.current,
+                    textX.current,
                     isDrawing,
                     redraw,
                     calculateCaretPosition,
-                    caretX,
-                    caretY,
+                    caretX.current,
+                    caretY.current,
                     fontColor
                 );
             }
@@ -464,59 +507,59 @@ const Canvas = ({
     function enterKeyAction() {
         if (!textArr.length) textArr.push([]);
         // Получаем текущую строку
-        const currentLine = textArr[caretPosition.line];
+        const currentLine = textArr[caretPosition.current.line];
 
         // Разделяем текущую строку на две части: до и после курсора
-        const beforeCaret = currentLine.slice(0, caretPosition.character);
-        const afterCaret = currentLine.slice(caretPosition.character);
+        const beforeCaret = currentLine.slice(0, caretPosition.current.character);
+        const afterCaret = currentLine.slice(caretPosition.current.character);
 
         // Обновляем текущую строку с новой частью до курсора
-        textArr[caretPosition.line] = [...beforeCaret];
+        textArr[caretPosition.current.line] = [...beforeCaret];
 
         // Вставляем новую строку после текущей
-        textArr.splice(caretPosition.line + 1, 0, [...afterCaret]);
+        textArr.splice(caretPosition.current.line + 1, 0, [...afterCaret]);
 
         // Обновляем позицию курсора
-        caretPosition.line++;
-        caretPosition.character = 0;
+        caretPosition.current.line++;
+        caretPosition.current.character = 0;
     }
 
 
     function ctrlArrowJumpAction (direction){
-        const currentLine = textArr[caretPosition.line];
+        const currentLine = textArr[caretPosition.current.line];
         let lineStr = currentLine.map(i => i.text).join('');
         let wordEndIndex;
         if (direction === 'left') {
-            let searchStr = lineStr.slice(0, caretPosition.character);
-            if (!searchStr.trim().length || caretPosition.character === 0) {
+            let searchStr = lineStr.slice(0, caretPosition.current.character);
+            if (!searchStr.trim().length || caretPosition.current.character === 0) {
                 wordEndIndex = -1
             }else {
-                wordEndIndex = searchStr.lastIndexOf(' ', caretPosition.character)+1;
-                if (caretPosition.character === -1) return;
+                wordEndIndex = searchStr.lastIndexOf(' ', caretPosition.current.character)+1;
+                if (caretPosition.current.character === -1) return;
             }
-            if (caretPosition.character === wordEndIndex){
+            if (caretPosition.current.character === wordEndIndex){
                 const letterToFind = searchStr.trimEnd().slice(-1);
-                wordEndIndex = searchStr.lastIndexOf(letterToFind, caretPosition) + 1;
+                wordEndIndex = searchStr.lastIndexOf(letterToFind, caretPosition.current) + 1;
             }
         }
         if (direction === 'right'){
-            wordEndIndex = lineStr.indexOf(' ', caretPosition.character);
+            wordEndIndex = lineStr.indexOf(' ', caretPosition.current.character);
             if (wordEndIndex === 0){
-                const letterToFind = lineStr.slice(caretPosition.character + 1, lineStr.length).trimStart();
-                wordEndIndex = lineStr.indexOf(letterToFind, caretPosition.character);
+                const letterToFind = lineStr.slice(caretPosition.current.character + 1, lineStr.length).trimStart();
+                wordEndIndex = lineStr.indexOf(letterToFind, caretPosition.current.character);
             } else if (wordEndIndex === -1) {
                 wordEndIndex = currentLine.length;
-            } else if(caretPosition.character === wordEndIndex && wordEndIndex < currentLine.length){
-                const letterToFind = lineStr.slice(caretPosition.character, lineStr.length).trimStart();
-                wordEndIndex = lineStr.indexOf(letterToFind, caretPosition.character);
+            } else if(caretPosition.current.character === wordEndIndex && wordEndIndex < currentLine.length){
+                const letterToFind = lineStr.slice(caretPosition.current.character, lineStr.length).trimStart();
+                wordEndIndex = lineStr.indexOf(letterToFind, caretPosition.current.character);
                 if (!letterToFind) {
                     wordEndIndex = currentLine.length;
                 }
             }
 
         }
-        caretPosition.character = wordEndIndex !== -1 ? wordEndIndex : 0;
-        console.log(caretPosition.character)
+        caretPosition.current.character = wordEndIndex !== -1 ? wordEndIndex : 0;
+        console.log(caretPosition.current.character)
 
     }
 

@@ -11,10 +11,8 @@ const coordsDisabled = [];
 
 const textHistory = [{'text': [[{character: 0, color: 'black', fontFamily: 'Courier', fontSize: 16, line: 0, text: ''}]], 'caretPosition': {line: 0, character: 0} }];
 let textHistoryIndex = 0;
-// const keysDontPrint = ['Esc', 'Alt', 'Tab', 'Shift', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'F12', 'F5', 'CapsLock', 'Meta'];
 const delDirections = {back: 'backspace', forward: 'delete'};
 
-// todo UPDATE ctrl+s сохранить png
 let textX = 10;
 let textY = 20;
 let caretX = textX;
@@ -104,7 +102,6 @@ const Canvas = ({
             fontFamily,
             textY,
             textX,
-            // colorAndIndex,
             isDrawing,
             redraw,
             calculateCaretPosition,
@@ -160,18 +157,14 @@ const Canvas = ({
 
 
     function loadFromHistory(index) {
-        // Обновляем состояние через новый массив
         textArr.splice(0, textArr.length, ...structuredClone(textHistory[index].text));
 
-        // Обновляем позицию каретки
         Object.assign(caretPosition, textHistory[index].caretPosition);
 
-        // Форсируем обновление интерфейса
         forceUpdate();
     }
 
     function saveToHistory() {
-        // Удаляем все записи после текущего индекса при наличии новых изменений
         if (textHistoryIndex < textHistory.length - 1) {
             textHistory.splice(textHistoryIndex + 1);
         }
@@ -183,7 +176,6 @@ const Canvas = ({
             caretPosition: {...caretPosition}
         };
 
-        // Проверка на дубликаты с предыдущим состоянием
         const lastEntry = textHistory[textHistory.length - 1];
         if (!lastEntry || !isEqualDeep(lastEntry, newEntry)) {
             textHistory.push(newEntry);
@@ -222,7 +214,6 @@ const Canvas = ({
     }
 
     function withCtrlSwitchCase(eKeyCode, e){
-        // console.log(eKeyCode)
         const keyCodes = {
             37: () => ctrlArrowJumpAction('left'),
             39: () => ctrlArrowJumpAction('right'),
@@ -249,13 +240,11 @@ const Canvas = ({
     }
 
     function ctrlZAction(e) {
-        // todo UPDATE добавить восстановление позиции каретки
         if ((coords.length && coordsDisabled.length < coordsDisabledLimit) && e.getModifierState('CapsLock')){
                         coordsDisabled.push(coords?.pop());
                     } else if (textHistoryIndex > 0 && !e.getModifierState('CapsLock')) {
                         textHistoryIndex--;
                         loadFromHistory(textHistoryIndex);
-                        // console.log(textArr, typeof textArr)
                     }
     }
 
@@ -292,11 +281,9 @@ const Canvas = ({
 
     function defaultKeyPressCase(eKey){
         if (
-            // !keysDontPrint.includes(eKey)
             eKey.length < 2 && checkLinesLimit(null,textArr, saveToHistory, linesLimit)) {
                 addLetter(eKey);
                 saveToHistory();
-            console.log(eKey.length)
         }
     }
 
@@ -333,7 +320,6 @@ const Canvas = ({
     }
 
     function addLetter(letter){
-        // console.log(typeof textArr)
        function simpleAddLetter(){
            const currentLine = textArr[caretPosition.line];
            const beforeCaret = currentLine.slice(0, caretPosition.character);
@@ -378,17 +364,13 @@ const Canvas = ({
                 caretPosition.character = previousLine.length;
             }
         } else if (direction === delDirections.forward) {
-            // Удаление символа под кареткой
             if (caretPosition.character < currentLine.length) {
-                // Удаляем символ под курсором
                 if (caretPosition.character === -1) caretPosition.character = 0;
-                // console.log(caretPosition.character)
                 currentLine.splice(caretPosition.character, 1);
             } else if (caretPosition.line < textArr.length - 1) {
-                // Объединяем текущую строку с следующей
                 let nextLine = textArr[caretPosition.line + 1];
-                currentLine.push(...nextLine); // Объединяем строки
-                textArr.splice(caretPosition.line + 1, 1); // Удаляем следующую строку
+                currentLine.push(...nextLine);
+                textArr.splice(caretPosition.line + 1, 1);
             }
         }
         saveToHistory();
@@ -415,29 +397,11 @@ const Canvas = ({
 
     function calculateCaretPosition() {
         let currentLine = textArr[caretPosition.line]?.map(i => i.text).join('') || '';
-
-        //todo UPDATE проитерироваться по строке и считать размер с учётом фонтФэмли
-        // возможно сравнивать позицию каретки с размером холста
-        //
         let caretMeasurement = ctx.measureText(currentLine.substring(0, caretPosition.character));
         caretX = textX + caretMeasurement.width;
 
         caretY = textY + (fontSize + 5) * caretPosition.line;
     }
-
-    // function calculateCaretPosition(fontOfLetter) {
-    //     let currentLine = textArr[caretPosition.line]?.map(i => i.text).join('') || '';
-    //     caretX = textX; // Начальная позиция по X
-    //
-    //     // Проходим по каждому символу до позиции курсора
-    //     for (let i = 0; i < caretPosition.character; i++) {
-    //         // Устанавливаем текущий шрифт для символа
-    //         ctx.font = fontOfLetter; // Предполагается, что у вас есть функция, возвращающая шрифт для символа
-    //         caretX += ctx.measureText(currentLine[i]).width; // Добавляем ширину символа к позиции курсора
-    //     }
-    //
-    //     caretY = textY + (fontSize + 5) * caretPosition.line; // Позиция по Y остается прежней
-    // }
 
     function pastText(callback){
         if (textArr.length > linesLimit - 1) return false;
@@ -474,24 +438,17 @@ const Canvas = ({
 
     function enterKeyAction() {
        if (!textArr.length) textArr.push([]);
-        // Получаем текущую строку
         const currentLine = textArr[caretPosition.line];
 
-        // Разделяем текущую строку на две части: до и после курсора
         const beforeCaret = currentLine.slice(0, caretPosition.character);
         const afterCaret = currentLine.slice(caretPosition.character);
 
-        // Обновляем текущую строку с новой частью до курсора
         textArr[caretPosition.line] = [...beforeCaret];
-
-        // Вставляем новую строку после текущей
         textArr.splice(caretPosition.line + 1, 0, [...afterCaret]);
 
-        // Обновляем позицию курсора
         caretPosition.line++;
         caretPosition.character = 0;
     }
-
 
     function ctrlArrowJumpAction (direction){
         const currentLine = textArr[caretPosition.line];
@@ -540,14 +497,11 @@ const Canvas = ({
     }
 
     function getPasteTextWithAlert() {
-        // Запрашиваем пользователя вставить текст
         const pastedText = prompt("Пожалуйста, вставьте текст, который вы скопировали:", "");
 
         if (pastedText !== null) {
-            // Если пользователь ввел текст, возвращаем его
             return pastedText;
         } else {
-            // Если пользователь отменил ввод
             return 'Ввод отменен';
         }
     }
@@ -565,7 +519,17 @@ const Canvas = ({
 
     return (
         <>
-            <canvas onBlur={noBlur} tabIndex={0} onKeyDown={(e) => onKeyDownSwitch(e)} onMouseDown={(e) => startDrawing(e.nativeEvent)} onMouseMove={(e) => draw(e.nativeEvent)} onMouseUp={endDrawing} onMouseOut={endDrawing} id='canvas' ref={canvasRef} className={cls.Canvas}></canvas>
+            <canvas
+                onBlur={noBlur}
+                tabIndex={0}
+                onKeyDown={(e) => onKeyDownSwitch(e)}
+                onMouseDown={(e) => startDrawing(e.nativeEvent)}
+                onMouseMove={(e) => draw(e.nativeEvent)}
+                onMouseUp={endDrawing} onMouseOut={endDrawing}
+                id='canvas'
+                ref={canvasRef}
+                className={cls.Canvas}
+            ></canvas>
             <SaveButton isLight={isLight} onClick={savePng}/>
         </>
     );

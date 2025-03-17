@@ -4,7 +4,6 @@ import ThemeSwitcher from "../features/ThemeSwitcher/ui/ThemeSwitcher.jsx";
 import {useEffect, useState} from "react";
 import Canvas from "../features/Canvas/ui/Canvas.jsx";
 import CapsLockIdentifier from "../entities/CapsLockIdentifier/ui/CapsLockIdentifier.jsx";
-import {Select} from "../shared/Select/ui/Select.jsx";
 import Palette from "../widgets/Palette/ui/Palette.jsx";
 import {saveToLocalStorage} from "../helpers/saveToLocalStorage.js";
 import {THEME_LOCALSTORAGE_KEY} from "./const/localStorage.js";
@@ -42,29 +41,22 @@ function App() {
 
   return (
     <div className={cls.App}>
-        {/*TODO удалить при релизе если не доведу до ума*/}
-        {/*<Select*/}
-        {/*    value={fontFamily}*/}
-        {/*    onChange={setFontFamily}*/}
-        {/*    options={fontsDefault} fontColor={fontColor}/>*/}
         <Palette
             setPenColor={setPenColor}
             setFontColor={setFontColor}
         />
 
-        {/*<div style={{*/}
-        {/*    display: 'flex',*/}
-        {/*    alignItems: "center",*/}
-        {/*    width: '163.09px',*/}
-        {/*    backgroundColor: 'var(--canvas-color)',*/}
-        {/*    justifyContent: "center",*/}
-        {/*    borderRadius: '28px',*/}
-        {/*    boxShadow: 'var(--shadow)'*/}
-        {/*}}>*/}
-
-        {/*    <SizeInput color={fontColor} value={fontSize} />*/}
-        {/*    <SizeInput color={penColor} value={penSize} onChange={setPenSize}/>*/}
-        {/*</div>*/}
+        <div style={{
+            display: 'flex',
+            alignItems: "center",
+            width: '163.09px',
+            backgroundColor: 'var(--canvas-color)',
+            justifyContent: "center",
+            borderRadius: '28px',
+            boxShadow: 'var(--shadow)'
+        }}>
+            <SizeInput color={penColor} value={penSize} onChange={setPenSize}/>
+        </div>
 
 
         <CapsLockIdentifier capsLockPressed={capsLockPressed}/>

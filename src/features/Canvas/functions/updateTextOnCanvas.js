@@ -49,17 +49,17 @@ export function updateTextOnCanvas(
 
             ctx.fillText(textArr[i][j].text, x, y);
             let charWidth = ctx.measureText(textArr[i][j].text).width;
-            x += charWidth; // Смещаем x для следующего символа
+            x += charWidth;
         }
 
-        y += fontSize + 5; // Переход на следующую строку
+        y += fontSize + 5;
     }
 
     calculateCaretPosition();
 
     if (!isDrawing) {
         ctx.fillStyle = fontColor;
-        ctx.fillRect(caretX, caretY - fontSize, 1, fontSize); // Рисуем каретку
+        ctx.fillRect(caretX, caretY - fontSize, 1, fontSize);
     }
     redraw();
 }

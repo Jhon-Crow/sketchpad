@@ -1,5 +1,5 @@
-# Sketchpad v.0.2.0 pre-alpha
-__Second__ almost-working version of Sketchpad
+# Sketchpad v.0.2.1
+__Second__ working version of Sketchpad
 
 Deployed [here](https://jhon-crow.github.io/sketchpad/) 
 

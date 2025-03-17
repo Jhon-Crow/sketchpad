@@ -13,7 +13,6 @@ const coordsDisabled = [];
 
 const textHistory = [{'text': [[{character: 0, color: 'black', fontFamily: 'Courier', fontSize: 16, line: 0, text: ''}]], 'caretPosition': {line: 0, character: 0} }];
 let textHistoryIndex = 0;
-// todo FIX история работает не правильно
 const keysDontPrint = ['Tab', 'Shift', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'F12', 'F5', 'CapsLock', 'Meta'];
 const delDirections = {back: 'backspace', forward: 'delete'};
 // todo BEFORE PULL -> RELEASE branch

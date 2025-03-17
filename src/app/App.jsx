@@ -42,7 +42,8 @@ function App() {
 
   return (
     <div className={cls.App}>
-        {/*TODO удалить при релизе если не доведу до ума*/}
+        {/*TODO доведсти до ума*/}
+        {/*TODO сделать мобильную версию*/}
         {/*<Select*/}
         {/*    value={fontFamily}*/}
         {/*    onChange={setFontFamily}*/}
